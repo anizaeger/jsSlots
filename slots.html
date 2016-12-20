@@ -15,6 +15,19 @@
 		<tr>
 			<td>
 				<table>
+					<!--
+						Playfield Table Layout:
+						|		| r1Dbg	|		| r2Dbg	|		| r3Dbg	|
+						|		| r0p0	| p2s0c0| p2s0c1| r1p0	| p2s1c0| p2s1c1| r2p0	|
+						|			| p4s0c0| p6s0c1|	| p6s1c0| p5s1c1|	|
+						|			| p6s0c0| p4s0c1|	| p5s1c0| p6s1c1|	|
+						|		| r0p1	| p1s0c0| p1s0c1| r1p1	| p1s1c0| p1s1c1| r2p1	|
+						|			| p7s0c0| p5s0c1|	| p4s1c0| p7s1c1|	|
+						|			| p5s0c0| p7s0c1|	| p7s1c0| p4s1c1|	|
+						|		| r0p2	| p3s0c0| p3s0c1| r1p2	| p3s1c0| p3s1c1| r2p2	|
+						|	|	|	|	|	|	|	|	|	|
+						-->
+					<!-- Upper Playfield Border -->
 					<tr>
 						<td colspan=2 />
 						<td id="r1Dbg">
@@ -29,6 +42,7 @@
 							
 						</td>
 					</tr>
+					<!-- Reel Row 1 -->
 					<tr>
 						<td colspan=2 />
 						<td><span id="r0p0"></span></td>
@@ -57,6 +71,7 @@
 						<td align="left"><span id="p6s1c1">&nbsp;</span></td>
 						<td />
 					</tr>
+					<!-- Reel Row 2 -->
 					<tr>
 						<td>
 							1:
@@ -87,6 +102,7 @@
 						<td align="left"><span id="p4s1c1">&nbsp;</span></td>
 						<td />
 					</tr>
+					<!-- Reel Row 3 -->
 					<tr>
 						<td colspan=2 />
 						<td><span id="r0p2"></span></td>
