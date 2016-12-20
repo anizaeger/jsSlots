@@ -59,17 +59,18 @@ var virtReel = new Array(numReels);
 var virtStop = new Array(numReels);
 
 
-// Physical reel strips
+// Physical reel strips and virtual reel stops per physical reel stop
 var strip = new Array(numReels);
-strip[0] 		= [0,4,0,7,0,3,0,5,0,2,0,4,0,1,0,5,0,3,0,6,0,2];
-strip[1] 		= [0,4,0,1,0,7,0,6,0,3,0,4,0,1,0,5,0,3,0,6,0,2];
-strip[2] 		= [0,7,0,1,0,5,0,3,0,2,0,4,0,1,0,5,0,3,0,6,0,2];
-
-// Virtual reel stops per physical reel stop
 var numVirtStops = new Array(numReels);
-numVirtStops[0]	= [3,3,5,1,5,3,3,3,3,2,3,3,3,6,3,3,3,3,5,1,5,3];
-numVirtStops[1]	= [2,4,2,4,5,1,7,1,5,3,2,3,2,4,2,1,2,4,5,2,5,6];
-numVirtStops[2]	= [5,1,5,4,3,4,2,3,2,4,3,2,3,5,2,3,3,2,5,1,5,5];
+
+strip[0] 		= [0,4,0,7,0,3,0,5,0,2,0,4,0,1,0,5,0,3,0,6,0,2];
+numVirtStops[0]		= [3,3,5,1,5,3,3,3,3,2,3,3,3,6,3,3,3,3,5,1,5,3];
+
+strip[1] 		= [0,4,0,1,0,7,0,6,0,3,0,4,0,1,0,5,0,3,0,6,0,2];
+numVirtStops[1]		= [2,4,2,4,5,1,7,1,5,3,2,3,2,4,2,1,2,4,5,2,5,6];
+
+strip[2] 		= [0,7,0,1,0,5,0,3,0,2,0,4,0,1,0,5,0,3,0,6,0,2];
+numVirtStops[2]		= [5,1,5,4,3,4,2,3,2,4,3,2,3,5,2,3,3,2,5,1,5,5];
 
 // Odds of symbol nudging to blank payline space, in symbols[] order
 var nudgeOdds = [0,1,2,3,10,20,30,100]
@@ -177,7 +178,7 @@ for ( p = 0; p < payouts.length; p++ ) {
 /*
  Cookie Manipulation
 */
-var expiry=1;  // Default number of days before cookies expire
+var expiry=3650;  // Default number of days before cookies expire
 
 function setCookie(cname, cvalue, exdays) {
 	var d = new Date();
