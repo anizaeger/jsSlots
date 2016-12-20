@@ -1026,9 +1026,6 @@ $(window).keypress(function(e){
 	var code = e.which || e.keyCode;
 	switch ( code )
 	{
-	case 27:
-		cashOut();
-		return false;
 	case 49:
 		betOne();
 		return false;
@@ -1038,8 +1035,11 @@ $(window).keypress(function(e){
 	case 51:
 		betMax();
 		return false;
-	case 53:
+	case 52:
 		insertCoin();
+		return false;
+	case 53:
+		cashOut();
 		return false;
 	case 54:
 		insertBill();
