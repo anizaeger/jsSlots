@@ -1,0 +1,137 @@
+<html>
+<head>
+	<title>Javascript Slot Machine v0.1.0</title>
+	<script src="scripts/jquery-3.1.0.js"></script>
+	<script src="scripts/slots.js"></script>
+
+	<style>
+	button { 
+		width:100px; 
+		height:100px;
+		text-align:center;
+	}
+	</style>
+</head>
+<body onLoad="init()">
+	<table>
+		<tr>
+			<td>
+				<table>
+					<tr>
+						<td />
+						<td colspan=7 />
+					</tr>
+					<tr>
+						<td />
+						<td><span id="r0p0"></span></td>
+						<td align="right" width=25><span id="p2s0c0">&nbsp;</span></td>
+						<td align="left" width=25><span id="p2s0c1">&nbsp;</span></td>
+						<td><span id="r1p0"></span></td>
+						<td width=25><span id="p2s1c0">&nbsp;</span></td>
+						<td width=25><span id="p2s1c1">&nbsp;</span></td>
+						<td><span id="r2p0"></span></td>
+					</tr>
+					<tr>
+						<td colspan=2 />
+						<td align="right"><span id="p4s0c0">&nbsp;</span></td>
+						<td align="left"><span id="p6s0c1">&nbsp;</span></td>
+						<td />
+						<td align="right"><span id="p6s1c0">&nbsp;</span></td>
+						<td align="left"><span id="p5s1c1">&nbsp;</span></td>
+						<td />
+					</tr>
+					<tr>
+						<td colspan=2 />
+						<td align="right"><span id="p6s0c0">&nbsp;</span></td>
+						<td align="left"><span id="p4s0c1">&nbsp;</span></td>
+						<td />
+						<td align="right"><span id="p5s1c0">&nbsp;</span></td>
+						<td align="left"><span id="p6s1c1">&nbsp;</span></td>
+						<td />
+					</tr>
+					<tr>
+						<td>
+							1:
+						</td>
+						<td><span id="r0p1">&nbsp;</span></td>
+						<td align="right"><span id="p1s0c0">-</span></td>
+						<td align="left"><span id="p1s0c1">-</span></td>
+						<td><span id="r1p1">&nbsp;</span></td>
+						<td align="right"><span id="p1s1c0">-</span></td>			
+						<td align="left"><span id="p1s1c1">-</span></td>	
+						<td><span id="r2p1">&nbsp;</span></td>
+					</tr>
+					<tr>
+						<td colspan=2 />
+						<td align="right"><span id="p7s0c0">&nbsp;</span></td>
+						<td align="left"><span id="p5s0c1">&nbsp;</span></td>
+						<td />
+						<td align="right"><span id="p4s1c0">&nbsp;</span></td>
+						<td align="left"><span id="p7s1c1">&nbsp;</span></td>
+						<td />
+					</tr>
+					<tr>
+						<td colspan=2 />
+						<td align="right"><span id="p5s0c0">&nbsp;</span></td>
+						<td align="left"><span id="p7s0c1">&nbsp;</span></td>
+						<td />
+						<td align="right"><span id="p7s1c0">&nbsp;</span></td>
+						<td align="left"><span id="p4s1c1">&nbsp;</span></td>
+						<td />
+					</tr>
+					<tr>
+						<td />
+						<td><span id="r0p2"></span></td>
+						<td align="right"><span id="p3s0c0">&nbsp;</span></td>
+						<td align="left"><span id="p3s0c1">&nbsp;</span></td>
+						<td><span id="r1p2"></span></td>
+						<td align="right"><span id="p3s1c0">&nbsp;</span></td>
+						<td align="left"><span id="p3s1c1">&nbsp;</span></td>
+						<td><span id="r2p2"></span></td>
+					</tr>
+					<tr>
+						<td />
+						<td colspan=7 />
+					</tr>
+				</table>
+				<table width="100%">
+					<tr>
+						<td colspan="4" align="center">
+							<span id="wintype">&nbsp;</span><br />
+						</td>
+					</tr>
+					<tr>
+						<td align="right">
+							Coins In:<br />
+							Credits:<br />
+						</td>
+						<td>
+							<input type="number" id="coinin" readonly style="width: 3em"/><br />
+							<input type="number" id="credits" readonly style="width: 7em"/><br />
+						</td>
+						<td align="right">
+							Win:<br />
+							Winner Paid:<br />
+						</td>
+						<td>
+							<input type="number" id="win" readonly style="width: 7em"/><br />
+							<input type="number" id="paid" readonly style="width: 7em"/><br />
+						</td>
+					</tr>
+					<tr>
+						<td align="center" colspan="4">
+							<button onclick="placeBet()">Bet<br />One<br />Credit</button>
+							<button onclick="spin()">Spin<br />&nbsp;<br />REELS</button>
+							<button onclick="betMax()">PLAY<br />MAX<br />CREDIT</button><br />
+						</td>
+					</tr>
+				</table>
+			</td>
+			<td valign="top">
+				<table id="paytable"></table>
+			</td>
+		</tr>
+	</table>
+	<span id="debug">&nbsp;</span>
+</body>
+</html>
