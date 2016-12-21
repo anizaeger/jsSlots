@@ -602,7 +602,7 @@ function drawReel(r) {
 // Spin related functions
 
 function startGame() {
-	if ( credits == 0 || lockSpin == 1 ) {
+	if ( credits == 0 && betAmt == 0 || lockSpin == 1 ) {
 		return;
 	}
 	if ( betAmt == 0 ) {
@@ -616,7 +616,7 @@ function rebet() {
 	if ( lockSpin == 1 || lastBet == 0) {
 		return;
 	}
-	if ( credits <= 0 ) {
+	if ( credits <= 0) {
 		return;
 	} else {
 		betOne();
