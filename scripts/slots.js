@@ -41,6 +41,8 @@ function gplAlert() {
 	
 }
 
+// Slot machine reels
+
 /*
 	Symbol Legend
 		0: Blank
@@ -86,6 +88,33 @@ for ( r = 0; r < numReels; r++ ) {
 }
 var reelStop = new Array(numReels);
 var reelTopPos = new Array(numReels);
+
+// Bonus wheel
+
+/*
+	Bonus Wheel Slot Value/Color Legend
+		0: Double, Yellow
+		1: 1000, Gold
+		2: 100, Purple
+		3: 50, Orange
+		4: 40, Cyan
+		5: 30, Blue
+		6: 20, Red
+		7: 10, Green
+*/
+
+var wheelSlotVals	= ["Double",1000,100,50,40,30,20,10];
+
+var wheelSlotColors	= ["yellow","gold","purple","orange","cyan","blue","red","green"];
+
+var wheelStrip = new Array(100);
+
+wheelStrip	= [1,4,2,5,7,6,3,0,4,2,5,6,3,1,4,7,5,6,3,0,4,2,5,6,3,1,4,7,5,2,6,3,0,4,7,5,6,3,1,4,2,5,6,3,0,4,7,5,6,3,1,4,2,5,7,6,3,0,4,2,5,6,3,1,4,7,5,6,3,0,4,2,5,6,3,1,4,7,5,2,6,3,0,4,7,5,6,3,1,4,2,5,6,3,0,4,7,5,6,3];
+
+// Wheel and Position
+var wheel = [-1,-1,-1,-1,-1];  // Array storing slots for each wheel position: wheel[] = [ top, second, middle (payspot), fourth, bottom ]
+var wheelStop;
+var wheelTopPos;
 
 // Paytable
 // Format: [Reel 1 Symbol, Reel 2 Symbol, Reel 3 Symbol, Payout, Win Name]
@@ -380,13 +409,13 @@ function printDebug() {
 		debugHtml += '<td>' + r + ': <input type="number" id="dbgSpinStop'+r+'" min=0 max=' + maxStop[r] + ' value='+dbgSpinStops[r]+' style="width:5em" onInput="setSpinStops('+r+')" /</td>';
 	}
 	debugHtml += "</tr></table>";
-	debugHtml += "Virtual Wheel Stops:";
+	debugHtml += "Virtual Reel Stops:";
 	debugHtml += "<table><tr>"
 	for ( r = 0; r < numReels; r++ ) {
 		debugHtml += '<td><div id="virtStop' + r + '" style="width:5em">' + r + ": " + virtStop[r] + '</div></td>';
 	}
 	debugHtml += "</tr></table>";
-	debugHtml += "Physical Wheel Stops:";
+	debugHtml += "Physical Reel Stops:";
 	debugHtml += "<table><tr>"
 	for ( r = 0; r < numReels; r++ ) {
 		debugHtml += '<td><div id="reelStop' + r + '" style="width:5em"> ' + r + ": "+ reelStop[r] + '</div></td>';
@@ -537,6 +566,7 @@ function cashOut() {
 		}, 4250 );
 	}
 }
+
 /*
  Reel-related Functions
 */
@@ -605,8 +635,13 @@ function startGame() {
 	if ( credits == 0 && betAmt == 0 || lockSpin == 1 ) {
 		return;
 	}
+	if ( bonusGame == 1 ) {
+		wheelSpin();
+	}
 	if ( betAmt == 0 ) {
 		rebet();
+	} else if ( bonusGame == 1 ) {
+		wheelSpin();
 	} else {
 		spin();
 	}
@@ -773,7 +808,6 @@ function doNudge(reel) {
 }
 */
 
-
 function doNudge() {
 	for ( r = 0; r < numReels; r++ ) {
 		var reelNum = r;
@@ -880,6 +914,41 @@ function checkPayline() {
 	document.getElementById("gameover").innerHTML="<blink>Game Over</blink>";
 }
 
+/*
+ Bonus Game
+*/
+
+// Set random starting position for bonus wheel
+function initWheel() {
+	wheelTopPos = Math.floor(Math.random() * 100)
+	setWheel();
+}
+
+function setWheel() {
+	for ( p = 0; p < 17; p++ ) {
+		stopNum = wheelTopPos + p;
+		if ( stopNum > 99 ) {
+			stopNum = stopNum - 100;
+		}
+		wheel[p] = wheelStrip[stopNum];
+	}
+	payslot = wheel[2];
+	drawWheel();
+}
+
+function drawWheel() {
+	for ( p = 0; p < 17; p++ ) {
+		slotVal = wheelSlotVals[wheel[p]];
+		slotColor = wheelSlotColors[wheel[p]];
+		document.getElementById( "wp" + p ).innerHTML=slotVal;
+		document.getElementById( "wp" + p ).style.backgroundColor=slotColor;
+	}
+}
+
+function wheelSpin() {
+	
+}
+
 function payWin(wintype,payout,i,paySound) {
 	var loopTime;
 	
@@ -923,6 +992,10 @@ function payWin(wintype,payout,i,paySound) {
 		}
 	}, loopTime);
 }
+
+/*
+ End Game
+*/
 
 function endGame() {
 	lastBet = betAmt;
@@ -1006,6 +1079,7 @@ function init() {
 	printPaytable();
 	initVReels();
 	initReels();
+	initWheel()
 	clearWin(0);
 	cookieRestore();
 	progInit();
