@@ -802,8 +802,6 @@ function doNudge() {
 	}
 }
 
-
-
 function checkPayline() {
 	var wilds = 0;
 	var matches;
@@ -868,6 +866,9 @@ function checkPayline() {
 			payout = paytable[wintype][3];
 			payout *= betAmt;
 		}
+		if ( wintype != 0 && wintype != 12 && wintype != 16) {
+			payout *= Math.pow(3, wilds);
+		}
 		document.getElementById("wintype").innerHTML="<marquee>"+paytable[wintype][4]+"</marquee>";
 		document.getElementById("win").value=payout;
 		i = 0;
@@ -877,7 +878,6 @@ function checkPayline() {
 		winStats( paytable.length, betAmt );
 		endGame();
 	}
-	document.getElementById("gameover").innerHTML="<blink>Game Over</blink>";
 }
 
 function payWin(wintype,payout,i,paySound) {
@@ -930,6 +930,7 @@ function endGame() {
 	lockBtn = 0;
 	betAmt = 0;
 	document.getElementById("betAmt").value=betAmt;
+	document.getElementById("gameover").innerHTML="<blink>Game Over</blink>";
 }
 
 function jackpot(c) {
