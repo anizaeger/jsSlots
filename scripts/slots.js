@@ -870,7 +870,7 @@ function checkPayline() {
 			payout *= betAmt;
 		}
 		if ( wintype != 0 && wintype != 12 && wintype != 16) {
-			payout *= Math.pow(3, wilds);
+			payout *= Math.pow(2, wilds);
 		}
 		document.getElementById("wintype").innerHTML="<marquee>"+paytable[wintype][4]+"</marquee>";
 		document.getElementById("win").value=payout;
