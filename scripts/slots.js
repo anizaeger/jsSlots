@@ -802,8 +802,6 @@ function doNudge() {
 	}
 }
 
-
-
 function checkPayline() {
 	var wilds = 0;
 	var matches;
@@ -867,6 +865,9 @@ function checkPayline() {
 		} else {
 			payout = paytable[wintype][3];
 			payout *= betAmt;
+		}
+		if ( wintype != 0 && wintype != 12 && wintype != 16) {
+			payout *= Math.pow(3, wilds);
 		}
 		document.getElementById("wintype").innerHTML="<marquee>"+paytable[wintype][4]+"</marquee>";
 		document.getElementById("win").value=payout;
