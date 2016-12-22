@@ -1161,6 +1161,15 @@ function playSound(sIndex) {
 		9: possWin2
 		10: jackpot
 		11: cashout
+		12: scatter1
+		13: scatter2
+		14: scatter3
+		15: bonusWin
+		16: bonusHit1
+		17: bonusHit2
+		18: bonusHit3
+		19:spinWheel
+		20: wheelTick
 	*/
 
 	createjs.Sound.play(sIndex)
