@@ -950,6 +950,10 @@ function wheelSpin() {
 	
 }
 
+function wheelLoop() {
+	
+}
+
 function payWin(wintype,payout,i,paySound) {
 	var loopTime;
 	
@@ -1129,7 +1133,7 @@ $(window).keypress(function(e){
 	SoundJS Functions
 */
 
-var sounds = ["insertCoin","coinBong","4C","4E","4G","5C","reelStop","possWin0","possWin1","possWin2","jackpot","cashOut"];
+var sounds = ["insertCoin","coinBong","4C","4E","4G","5C","reelStop","possWin0","possWin1","possWin2","jackpot","cashOut","scatter1","scatter2","scatter3","bonusWin","bonusHit1","bonusHit2","bonusHit3","spinWheel","wheelTick"];
 
 var paySounds = 33;
 
