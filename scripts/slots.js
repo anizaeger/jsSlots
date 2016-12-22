@@ -53,9 +53,10 @@ function gplAlert() {
 		5: White 7
 		6: Red 7
 		7: Wild
+		8: Spin
 */
 
-var symbols = ["blank","BR", "BW", "BB", "7B", "7W", "7R", "Wild"];
+var symbols = ["blank","BR", "BW", "BB", "7B", "7W", "7R", "Wild", "Spin"];
 
 var virtReel = new Array(numReels);
 var virtStop = new Array(numReels);
@@ -71,8 +72,8 @@ numVirtStops[0]		= [4,1,5,1,6,3,4,1,3,2,5,1,3,6,4,1,5,3,5,1,5,3];
 strip[1] 		= [0,4,0,1,0,7,0,6,0,3,0,4,0,1,0,5,0,3,0,6,0,2];
 numVirtStops[1]		= [4,1,4,4,5,1,7,1,5,3,3,1,3,4,3,1,3,4,5,1,5,4];
 
-strip[2] 		= [0,7,0,1,0,5,0,3,0,2,0,4,0,1,0,5,0,3,0,6,0,2];
-numVirtStops[2]		= [5,1,5,4,3,1,3,3,2,4,4,2,4,5,3,1,3,2,5,1,6,5];
+strip[2] 		= [0,7,0,1,0,5,0,3,0,2,0,4,0,8,0,5,0,3,0,6,0,2];
+numVirtStops[2]		= [4,1,6,9,3,1,3,3,2,4,4,2,4,3,3,1,3,2,5,1,3,5];
 
 // Odds of symbol nudging to blank payline space, in symbols[] order
 var nudgeOdds = [0,1,2,3,10,20,30,100]
