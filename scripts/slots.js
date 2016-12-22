@@ -80,9 +80,12 @@ var nudgeVal = new Array(numReels);  // Direction, if any, to nudge reels.
 
 // Reels and Positions
 var numReels = strip.length;  //Number of reels
+var numReelPos = 3;
 var reel = new Array( numReels );  // Array storing symbols for each reel position: reel[r] = [ top, middle, bottom ]
 for ( r = 0; r < numReels; r++ ) {
-	reel[r] = [-1,-1,-1];
+	for ( p = 0; p < numReelPos; p++ ) {
+		reel[r][p] = -1;
+	}
 }
 var reelStop = new Array(numReels);
 var reelTopPos = new Array(numReels);
@@ -581,7 +584,7 @@ function advReel(minSpin) {
 }
 
 function setReel(r) {
-	for ( p = 0; p < 3; p++ ) {
+	for ( p = 0; p < numReelPos; p++ ) {
 		stopNum = reelTopPos[r] + p;
 		if ( stopNum > 21 ) {
 			stopNum = stopNum - 22;
@@ -593,7 +596,7 @@ function setReel(r) {
 }
 
 function drawReel(r) {
-	for ( p = 0; p < 3; p++ ) {
+	for ( p = 0; p < numReelPos; p++ ) {
 		symbol = symbols[reel[r][p]];
 		document.getElementById( "r" + r + "p" + p ).innerHTML='<image width="100" src=images/' + symbol + '.png />';
 	}
@@ -814,7 +817,7 @@ function checkPayline() {
 			wilds++;
 		}
 	}
-	for (p = 0; p < 18; p++) {
+	for (p = 0; p < paytable.length; p++) {
 		match = 0;
 		if ((p == 12 && wilds == 2) || (p == 16 && wilds == 1)) { // Any Wilds
 			wintype = p;
