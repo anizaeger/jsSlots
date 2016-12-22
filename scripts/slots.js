@@ -877,7 +877,6 @@ function checkPayline() {
 		winStats( paytable.length, betAmt );
 		endGame();
 	}
-	document.getElementById("gameover").innerHTML="<blink>Game Over</blink>";
 }
 
 function payWin(wintype,payout,i,paySound) {
@@ -930,6 +929,7 @@ function endGame() {
 	lockBtn = 0;
 	betAmt = 0;
 	document.getElementById("betAmt").value=betAmt;
+	document.getElementById("gameover").innerHTML="<blink>Game Over</blink>";
 }
 
 function jackpot(c) {
