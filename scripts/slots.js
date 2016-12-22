@@ -82,10 +82,14 @@ var nudgeVal = new Array(numReels);  // Direction, if any, to nudge reels.
 
 
 // Reels and Positions
-var numReels = strip.length;  //Number of reels
+var numReels = strip.length;  // Number of reels
+var numReelPos = 3;  // Number of visible reel positions
 var reel = new Array( numReels );  // Array storing symbols for each reel position: reel[r] = [ top, middle, bottom ]
 for ( r = 0; r < numReels; r++ ) {
-	reel[r] = [-1,-1,-1];
+	reel[r] = new Array( numReelPos );
+	for ( p = 0; p < numReelPos; p++ ) {
+		reel[r][p] = -1;
+	}
 }
 var reelStop = new Array(numReels);
 var reelTopPos = new Array(numReels);
@@ -100,17 +104,17 @@ paytable[1] = [6,5,4,300,"Red 7, White 7, Blue 7"];
 paytable[2] = [6,6,6,120,"3 Red Sevens"];
 paytable[3] = [5,5,5,100,"3 White Sevens"];
 paytable[4] = [4,4,4,80,"3 Blue Sevens"];
-paytable[5] = [8,8,8,40,"Any 3 Sevens"];
+paytable[5] = [100,100,100,40,"Any 3 Sevens"];
 paytable[6] = [1,2,3,40,"Red Bar, White Bar, Blue Bar"];
 paytable[7] = [3,3,3,30,"3 Blue Bars"];
 paytable[8] = [2,2,2,20,"3 White Bars"];
-paytable[9] = [10,11,12,20,"Any Red, Any White, Any Blue"];
+paytable[9] = [102,103,104,20,"Any Red, Any White, Any Blue"];
 paytable[10] = [1,1,1,10,"3 Red Bars"];
-paytable[11] = [9,9,9,5,"Any 3 Bars"];
+paytable[11] = [101,101,101,5,"Any 3 Bars"];
 paytable[12] = [-2,-2,-2,5,"2 Wilds"];
-paytable[13] = [10,10,10,2,"Any 3 Reds"];
-paytable[14] = [11,11,11,2,"Any 3 Whites"];
-paytable[15] = [12,12,12,2,"Any 3 Blues"];
+paytable[13] = [102,102,102,2,"Any 3 Reds"];
+paytable[14] = [103,103,103,2,"Any 3 Whites"];
+paytable[15] = [104,104,104,2,"Any 3 Blues"];
 paytable[16] = [-1,-1,-1,2,"1 Wild"];
 paytable[17] = [0,0,0,1,"3 Blanks"];
 
@@ -124,7 +128,7 @@ groups[4] = ["Any<br />Blue",3,4];
 
 var payline = new Array(numReels);  // Physical reel stop at payline
 var paysym = new Array(numReels);  // Numeric value representing symbol on payline
-var paylines = 1;  // Number of paylines.  Must remain set to one.
+var paylines = 1;  // Number of paylines.  Must remain set to one.  Included for multiple paylines in the future.
 		
 // Spin related variables
 var spinCount;
@@ -137,6 +141,7 @@ var possWin;
 var maxLineBet = 3;
 var betLimit = maxLineBet * paylines
 
+var billCredits = 100;
 var credits = 0;
 var betAmt = 0;
 var lastBet = 0;
@@ -221,7 +226,7 @@ function printPaytable() {
 			paytext = paytext + '<tr><td width="25" id="pt' + p + 'w0">&nbsp;</td>';
 			for ( s = 0; s < numReels; s++ ) {
 				if (paytable[p][s] > 7 ) {
-					var g = paytable[p][s] - 8;
+					var g = paytable[p][s] - 100;
 					paytext = paytext + '<td align="center">' + groups[g][0] + '</td>';
 				} else {
 					symbol = symbols[ paytable[p][s] ];
@@ -460,7 +465,7 @@ function insertBill() {
 		return;
 	} else {
 		clearWin();
-		credits = credits + 100;
+		credits = credits + billCredits;
 		document.getElementById("credits").value=credits;
 		setCookie("credits",credits,expiry);
 		playSound(1);
@@ -567,7 +572,7 @@ function initVReels() {
 // Set random starting position for physical reels
 function initReels() {
 	for ( r = 0; r < numReels; r++ ) {
-		reelTopPos[r] = Math.floor(Math.random() * 22)
+		reelTopPos[r] = Math.floor(Math.random() * strip[r].length)
 		setReel(r);
 	}
 }
@@ -576,7 +581,7 @@ function initReels() {
 function advReel(minSpin) {
 	for ( r = minSpin; r < numReels; r++ ) {
 		reelTopPos[r]++;
-		if ( reelTopPos[r] > 21 ) {
+		if ( reelTopPos[r] > strip[r].length - 1 ) {
 			reelTopPos[r] = 0
 		}
 		setReel(r);
@@ -584,10 +589,10 @@ function advReel(minSpin) {
 }
 
 function setReel(r) {
-	for ( p = 0; p < 3; p++ ) {
+	for ( p = 0; p < numReelPos; p++ ) {
 		stopNum = reelTopPos[r] + p;
-		if ( stopNum > 21 ) {
-			stopNum = stopNum - 22;
+		if ( stopNum > strip[r].length - 1 ) {
+			stopNum = stopNum - strip[r].length;
 		}
 		reel[r][p] = strip[r][stopNum];
 	}
@@ -596,7 +601,7 @@ function setReel(r) {
 }
 
 function drawReel(r) {
-	for ( p = 0; p < 3; p++ ) {
+	for ( p = 0; p < numReelPos; p++ ) {
 		symbol = symbols[reel[r][p]];
 		document.getElementById( "r" + r + "p" + p ).innerHTML='<image width="100" src=images/' + symbol + '.png />';
 	}
@@ -647,7 +652,7 @@ function spin() {
 	spinSteps = 0;
 	possWin = 1;
 	for ( r = 0; r < numReels; r++ ) {
-		spinSteps += Math.floor(Math.random() * 20) + 20;
+		spinSteps += Math.floor(Math.random() * strip[r].length) + strip[r].length;
 		reelSteps[r] = spinSteps;
 		if ( dbgSpin == 1 ) {
 			reelStop[r] = dbgSpinStops[r];
@@ -726,7 +731,7 @@ function checkNudge() {
 	for ( r = 0; r < numReels; r++ ) {
 		nudgeVal[r] = 0;
 		if ( payline[r] != 0 ) { continue; }
-		var nudgePos = ( Math.floor(Math.random() * 3));
+		var nudgePos = ( Math.floor(Math.random() * numReelPos));
 		if ( nudgePos == 1 ) { continue; }
 		var nudgeSym = reel[r][nudgePos];
 		var nudgeProb = Math.floor( Math.random() * nudgeOdds[nudgeSym] );
@@ -815,7 +820,7 @@ function checkPayline() {
 			wilds++;
 		}
 	}
-	for (p = 0; p < 18; p++) {
+	for (p = 0; p < paytable.length; p++) {
 		match = 0;
 		if ((p == 12 && wilds == 2) || (p == 16 && wilds == 1)) { // Any Wilds
 			wintype = p;
@@ -827,7 +832,7 @@ function checkPayline() {
 			}
 
 			for (r = 0; r < numReels; r++) {
-				if (paysym[r] < 8) {
+				if (paysym[r] < 100) {
 					if (payline[r] == paysym[r] || payline[r] == 7) {
 						if (r == 2) {
 							wintype = p;
@@ -840,7 +845,7 @@ function checkPayline() {
 						break;
 					}
 				} else {
-					gnum = paysym[r] - 8;
+					gnum = paysym[r] - 100;
 					for ( i = 1; i < groups[gnum].length; i++) {
 						if (payline[r] == groups[gnum][i] || payline[r] == 7) {
 							match++;
