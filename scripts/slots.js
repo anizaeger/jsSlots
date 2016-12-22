@@ -150,12 +150,12 @@ var dbgRapid = 0;
 
 // Virtual reel debugging
 var dbgVReel = 0;
-var dbgVReelStops = [new Array(numReels)];
+var dbgVReelStops = new Array(numReels);
 dbgVReelStops = [11,17,5];  // Default debugging stops: 3 Wilds
 
 // Physical reel debugging
 var dbgSpin = 0;
-var dbgSpinStops = [new Array(numReels)];
+var dbgSpinStops = new Array(numReels);
 dbgSpinStops = [3,5,1];  // Default debugging stops: 3 Wilds
 
 var progCnt;
@@ -492,7 +492,7 @@ function betOne() {
 				if ( c == betAmt ) {
 					weight = "bold";
 				} else {
-					weight = "normal";					
+					weight = "normal";
 				}
 				x = document.getElementsByClassName('c'+c);
 				for (i = 0; i < x.length; i++) {
