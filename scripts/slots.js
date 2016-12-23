@@ -85,12 +85,12 @@ var nudgeVal = new Array(numReels);  // Direction, if any, to nudge reels.
 
 
 // Reels and Positions
-var numReels = strip.length;  //Number of reels
-var numReelPos = 3;
+var numReels = strip.length;  // Number of reels
+var numReelPos = 3;  // Number of visible reel positions
 var reel = new Array( numReels );  // Array storing symbols for each reel position: reel[r] = [ top, middle, bottom ]
 for ( r = 0; r < numReels; r++ ) {
-	reel[r] = new Array(numReelPos);
-	for ( p = 0; p < numReelPos; p++ ){
+	reel[r] = new Array( numReelPos );
+	for ( p = 0; p < numReelPos; p++ ) {
 		reel[r][p] = -1;
 	}
 }
@@ -534,7 +534,7 @@ function betOne() {
 				if ( c == betAmt ) {
 					weight = "bold";
 				} else {
-					weight = "normal";					
+					weight = "normal";
 				}
 				x = document.getElementsByClassName('c'+c);
 				for (i = 0; i < x.length; i++) {
@@ -847,8 +847,6 @@ function doNudge() {
 	}
 }
 
-
-
 function checkPayline() {
 	var wilds = 0;
 	var matches;
@@ -859,9 +857,6 @@ function checkPayline() {
 		if (payline[r] == 7) {
 			wilds++;
 		}
-	}
-	if ( payline[2] == 8 ) {
-		doSpin = 1;
 	}
 	for (p = 0; p < paytable.length; p++) {
 		match = 0;
@@ -1230,7 +1225,7 @@ function playSound(sIndex) {
 		16: bonusHit1
 		17: bonusHit2
 		18: bonusHit3
-		19:spinWheel
+		19: spinWheel
 		20: wheelTick
 	*/
 
