@@ -1,7 +1,7 @@
 /*
 Copyright (C) 2016, Anakin-Marc Zaeger
 
-@source: pbx.nyfnet.net/slots/scripts/slots_0.1.5.js
+@source: pbx.nyfnet.net/slots/scripts/slots.js
 
 @licstart
 This program is free software: you can redistribute it and/or modify
