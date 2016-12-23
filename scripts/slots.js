@@ -83,9 +83,13 @@ var nudgeVal = new Array(numReels);  // Direction, if any, to nudge reels.
 
 // Reels and Positions
 var numReels = strip.length;  //Number of reels
+var numReelPos = 3;
 var reel = new Array( numReels );  // Array storing symbols for each reel position: reel[r] = [ top, middle, bottom ]
 for ( r = 0; r < numReels; r++ ) {
-	reel[r] = [-1,-1,-1];
+	reel[r] = new Array(numReelPos);
+	for ( p = 0; p < numReelPos; p++ ){
+		reel[r][p] = -1;
+	}
 }
 var reelStop = new Array(numReels);
 var reelTopPos = new Array(numReels);
@@ -112,34 +116,36 @@ var wheelStrip = new Array(100);
 
 wheelStrip	= [1,4,2,5,7,6,3,0,4,2,5,6,3,1,4,7,5,6,3,0,4,2,5,6,3,1,4,7,5,2,6,3,0,4,7,5,6,3,1,4,2,5,6,3,0,4,7,5,6,3,1,4,2,5,7,6,3,0,4,2,5,6,3,1,4,7,5,6,3,0,4,2,5,6,3,1,4,7,5,2,6,3,0,4,7,5,6,3,1,4,2,5,6,3,0,4,7,5,6,3];
 
-// Wheel and Position
+// Wheel Position and Display
 var wheel = [-1,-1,-1,-1,-1];  // Array storing slots for each wheel position: wheel[] = [ top, second, middle (payspot), fourth, bottom ]
 var wheelStop;
 var wheelTopPos;
+var wheelRows = 17;
 
 // Paytable
 // Format: [Reel 1 Symbol, Reel 2 Symbol, Reel 3 Symbol, Payout, Win Name]
 // Negative values indicate number of "Wilds" on payline.
-// Symbol values 8 and higher indicate symbol groups.
+// Symbol values 100 and higher indicate symbol groups.
 var paytable = new Array();
 paytable[0] = [7,7,7,1000,"3 Wilds"];
 paytable[1] = [6,5,4,300,"Red 7, White 7, Blue 7"];
 paytable[2] = [6,6,6,120,"3 Red Sevens"];
 paytable[3] = [5,5,5,100,"3 White Sevens"];
 paytable[4] = [4,4,4,80,"3 Blue Sevens"];
-paytable[5] = [8,8,8,40,"Any 3 Sevens"];
+paytable[5] = [100,100,100,40,"Any 3 Sevens"];
 paytable[6] = [1,2,3,40,"Red Bar, White Bar, Blue Bar"];
 paytable[7] = [3,3,3,30,"3 Blue Bars"];
 paytable[8] = [2,2,2,20,"3 White Bars"];
-paytable[9] = [10,11,12,20,"Any Red, Any White, Any Blue"];
+paytable[9] = [102,103,104,20,"Any Red, Any White, Any Blue"];
 paytable[10] = [1,1,1,10,"3 Red Bars"];
-paytable[11] = [9,9,9,5,"Any 3 Bars"];
+paytable[11] = [101,101,101,5,"Any 3 Bars"];
 paytable[12] = [-2,-2,-2,5,"2 Wilds"];
-paytable[13] = [10,10,10,2,"Any 3 Reds"];
-paytable[14] = [11,11,11,2,"Any 3 Whites"];
-paytable[15] = [12,12,12,2,"Any 3 Blues"];
+paytable[13] = [102,102,102,2,"Any 3 Reds"];
+paytable[14] = [103,103,103,2,"Any 3 Whites"];
+paytable[15] = [104,104,104,2,"Any 3 Blues"];
 paytable[16] = [-1,-1,-1,2,"1 Wild"];
 paytable[17] = [0,0,0,1,"3 Blanks"];
+paytable[18] = [-1,-1,8,10,"Spin Wheel!"];
 
 // Symbol groups
 var groups = new Array();
@@ -247,8 +253,8 @@ function printPaytable() {
 		} else {
 			paytext = paytext + '<tr><td width="25" id="pt' + p + 'w0">&nbsp;</td>';
 			for ( s = 0; s < numReels; s++ ) {
-				if (paytable[p][s] > 7 ) {
-					var g = paytable[p][s] - 8;
+				if (paytable[p][s] >= 100 ) {
+					var g = paytable[p][s] - 100;
 					paytext = paytext + '<td align="center">' + groups[g][0] + '</td>';
 				} else {
 					symbol = symbols[ paytable[p][s] ];
@@ -595,7 +601,7 @@ function initVReels() {
 // Set random starting position for physical reels
 function initReels() {
 	for ( r = 0; r < numReels; r++ ) {
-		reelTopPos[r] = Math.floor(Math.random() * 22)
+		reelTopPos[r] = Math.floor(Math.random() * strip[r].length)
 		setReel(r);
 	}
 }
@@ -604,7 +610,7 @@ function initReels() {
 function advReel(minSpin) {
 	for ( r = minSpin; r < numReels; r++ ) {
 		reelTopPos[r]++;
-		if ( reelTopPos[r] > 21 ) {
+		if ( reelTopPos[r] > strip[r].length - 1 ) {
 			reelTopPos[r] = 0
 		}
 		setReel(r);
@@ -614,8 +620,8 @@ function advReel(minSpin) {
 function setReel(r) {
 	for ( p = 0; p < 3; p++ ) {
 		stopNum = reelTopPos[r] + p;
-		if ( stopNum > 21 ) {
-			stopNum = stopNum - 22;
+		if ( stopNum > strip[r].length - 1 ) {
+			stopNum = stopNum - strip[r].length;
 		}
 		reel[r][p] = strip[r][stopNum];
 	}
@@ -849,7 +855,7 @@ function checkPayline() {
 			wilds++;
 		}
 	}
-	for (p = 0; p < 18; p++) {
+	for (p = 0; p < paytable.length; p++) {
 		match = 0;
 		if ((p == 12 && wilds == 2) || (p == 16 && wilds == 1)) { // Any Wilds
 			wintype = p;
@@ -861,7 +867,7 @@ function checkPayline() {
 			}
 
 			for (r = 0; r < numReels; r++) {
-				if (paysym[r] < 8) {
+				if (paysym[r] < 100) {
 					if (payline[r] == paysym[r] || payline[r] == 7) {
 						if (r == 2) {
 							wintype = p;
@@ -874,7 +880,7 @@ function checkPayline() {
 						break;
 					}
 				} else {
-					gnum = paysym[r] - 8;
+					gnum = paysym[r] - 100;
 					for ( i = 1; i < groups[gnum].length; i++) {
 						if (payline[r] == groups[gnum][i] || payline[r] == 7) {
 							match++;
@@ -921,15 +927,15 @@ function checkPayline() {
 
 // Set random starting position for bonus wheel
 function initWheel() {
-	wheelTopPos = Math.floor(Math.random() * 100)
+	wheelTopPos = Math.floor(Math.random() * wheelStrip.length)
 	setWheel();
 }
 
 function setWheel() {
-	for ( p = 0; p < 17; p++ ) {
+	for ( p = 0; p < wheelRows; p++ ) {
 		stopNum = wheelTopPos + p;
-		if ( stopNum > 99 ) {
-			stopNum = stopNum - 100;
+		if ( stopNum > wheelStrip.length - 1 ) {
+			stopNum = stopNum - wheelStrip;
 		}
 		wheel[p] = wheelStrip[stopNum];
 	}
@@ -938,7 +944,7 @@ function setWheel() {
 }
 
 function drawWheel() {
-	for ( p = 0; p < 17; p++ ) {
+	for ( p = 0; p < wheelRows; p++ ) {
 		slotVal = wheelSlotVals[wheel[p]];
 		slotColor = wheelSlotColors[wheel[p]];
 		document.getElementById( "wp" + p ).innerHTML=slotVal;
