@@ -651,13 +651,8 @@ function startGame() {
 	if ( credits == 0 && betAmt == 0 || lockSpin == 1 ) {
 		return;
 	}
-	if ( bonusGame == 1 ) {
-		wheelSpin();
-	}
 	if ( betAmt == 0 ) {
 		rebet();
-	} else if ( bonusGame == 1 ) {
-		wheelSpin();
 	} else {
 		spin();
 	}
@@ -926,12 +921,9 @@ function checkPayline() {
 		if ( wintype != 0 && wintype != 12 && wintype != 16 && wintype != 18 ) {
 			payout *= Math.pow(2, wilds);
 		}
-		if ( wintype == 18 ) {
+		if ( wintype == 18 && betAmt == betLimit) {
 			doBonusSpin(payout,wilds);
 		} else {
-			document.getElementById("wintype").innerHTML="<marquee>"+paytable[wintype][4]+"</marquee>";
-			document.getElementById("win").value=payout;
-			winStats( wintype, betAmt );
 			payWin( wintype, payout, 0, 0 );
 		}
 	} else {
@@ -988,37 +980,43 @@ function drawWheel() {
 function wheelSpin() {
 	spinSteps = 0;
 	wheelSteps = Math.floor(Math.random() * wheelStrip.length) + wheelStrip.length;
+	wheelStop = Math.floor(Math.random() * wheelStrip.length);
 	wheelLoop();
 }
 
 function wheelLoop() {
-	if ( spinSteps < wheelSteps ) {
+	var topPos = wheelStop - 8;
+	if ( spinSteps < wheelSteps || wheelTopPos != wheelStop ) {
 		advWheel();
 		spinSteps++;
 		setTimeout(function () {
 			wheelLoop();
-		}, 20 );
+		}, 50 );
 	} else {
 		endWheel();
 	}
 }
 
 function endWheel() {
+	payslot = wheel[8];
 	if ( payslot == 0 ) { 
 		payout *= 2
 	}
-	payslot = wheel[8];
 	wheelPay = wheelSlotVals[payslot];
 	if ( wheelPay  == "Double" ) {
-		payout = wheelPrePay * Math.pow(2, wilds) * 2;
+		payout = wheelPrePay * Math.pow(2, wheelMult) * 2;
 	} else {
-		payout = ( wheelPrePay + wheelPay ) * Math.pow(2, wilds) * 2;
+		payout = ( wheelPrePay + wheelPay ) * Math.pow(2, wheelMult);
 	}
 	payWin(18,payout,0,0)
 }
 
 function payWin(wintype,payout,i,paySound) {
 	var loopTime;
+	
+	document.getElementById("wintype").innerHTML="<marquee>"+paytable[wintype][4]+"</marquee>";
+	document.getElementById("win").value=payout;
+	winStats( wintype, betAmt );
 	
 	if (payout >= 300) {
 		loopTime = 25;
