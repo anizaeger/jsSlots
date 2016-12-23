@@ -121,7 +121,8 @@ wheelStrip	= [1,4,2,5,7,6,3,0,4,2,5,6,3,1,4,7,5,6,3,0,4,2,5,6,3,1,4,7,5,2,6,3,0,
 var wheel = [-1,-1,-1,-1,-1];  // Array storing slots for each wheel position: wheel[] = [ top, second, middle (payspot), fourth, bottom ]
 var wheelStop;
 var wheelTopPos;
-var wheelRows = 17;
+var wheelRows = 19;  // Recommend odd values.  Even values will be incremented to the next highest odd integer
+var wheelPayRow;
 var wheelStop;
 
 // Paytable
@@ -370,21 +371,21 @@ function printStats() {
 		statsHtml = statsHtml + '<td>'+c+'</td>';
 	}
 	for ( p = 0; p < paytable.length; p++ ) {
-		statsHtml = statsHtml + '<tr><td><div style="text-align:left">'+paytable[p][4]+'</div></td>';
+		statsHtml += '<tr><td><div style="text-align:left">'+paytable[p][4]+'</div></td>';
 		for ( c = 0; c < maxLineBet; c++) {
-			statsHtml = statsHtml + '<td id="payouts'+p+'c'+ c +'" style="width:2em">'+payouts[p][c]+'</td>';
+			statsHtml += '<td id="payouts'+p+'c'+ c +'" style="width:2em">'+payouts[p][c]+'</td>';
 		}
-		statsHtml = statsHtml + '</tr>';
+		statsHtml += '</tr>';
 	}
-	statsHtml = statsHtml + '<tr><td><div style="text-align:left">Loss</div></td>'
+	statsHtml += '<tr><td><div style="text-align:left">Loss</div></td>'
 	for ( c = 0; c < maxLineBet; c++) {
-		statsHtml = statsHtml + '<td id="payouts'+paytable.length+'c'+ c +'">'+payouts[paytable.length][c]+'</td>';
+		statsHtml += '<td id="payouts'+paytable.length+'c'+ c +'">'+payouts[paytable.length][c]+'</td>';
 	}
-	statsHtml = statsHtml + '</tr>';
-	statsHtml = statsHtml + '</table>';
-	statsHtml = statsHtml + '<button onclick="resetStats()">Reset Stats</button>';
-	statsHtml = statsHtml + '<button onclick="progReset()">Reset Progressive</button><br />';
-	statsHtml = statsHtml + '<button onclick="gplAlert()">About</button>';
+	statsHtml += '</tr>';
+	statsHtml += '</table>';
+	statsHtml += '<button onclick="resetStats()">Reset Stats</button>';
+	statsHtml += '<button onclick="progReset()">Reset Progressive</button><br />';
+	statsHtml += '<button onclick="gplAlert()">About</button>';
 	document.getElementById("stats").innerHTML=statsHtml;
 }
 
@@ -933,15 +934,31 @@ function checkPayline() {
 */
 
 // Set random starting position for bonus wheel
-function doBonusSpin(prepay,mult) {
-	wheelPrePay = prepay;
-	wheelMult = mult;
-	wheelSpin();
-}
 
 function initWheel() {
+	if ( wheelRows % 2 == 0 ) {
+		wheelRows++
+	}
+	wheelPayRow = ( wheelRows - 1 ) / 2;
 	wheelTopPos = Math.floor(Math.random() * wheelStrip.length)
+	printWheel();
 	setWheel();
+}
+
+function printWheel() {
+	wheeltext = ""
+	wheeltext += "<tr><td /><td width=100 /><td /></tr>"
+	for ( row = 0; row < wheelRows; row++ ) {
+		wheeltext += "<tr><td id='wp"+row+"c0'><td id='wp"+row+"'><td id='wp"+row+"c1'></tr>";
+	}
+	document.getElementById("bonusWheel").innerHTML=wheeltext;
+	for ( c = 0; c < 2; c++ ) {
+		if ( c == 0) {
+			document.getElementById("wp" + wheelPayRow + "c" + c).innerHTML="-->";
+		} else {
+			document.getElementById("wp" + wheelPayRow + "c" + c).innerHTML="<--";
+		}
+	}
 }
 
 function advWheel() {
@@ -973,6 +990,12 @@ function drawWheel() {
 	}
 }
 
+function doBonusSpin(prepay,mult) {
+	wheelPrePay = prepay;
+	wheelMult = mult;
+	wheelSpin();
+}
+
 function wheelSpin() {
 	spinSteps = 0;
 	wheelSteps = Math.floor(Math.random() * wheelStrip.length) + wheelStrip.length;
@@ -981,7 +1004,7 @@ function wheelSpin() {
 }
 
 function wheelLoop() {
-	var topPos = wheelStop - 8;
+	var topPos = wheelStop - wheelPayRow;
 	if ( spinSteps < wheelSteps || wheelTopPos != wheelStop ) {
 		advWheel();
 		spinSteps++;
@@ -999,8 +1022,8 @@ function wheelLoop() {
 }
 
 function endWheel() {
-	payslot = wheel[8];
-	if ( payslot == 0 ) { 
+	payslot = wheel[wheelPayRow];
+	if ( payslot == 0 ) {
 		payout *= 2
 	}
 	wheelPay = wheelSlotVals[payslot];
