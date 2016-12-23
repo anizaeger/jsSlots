@@ -985,9 +985,14 @@ function wheelLoop() {
 	if ( spinSteps < wheelSteps || wheelTopPos != wheelStop ) {
 		advWheel();
 		spinSteps++;
+		if ( spinSteps < wheelSteps ) {
+			loopTime = 50;
+		} else {
+			loopTime = 100;
+		}
 		setTimeout(function () {
 			wheelLoop();
-		}, 50 );
+		}, loopTime );
 	} else {
 		endWheel();
 	}
