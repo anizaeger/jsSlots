@@ -66,6 +66,9 @@ var virtStop = new Array(numReels);
 var strip = new Array(numReels);
 var numVirtStops = new Array(numReels);
 
+// Reel Stop		   0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 2 2
+// Numbers		   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+
 strip[0] 		= [0,4,0,7,0,3,0,5,0,2,0,4,0,1,0,5,0,3,0,6,0,2];
 numVirtStops[0]		= [4,1,5,1,6,3,4,1,3,2,5,1,3,6,4,1,5,3,5,1,5,3];
 
@@ -157,8 +160,8 @@ groups[4] = ["Any<br />Blue",3,4];
 
 var payline = new Array(numReels);  // Physical reel stop at payline
 var paysym = new Array(numReels);  // Numeric value representing symbol on payline
-var paylines = 1;  // Number of paylines.  Must remain set to one.
-		
+var paylines = 1;  // Number of paylines.  Must remain set to one.  Included for multiple paylines in the future.
+
 // Spin related variables
 var spinCount;
 var lockSpin = 0;
@@ -170,6 +173,7 @@ var possWin;
 var maxLineBet = 3;
 var betLimit = maxLineBet * paylines
 
+var billCredits = 100;
 var credits = 0;
 var betAmt = 0;
 var lastBet = 0;
@@ -183,12 +187,12 @@ var dbgRapid = 0;
 
 // Virtual reel debugging
 var dbgVReel = 0;
-var dbgVReelStops = [new Array(numReels)];
+var dbgVReelStops = new Array(numReels);
 dbgVReelStops = [11,17,5];  // Default debugging stops: 3 Wilds
 
 // Physical reel debugging
 var dbgSpin = 0;
-var dbgSpinStops = [new Array(numReels)];
+var dbgSpinStops = new Array(numReels);
 dbgSpinStops = [3,5,1];  // Default debugging stops: 3 Wilds
 
 var progCnt;
@@ -493,7 +497,7 @@ function insertBill() {
 		return;
 	} else {
 		clearWin();
-		credits = credits + 100;
+		credits = credits + billCredits;
 		document.getElementById("credits").value=credits;
 		setCookie("credits",credits,expiry);
 		playSound(1);
@@ -618,7 +622,7 @@ function advReel(minSpin) {
 }
 
 function setReel(r) {
-	for ( p = 0; p < 3; p++ ) {
+	for ( p = 0; p < numReelPos; p++ ) {
 		stopNum = reelTopPos[r] + p;
 		if ( stopNum > strip[r].length - 1 ) {
 			stopNum = stopNum - strip[r].length;
@@ -630,7 +634,7 @@ function setReel(r) {
 }
 
 function drawReel(r) {
-	for ( p = 0; p < 3; p++ ) {
+	for ( p = 0; p < numReelPos; p++ ) {
 		symbol = symbols[reel[r][p]];
 		document.getElementById( "r" + r + "p" + p ).innerHTML='<image width="100" src=images/' + symbol + '.png />';
 	}
@@ -686,7 +690,7 @@ function spin() {
 	spinSteps = 0;
 	possWin = 1;
 	for ( r = 0; r < numReels; r++ ) {
-		spinSteps += Math.floor(Math.random() * 20) + 20;
+		spinSteps += Math.floor(Math.random() * strip[r].length) + strip[r].length;
 		reelSteps[r] = spinSteps;
 		if ( dbgSpin == 1 ) {
 			reelStop[r] = dbgSpinStops[r];
@@ -765,7 +769,7 @@ function checkNudge() {
 	for ( r = 0; r < numReels; r++ ) {
 		nudgeVal[r] = 0;
 		if ( payline[r] != 0 ) { continue; }
-		var nudgePos = ( Math.floor(Math.random() * 3));
+		var nudgePos = ( Math.floor(Math.random() * numReelPos));
 		if ( nudgePos == 1 ) { continue; }
 		var nudgeSym = reel[r][nudgePos];
 		var nudgeProb = Math.floor( Math.random() * nudgeOdds[nudgeSym] );
@@ -909,6 +913,9 @@ function checkPayline() {
 			payout = paytable[wintype][3];
 			payout *= betAmt;
 		}
+		if ( wintype != 0 && wintype != 12 && wintype != 16) {
+			payout *= Math.pow(2, wilds);
+		}
 		document.getElementById("wintype").innerHTML="<marquee>"+paytable[wintype][4]+"</marquee>";
 		document.getElementById("win").value=payout;
 		i = 0;
@@ -918,7 +925,6 @@ function checkPayline() {
 		winStats( paytable.length, betAmt );
 		endGame();
 	}
-	document.getElementById("gameover").innerHTML="<blink>Game Over</blink>";
 }
 
 /*
@@ -1014,6 +1020,7 @@ function endGame() {
 	lockBtn = 0;
 	betAmt = 0;
 	document.getElementById("betAmt").value=betAmt;
+	document.getElementById("gameover").innerHTML="<blink>Game Over</blink>";
 }
 
 function jackpot(c) {
