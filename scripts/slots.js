@@ -858,6 +858,9 @@ function checkPayline() {
 			wilds++;
 		}
 	}
+	if ( payline[2] == 8 ) {
+		doSpin = 1;
+	}
 	for (p = 0; p < paytable.length; p++) {
 		match = 0;
 		if (p == 18 && doSpin == 1 ) {
