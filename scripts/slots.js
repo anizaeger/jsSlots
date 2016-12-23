@@ -148,7 +148,7 @@ paytable[14] = [103,103,103,2,"Any 3 Whites"];
 paytable[15] = [104,104,104,2,"Any 3 Blues"];
 paytable[16] = [-1,-1,-1,2,"1 Wild"];
 paytable[17] = [0,0,0,1,"3 Blanks"];
-paytable[18] = [-1,-1,8,10,"Spin Wheel!"];
+paytable[18] = [-1,-1,8,10,"Spin"];
 
 // Symbol groups
 var groups = new Array();
