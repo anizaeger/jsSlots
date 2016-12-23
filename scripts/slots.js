@@ -77,7 +77,7 @@ strip[2] 		= [0,7,0,1,0,5,0,3,0,2,0,4,0,8,0,5,0,3,0,6,0,2];
 numVirtStops[2]		= [4,1,6,9,3,1,3,3,2,4,4,2,4,3,3,1,3,2,5,1,3,5];
 
 // Odds of symbol nudging to blank payline space, in symbols[] order
-var nudgeOdds = [0,1,2,3,10,20,30,100]
+var nudgeOdds = [0,1,2,3,10,20,30,100,5]
 
 var nudgeVal = new Array(numReels);  // Direction, if any, to nudge reels.
 
@@ -146,7 +146,7 @@ paytable[12] = [-2,-2,-2,5,"2 Wilds"];
 paytable[13] = [102,102,102,2,"Any 3 Reds"];
 paytable[14] = [103,103,103,2,"Any 3 Whites"];
 paytable[15] = [104,104,104,2,"Any 3 Blues"];
-paytable[16] = [-1,-1,-1,2,"1 Wild"];
+paytable[16] = [-2,-2,-2,2,"1 Wild"];
 paytable[17] = [0,0,0,1,"3 Blanks"];
 paytable[18] = [-1,-1,8,10,"Spin"];
 
@@ -251,7 +251,7 @@ function printPaytable() {
 	var paytext = "";
 	var g;
 	for (p = 0; p < paytable.length; p++) {
-		if ( paytable[p][0] <= 0 ) {
+		if ( paytable[p][0] < -1 ) {  // Print payout name for wild-only combinations.
 			paytext += '<tr><td width="25" id="pt' + p + 'w0">&nbsp;</td>';
 			paytext += '<td align="center" colspan=' + numReels + '>' + paytable[p][ numReels + 1 ] + '</td>';
 			for ( c = 1; c <= maxLineBet; c++ ) {
@@ -259,24 +259,28 @@ function printPaytable() {
 			}
 			paytext += '<td width="25" id="pt' + p + 'w1">&nbsp;</td></tr>';
 		} else {
-			paytext = paytext + '<tr><td width="25" id="pt' + p + 'w0">&nbsp;</td>';
+			paytext += '<tr><td width="25" id="pt' + p + 'w0">&nbsp;</td>';
 			for ( s = 0; s < numReels; s++ ) {
 				if (paytable[p][s] >= 100 ) {
 					var g = paytable[p][s] - 100;
-					paytext = paytext + '<td align="center">' + groups[g][0] + '</td>';
+					paytext += '<td align="center">' + groups[g][0] + '</td>';
+				} else if ( paytable[p][s] == -1 ) {
+					paytext += '<td align="center">*</td>';
 				} else {
 					symbol = symbols[ paytable[p][s] ];
-					paytext = paytext + '<td align="center"><image width="25" src=images/'+symbol+'.png /></td>';
+					paytext += '<td align="center"><image width="25" src=images/'+symbol+'.png /></td>';
 				}
 			}
 			for ( c = 1; c <= maxLineBet; c++ ) {
 				if ( p == 0 && c == maxLineBet ) {
-					paytext = paytext + '<td colspan=2 id="pt' + p + '"><input type="number" id="progVal" value=' + progVal + ' style="width:5em"></td>';
+					paytext += '<td colspan=2 id="pt' + p + 'c' + c + '"><input type="number" id="progVal" value=' + progVal + ' style="width:5em"></td>';
+				} else if ( p == 18 && c == maxLineBet ) {
+					paytext += '<td colspan=2 id="pt' + p + 'c' + c + '">' + paytable[p][numReels] * c + ' plus<br />Wheel</td>';
 				} else {
-					paytext = paytext + '<td id="pt' + p + 'c' + c + '" class="c' + c + '">' + paytable[p][numReels] * c + '</td>';
+					paytext += '<td id="pt' + p + 'c' + c + '" class="c' + c + '">' + paytable[p][numReels] * c + '</td>';
 				}
 			}
-			paytext = paytext + '<td width="25" id="pt' + p + 'w1">&nbsp;</td></tr>';
+			paytext += '<td width="25" id="pt' + p + 'w1">&nbsp;</td></tr>';
 		}
 	}
 	document.getElementById( "paytable" ).innerHTML=paytext;
@@ -936,12 +940,14 @@ function checkPayline() {
 // Set random starting position for bonus wheel
 
 function initWheel() {
+	wheelMult = 0;
 	if ( wheelRows % 2 == 0 ) {
 		wheelRows++
 	}
 	wheelPayRow = ( wheelRows - 1 ) / 2;
 	wheelTopPos = Math.floor(Math.random() * wheelStrip.length)
 	printWheel();
+	document.getElementById("wheelmult").innerHTML=wheelMult;
 	setWheel();
 }
 
@@ -949,8 +955,9 @@ function printWheel() {
 	wheeltext = ""
 	wheeltext += "<tr><td /><td width=100 /><td /></tr>"
 	for ( row = 0; row < wheelRows; row++ ) {
-		wheeltext += "<tr><td id='wp"+row+"c0'><td id='wp"+row+"'><td id='wp"+row+"c1'></tr>";
+		wheeltext += "<tr><td id='wp"+row+"c0'><td id='wp"+row+"'></td><td id='wp"+row+"c1'></td></tr>";
 	}
+	wheeltext += "<tr><td colspan=2>Wheel<br />Multiplier</td><td id='wheelmult'></td></tr>";
 	document.getElementById("bonusWheel").innerHTML=wheeltext;
 	for ( c = 0; c < 2; c++ ) {
 		if ( c == 0) {
@@ -998,6 +1005,7 @@ function doBonusSpin(prepay,mult) {
 
 function wheelSpin() {
 	spinSteps = 0;
+	document.getElementById("wheelmult").innerHTML=Math.pow(2, wheelMult)
 	wheelSteps = Math.floor(Math.random() * wheelStrip.length) + wheelStrip.length;
 	wheelStop = Math.floor(Math.random() * wheelStrip.length);
 	wheelLoop();
@@ -1028,7 +1036,10 @@ function endWheel() {
 	}
 	wheelPay = wheelSlotVals[payslot];
 	if ( wheelPay  == "Double" ) {
-		payout = wheelPrePay * Math.pow(2, wheelMult) * 2;
+		wheelMult++
+		setTimeout(function () {
+			wheelSpin()
+		}, 500)
 	} else {
 		payout = ( wheelPrePay + wheelPay ) * Math.pow(2, wheelMult);
 	}
@@ -1037,8 +1048,6 @@ function endWheel() {
 
 function payWin(wintype,payout,i,paySound) {
 	var loopTime;
-	
-	document.getElementById("wintype").innerHTML="<marquee>"+paytable[wintype][4]+"</marquee>";
 	document.getElementById("win").value=payout;
 	winStats( wintype, betAmt );
 	
@@ -1078,6 +1087,7 @@ function payWin(wintype,payout,i,paySound) {
 		if (i < payout) {
 			payWin(wintype,payout,i,paySound);
 		} else {
+			document.getElementById("wintype").innerHTML="<marquee>"+paytable[wintype][4]+"</marquee>";
 			endGame();
 		}
 	}, loopTime);
