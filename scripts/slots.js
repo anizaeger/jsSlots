@@ -121,7 +121,7 @@ wheelStrip	= [1,4,2,5,7,6,3,0,4,2,5,6,3,1,4,7,5,6,3,0,4,2,5,6,3,1,4,7,5,2,6,3,0,
 var wheel = [-1,-1,-1,-1,-1];  // Array storing slots for each wheel position: wheel[] = [ top, second, middle (payspot), fourth, bottom ]
 var wheelStop;
 var wheelTopPos;
-var wheelRows = 19;  // Recommend odd values.  Even values will be incremented to the next highest odd integer
+var wheelRows = 15;  // Recommend odd values.  Even values will be incremented to the next highest odd integer
 var wheelPayRow;
 var wheelStop;
 
@@ -331,7 +331,7 @@ function payStats(pmt) {
 	
 	setCookie("paidIn",paidIn,expiry);
 	setCookie("paidOut",paidOut,expiry);
-	if ( miscDataType == 1 ) {
+	if ( miscDataType == "stats" ) {
 		document.getElementById("paidIn").innerHTML=paidIn;
 		document.getElementById("paidOut").innerHTML=paidOut;
 		document.getElementById("paidNet").innerHTML=paidNet;
@@ -343,7 +343,7 @@ function winStats(w,c) {
 	cIndex = c - 1;
 	payouts[w][ cIndex ]++;
 	setCookie("payouts"+w+"c"+cIndex,payouts[w][ cIndex ],expiry);
-	if ( miscDataType == 1) {
+	if ( miscDataType == "stats") {
 		document.getElementById("payouts"+w+"c"+cIndex).innerHTML=payouts[w][ cIndex ];
 	}
 }
@@ -370,7 +370,7 @@ function miscData(value) {
 	dbgMode=0;
 	dbgSpin=0;
 	dbgRapid=0;
-	var miscDataType=value;
+	miscDataType=value;
 	switch ( miscDataType ) {
 	case "none":
 		clearMisc();
@@ -704,7 +704,9 @@ function spin() {
 	lockSpin = 1;
 	lockBtn = 1;
 	spinCount++;
-	document.getElementById("spinCount").innerHTML=spinCount;
+	if ( miscDataType == "stats") {
+		document.getElementById("spinCount").innerHTML=spinCount;
+	}
 	setCookie("spinCount",spinCount,expiry);
 	setCookie("credits",credits,expiry);
 	progInc(betAmt);
@@ -965,7 +967,7 @@ function initWheel() {
 	wheelPayRow = ( wheelRows - 1 ) / 2;
 	wheelTopPos = Math.floor(Math.random() * wheelStrip.length)
 	printWheel();
-	document.getElementById("wheelmult").value=wheelMult;
+	document.getElementById("wheelmult").innerHTML=wheelMult;
 	setWheel();
 }
 
@@ -1022,7 +1024,7 @@ function doBonusSpin(prepay,mult) {
 
 function wheelSpin() {
 	spinSteps = 0;
-	document.getElementById("wheelmult").value=Math.pow(2, wheelMult)
+	document.getElementById("wheelmult").innerHTML=Math.pow(2, wheelMult)
 	wheelSteps = Math.floor(Math.random() * wheelStrip.length) + wheelStrip.length;
 	wheelStop = Math.floor(Math.random() * wheelStrip.length);
 	wheelLoop();
@@ -1193,7 +1195,7 @@ function init() {
 	var spinnum;
 	var symbol;
 	var symnum;
-	var miscDataType=0;
+	var miscDataType="none";
 	preloadSound();
 	printPaytable();
 	initVReels();

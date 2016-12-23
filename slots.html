@@ -185,23 +185,25 @@
 				</table>
 			</td>
 			<td valign="top">
-				<table id="bonusWheel"></table>
-				<table>
+				<table align="center">
 					<tr>
 						<td>Wheel Multiplier:</td>
-						<td><input type='number' id='wheelmult' readonly style='width: 3em'/></td>
+						<td><span id='wheelmult'></span>x</td>
 					</tr>
 				</table>
+				<table id="bonusWheel"></table>
 			</td>
 			<td valign="top">
 				<table id="paytable"></table>
 			</td>
 			<td valign="top">
-				<select id="miscData" onchange="miscData(this.value)">
-					<option value="none" id="miscDataNone">None</option>
-					<option value="stats" id="miscDataStats">Stats</option>
-					<option value="debug" id="miscDataDebug">Debug</option>
-				</select>
+				<div align="left">
+					<select id="miscData" onchange="miscData(this.value)">
+						<option value="none" id="miscDataNone">None</option>
+						<option value="stats" id="miscDataStats">Stats</option>
+						<option value="debug" id="miscDataDebug">Debug</option>
+					</select>
+				</div>
 				<table id="miscDataTbl"></table>
 			</td>
 		</tr>
