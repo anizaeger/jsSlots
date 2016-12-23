@@ -124,6 +124,7 @@ var wheel = [-1,-1,-1,-1,-1];  // Array storing slots for each wheel position: w
 var wheelStop;
 var wheelTopPos;
 var wheelRows = 17;
+var wheelStop;
 
 // Paytable
 // Format: [Reel 1 Symbol, Reel 2 Symbol, Reel 3 Symbol, Payout, Win Name]
@@ -168,6 +169,10 @@ var lockSpin = 0;
 var spinSteps;
 var reelSteps = new Array(numReels);
 var possWin;
+
+var wheelPrePay;
+var wheelMult;
+var wheelSteps;
 
 // Bet related variables
 var maxLineBet = 3;
@@ -854,17 +859,22 @@ function checkPayline() {
 	var matches;
 	var gnum;
 	var wintype = -1;
+	var doSpin = 0;
 	for (r = 0; r < numReels; r++) {
 		if (payline[r] == 7) {
 			wilds++;
 		}
 	}
+	if ( payline[2] == 8 ) {
+		doSpin = 1;
+	}
 	for (p = 0; p < paytable.length; p++) {
 		match = 0;
+		if (p == 18 && doSpin == 1 ) {
+			wintype = p;
+		}
 		if ((p == 12 && wilds == 2) || (p == 16 && wilds == 1)) { // Any Wilds
 			wintype = p;
-			p = paytable.length;
-			break;
 		} else {
 			for (r = 0; r < numReels; r++) {
 				paysym[r] = paytable[p][r];
@@ -913,14 +923,17 @@ function checkPayline() {
 			payout = paytable[wintype][3];
 			payout *= betAmt;
 		}
-		if ( wintype != 0 && wintype != 12 && wintype != 16) {
+		if ( wintype != 0 && wintype != 12 && wintype != 16 && wintype != 18 ) {
 			payout *= Math.pow(2, wilds);
 		}
-		document.getElementById("wintype").innerHTML="<marquee>"+paytable[wintype][4]+"</marquee>";
-		document.getElementById("win").value=payout;
-		i = 0;
-		winStats( wintype, betAmt );
-		payWin( wintype, payout, 0, 0 );
+		if ( wintype == 18 ) {
+			doBonusSpin(payout,wilds);
+		} else {
+			document.getElementById("wintype").innerHTML="<marquee>"+paytable[wintype][4]+"</marquee>";
+			document.getElementById("win").value=payout;
+			winStats( wintype, betAmt );
+			payWin( wintype, payout, 0, 0 );
+		}
 	} else {
 		winStats( paytable.length, betAmt );
 		endGame();
@@ -932,8 +945,23 @@ function checkPayline() {
 */
 
 // Set random starting position for bonus wheel
+function doBonusSpin(prepay,mult) {
+	wheelPrePay = prepay;
+	wheelMult = mult;
+	wheelSpin();
+}
+
 function initWheel() {
 	wheelTopPos = Math.floor(Math.random() * wheelStrip.length)
+	setWheel();
+}
+
+function advWheel() {
+	wheelTopPos++;
+	if ( wheelTopPos > wheelStrip.length - 1 ) {
+		wheelTopPos = 0
+	}
+	playSound(20);
 	setWheel();
 }
 
@@ -941,11 +969,10 @@ function setWheel() {
 	for ( p = 0; p < wheelRows; p++ ) {
 		stopNum = wheelTopPos + p;
 		if ( stopNum > wheelStrip.length - 1 ) {
-			stopNum = stopNum - wheelStrip;
+			stopNum = stopNum - wheelStrip.length;
 		}
 		wheel[p] = wheelStrip[stopNum];
 	}
-	payslot = wheel[2];
 	drawWheel();
 }
 
@@ -959,11 +986,35 @@ function drawWheel() {
 }
 
 function wheelSpin() {
-	
+	spinSteps = 0;
+	wheelSteps = Math.floor(Math.random() * wheelStrip.length) + wheelStrip.length;
+	wheelLoop();
 }
 
 function wheelLoop() {
-	
+	if ( spinSteps < wheelSteps ) {
+		advWheel();
+		spinSteps++;
+		setTimeout(function () {
+			wheelLoop();
+		}, 20 );
+	} else {
+		endWheel();
+	}
+}
+
+function endWheel() {
+	if ( payslot == 0 ) { 
+		payout *= 2
+	}
+	payslot = wheel[8];
+	wheelPay = wheelSlotVals[payslot];
+	if ( wheelPay  == "Double" ) {
+		payout = wheelPrePay * Math.pow(2, wilds) * 2;
+	} else {
+		payout = ( wheelPrePay + wheelPay ) * Math.pow(2, wilds) * 2;
+	}
+	payWin(18,payout,0,0)
 }
 
 function payWin(wintype,payout,i,paySound) {
