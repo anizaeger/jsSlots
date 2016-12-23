@@ -1095,7 +1095,7 @@ function playSound(sIndex) {
 		13: scatter2
 		14: scatter3
 		15: bonusWin
-		16:bonusHit1
+		16: bonusHit1
 		17: bonusHit2
 		18: bonusHit3
 		19: spinWheel
