@@ -83,9 +83,6 @@ var nudgeVal = new Array(numReels);  // Direction, if any, to nudge reels.
 
 
 // Reels and Positions
-var numReels = strip.length;  //Number of reels
-var numReelPos = 3;
-var reel = new Array( numReels );  // Array storing symbols for each reel position: reel[r] = [ top, middle, bottom ]
 var numReels = strip.length;  // Number of reels
 var numReelPos = 3;  // Number of visible reel positions
 var reel = new Array( numReels );  // Array storing symbols for each reel position: reel[r] = [ top, middle, bottom ]
