@@ -162,6 +162,8 @@ var payline = new Array(numReels);  // Physical reel stop at payline
 var paysym = new Array(numReels);  // Numeric value representing symbol on payline
 var paylines = 1;  // Number of paylines.  Must remain set to one.  Included for multiple paylines in the future.
 
+var miscDataType;
+
 // Spin related variables
 var spinCount;
 var lockSpin = 0;
@@ -329,18 +331,21 @@ function payStats(pmt) {
 	
 	setCookie("paidIn",paidIn,expiry);
 	setCookie("paidOut",paidOut,expiry);
-	
-	document.getElementById("paidIn").innerHTML=paidIn;
-	document.getElementById("paidOut").innerHTML=paidOut;
-	document.getElementById("paidNet").innerHTML=paidNet;
-	document.getElementById("paidPcnt").innerHTML=paidPcnt;
+	if ( miscDataType == 1 ) {
+		document.getElementById("paidIn").innerHTML=paidIn;
+		document.getElementById("paidOut").innerHTML=paidOut;
+		document.getElementById("paidNet").innerHTML=paidNet;
+		document.getElementById("paidPcnt").innerHTML=paidPcnt;
+	}
 }
 
 function winStats(w,c) {
 	cIndex = c - 1;
 	payouts[w][ cIndex ]++;
 	setCookie("payouts"+w+"c"+cIndex,payouts[w][ cIndex ],expiry);
-	document.getElementById("payouts"+w+"c"+cIndex).innerHTML=payouts[w][ cIndex ];
+	if ( miscDataType == 1) {
+		document.getElementById("payouts"+w+"c"+cIndex).innerHTML=payouts[w][ cIndex ];
+	}
 }
 
 function resetStats() {
@@ -359,6 +364,38 @@ function resetStats() {
 			document.getElementById("payouts"+p+"c"+c).innerHTML=payouts[p][c];
 		}
 	}
+}
+
+function miscData(value) {
+	dbgMode=0;
+	dbgSpin=0;
+	dbgRapid=0;
+	var miscDataType=value;
+	switch ( miscDataType ) {
+	case "none":
+		clearMisc();
+		break;
+	case "stats":
+		printStats();
+		break;
+	case "debug":
+		dbgMode = 1;
+		printDebug();
+		document.getElementById('spinDebug').checked = false;
+		document.getElementById('vReelDebug').checked = false;
+		document.getElementById('dbgRapid').checked = false;
+		break;
+	default:
+		alert("Error!");
+		break;
+	}
+}
+
+function clearMisc() {
+	dbgMode=0;
+	dbgSpin=0;
+	dbgRapid=0;
+	document.getElementById("miscDataTbl").innerHTML="";
 }
 
 function printStats() {
@@ -389,24 +426,9 @@ function printStats() {
 	statsHtml += '</table>';
 	statsHtml += '<button onclick="resetStats()">Reset Stats</button>';
 	statsHtml += '<button onclick="progReset()">Reset Progressive</button><br />';
-	statsHtml += '<button onclick="gplAlert()">About</button>';
-	document.getElementById("stats").innerHTML=statsHtml;
+	document.getElementById("miscDataTbl").innerHTML=statsHtml;
 }
 
-function tgglDebug() {
-	if (document.getElementById('debugMode').checked) {
-		dbgMode = 1;
-		printDebug();
-	} else {
-		dbgMode=0;
-		dbgSpin=0;
-		dbgRapid=0;
-		document.getElementById('spinDebug').checked = false;
-		document.getElementById('vReelDebug').checked = false;
-		document.getElementById('dbgRapid').checked = false;
-		clearDebug();
-	}
-}
 
 function printDebug() {
 	var debugHtml = "";
@@ -441,11 +463,7 @@ function printDebug() {
 	}
 	debugHtml += "</tr></table>";
 	debugHtml += 'Rapid Mode: <input type="checkbox" id="dbgRapid" onClick="tgglDbgRapid()" /><br />';
-	document.getElementById("debug").innerHTML=debugHtml
-}
-
-function clearDebug() {
-	document.getElementById("debug").innerHTML="";
+	document.getElementById("miscDataTbl").innerHTML=debugHtml
 }
 
 function tgglSpinDbg() {
@@ -947,17 +965,16 @@ function initWheel() {
 	wheelPayRow = ( wheelRows - 1 ) / 2;
 	wheelTopPos = Math.floor(Math.random() * wheelStrip.length)
 	printWheel();
-	document.getElementById("wheelmult").innerHTML=wheelMult;
+	document.getElementById("wheelmult").value=wheelMult;
 	setWheel();
 }
 
 function printWheel() {
 	wheeltext = ""
-	wheeltext += "<tr><td /><td width=100 /><td /></tr>"
+	wheeltext += "<tr><td /><td width=200 /><td /></tr>"
 	for ( row = 0; row < wheelRows; row++ ) {
 		wheeltext += "<tr><td id='wp"+row+"c0'><td id='wp"+row+"'></td><td id='wp"+row+"c1'></td></tr>";
 	}
-	wheeltext += "<tr><td colspan=2>Wheel<br />Multiplier</td><td id='wheelmult'></td></tr>";
 	document.getElementById("bonusWheel").innerHTML=wheeltext;
 	for ( c = 0; c < 2; c++ ) {
 		if ( c == 0) {
@@ -1005,7 +1022,7 @@ function doBonusSpin(prepay,mult) {
 
 function wheelSpin() {
 	spinSteps = 0;
-	document.getElementById("wheelmult").innerHTML=Math.pow(2, wheelMult)
+	document.getElementById("wheelmult").value=Math.pow(2, wheelMult)
 	wheelSteps = Math.floor(Math.random() * wheelStrip.length) + wheelStrip.length;
 	wheelStop = Math.floor(Math.random() * wheelStrip.length);
 	wheelLoop();
@@ -1148,7 +1165,7 @@ function progInit() {
 		progVal = paytable[0][numReels] * maxLineBet * 5/3;
 		setCookie("progCnt",progCnt,expiry)
 		setCookie("progVal",progVal,expiry)
-		document.getElementById("progVal").value=progVal;		
+		document.getElementById("progVal").value=progVal;
 	}
 }
 
@@ -1176,6 +1193,7 @@ function init() {
 	var spinnum;
 	var symbol;
 	var symnum;
+	var miscDataType=0;
 	preloadSound();
 	printPaytable();
 	initVReels();
@@ -1184,14 +1202,14 @@ function init() {
 	clearWin(0);
 	cookieRestore();
 	progInit();
-	printStats();
+	clearMisc();
 	payStats(0);
 	document.getElementById("credits").value=credits;
 	document.getElementById("betAmt").value=betAmt;
 	document.getElementById("progVal").value=progVal;
 	document.getElementById("gameover").innerHTML="Game Over";
 	document.getElementById("maxcred").innerHTML="Play " + betLimit + " Credits";
-	document.getElementById("debugMode").checked = false;
+	document.getElementById("miscDataNone").selected = true;
 }
 
 /*

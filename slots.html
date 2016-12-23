@@ -186,21 +186,27 @@
 			</td>
 			<td valign="top">
 				<table id="bonusWheel"></table>
+				<table>
+					<tr>
+						<td>Wheel Multiplier:</td>
+						<td><input type='number' id='wheelmult' readonly style='width: 3em'/></td>
+					</tr>
+				</table>
 			</td>
 			<td valign="top">
 				<table id="paytable"></table>
 			</td>
 			<td valign="top">
-				Statistics
-				<div id="stats"></div>
-				<a href="about/licenses.html" rel="jslicense">JavaScript license information</a>
-			</td>
-			<td valign="top">
-				<div style="text-align:left"><input type="checkbox" id="debugMode" onClick="tgglDebug()"/>Debug Mode</div>
-				
-				<div id="debug"></div>
+				<select id="miscData" onchange="miscData(this.value)">
+					<option value="none" id="miscDataNone">None</option>
+					<option value="stats" id="miscDataStats">Stats</option>
+					<option value="debug" id="miscDataDebug">Debug</option>
+				</select>
+				<table id="miscDataTbl"></table>
 			</td>
 		</tr>
 	</table>
+	<a href="about/licenses.html" rel="jslicense">JavaScript license information</a><br />
+	<button onclick="gplAlert()">About</button>
 </body>
 </html>
