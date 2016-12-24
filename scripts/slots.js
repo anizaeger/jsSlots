@@ -1044,7 +1044,7 @@ function initWheel() {
 	wheelPayRow = ( wheelRows - 1 ) / 2;
 	wheelTopPos = Math.floor(Math.random() * wheelStrip.length)
 	printWheel();
-	document.getElementById("wheelmult").innerHTML=wheelMult;
+	document.getElementById("wheelmult").innerHTML=Math.pow(2, wheelMult);
 	setWheel();
 }
 
