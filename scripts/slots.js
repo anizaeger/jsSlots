@@ -196,6 +196,8 @@ groups[2] = ["Any<br />Red",1,6];
 groups[3] = ["Any<br />White",2,5];
 groups[4] = ["Any<br />Blue",3,4];
 
+var grpSym = ["7A", "BA", "RA", "WA", "BA"];
+
 var payline = new Array(numReels);  // Physical reel stop at payline
 var paysym = new Array(numReels);  // Numeric value representing symbol on payline
 var paylines = 1;  // Number of paylines.  Must remain set to one.  Included for multiple paylines in the future.
@@ -320,7 +322,7 @@ function printPaytable() {
 				if ( p == 0 && c == maxLineBet ) {
 					paytext += '<td colspan=2 id="pt' + p + 'c' + c + '"><input type="number" id="progVal" value=' + progVal + ' style="width:5em"></td>';
 				} else if ( p == 18 && c == maxLineBet ) {
-					paytext += '<td colspan=2 id="pt' + p + 'c' + c + '">' + paytable[p][numReels] * c + ' plus<br />Wheel</td>';
+					paytext += '<td colspan=2 id="pt' + p + 'c' + c + '" class="c' + c + '">' + paytable[p][numReels] * c + ' plus<br />Wheel</td>';
 				} else {
 					paytext += '<td id="pt' + p + 'c' + c + '" class="c' + c + '">' + paytable[p][numReels] * c + '</td>';
 				}
@@ -1016,11 +1018,11 @@ function checkPayline() {
 			payout = paytable[wintype][3];
 			payout *= betAmt;
 		}
-		if ( wintype != 0 && wintype != 12 && wintype != 16 && wintype != 18 ) {
+		if ( wintype != 0 && wintype != 12 && wintype != 16 ) {
 			payout *= Math.pow(2, wilds);
-		}
-		if ( wintype == 18 && betAmt == betLimit) {
-			doBonusSpin(payout,wilds);
+			if ( wintype == 18 && betAmt == betLimit) {
+				doBonusSpin(payout,wilds);
+			}
 		} else {
 			payWin( wintype, payout, 0, 0 );
 		}
@@ -1074,7 +1076,9 @@ function advWheel() {
 	} else {
 		wPos = wheelTopPos + wheelPayRow
 	}
-	document.getElementById("wheelTopPos").innerHTML=wPos
+	if ( dbgMode == 1 ) {
+		document.getElementById("wheelTopPos").innerHTML=wPos
+	}
 	playSound(20);
 	setWheel();
 }
@@ -1153,7 +1157,7 @@ function endWheel() {
 			wheelSpin()
 		}, 500)
 	} else {
-		payout = ( wheelPrePay + wheelPay ) * Math.pow(2, wheelMult);
+		payout = wheelPrePay + ( wheelPay * Math.pow(2, wheelMult));
 		winStats( 18, betAmt );
 		payWin(18,payout,0,0)
 	}
