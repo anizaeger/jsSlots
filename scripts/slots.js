@@ -716,7 +716,9 @@ function advReel(minSpin) {
 		} else {
 			rPos = reelTopPos[r] + 1
 		}
-		document.getElementById("reelTopPos" + r).innerHTML=rPos
+		if ( dbgMode == 1 ) {
+			document.getElementById("reelTopPos" + r).innerHTML=rPos
+		}
 		setReel(r);
 	}
 }
