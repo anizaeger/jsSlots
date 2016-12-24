@@ -467,10 +467,6 @@ function printDebug() {
 	var debugHtml = "";
 	var maxStop = new Array(numReels);
 	var maxVStop = new Array(numReels);
-	for ( r = 0; r < numReels; r++ ) {
-		maxStop[r] = strip[r].length - 1;
-		maxVStop[r] = virtReel[r].length - 1;
-	}
 	var maxWheelStop = wheelStrip.length - 1;
 	
 	//Spin Debugging
@@ -502,12 +498,12 @@ function printDebug() {
 	debugHtml += '<td colspan='+numReels+' style="text-align:left">Physical Reel Stops:</td>';
 	debugHtml += '</tr><tr>';
 	for ( r = 0; r < numReels; r++ ) {
-		debugHtml += '<td width=33% style="text-align:left"><div id="reelStop' + r + '" style="width:5em"> ' + r + ": "+ reelStop[r] + '</div></td>';
+		debugHtml += '<td width=33% style="text-align:left"><div style="width:5em">' + r + ': <span id="reelTopPos' + r + '">' + (reelTopPos[r] + 1) + '</span>&nbsp;-&gt;&nbsp;<span id="reelStop' + r + '"> ' + (reelTopPos[r] + 1) + '</span></div></td>';
 	}
 	debugHtml += '</tr><tr>';
 	debugHtml += '<td colspan='+numReels+' style="text-align:left">Bonus Wheel Stop:</td>';
 	debugHtml += '</tr><tr>';
-	debugHtml += '<td width=33% style="text-align:left"><div id="wheelStop" style="width:5em">' + wheelStop + '</div></td>';
+	debugHtml += '<td width=33% style="text-align:left"><div style="width:5em"><span id="wheelTopPos">' + (wheelTopPos + 1) + '</span>&nbsp;-&gt;&nbsp;<span id="wheelStop">' + (wheelTopPos + 1) + '</span></div></td>';
 	debugHtml += '</tr><table>';
 	document.getElementById("miscDataTbl").innerHTML=debugHtml
 }
@@ -705,6 +701,12 @@ function advReel(minSpin) {
 		if ( reelTopPos[r] > strip[r].length - 1 ) {
 			reelTopPos[r] = 0
 		}
+		if ( reelTopPos[r] + 1 > strip[r].length - 1 ) {
+			rPos = reelTopPos[r] + 1 - strip[r].length
+		} else {
+			rPos = reelTopPos[r] + 1
+		}
+		document.getElementById("reelTopPos" + r).innerHTML=rPos
 		setReel(r);
 	}
 }
@@ -789,8 +791,8 @@ function spin() {
 			reelStop[r] = virtReel[r][virtStop[r]];
 		}
 		if ( dbgMode == 1 ) {
-			document.getElementById("virtStop" + r ).innerHTML=r + ": " + virtStop[r];
-			document.getElementById("reelStop" + r ).innerHTML=r + ": " + reelStop[r];
+			document.getElementById("virtStop" + r ).innerHTML=virtStop[r];
+			document.getElementById("reelStop" + r ).innerHTML=reelStop[r];
 		}
 	}
 	spinSteps = 0;
@@ -1055,6 +1057,12 @@ function advWheel() {
 	if ( wheelTopPos > wheelStrip.length - 1 ) {
 		wheelTopPos = 0
 	}
+	if ( wheelTopPos + wheelPayRow > wheelStrip.length - 1 ) {
+		wPos = wheelTopPos + wheelPayRow - wheelStrip.length
+	} else {
+		wPos = wheelTopPos + wheelPayRow
+	}
+	document.getElementById("wheelTopPos").innerHTML=wPos
 	playSound(20);
 	setWheel();
 }
