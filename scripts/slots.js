@@ -56,13 +56,41 @@ function gplAlert() {
 
 var symbols = ["blank","BR", "BW", "BB", "7B", "7W", "7R", "Wild", "Spin"];
 
-var virtReel = new Array(numReels);
-var virtStop = new Array(numReels);
+var virtReel = new Array(numReels);	// Auto-generated virtual reels.
+var virtStop = new Array(numReels);	// Stop position for virtual reel.  Randomly-selected at spin.
 
 
 // Physical reel strips and virtual reel stops per physical reel stop
-var strip = new Array(numReels);
-var numVirtStops = new Array(numReels);
+// Physical reel strip elements indicate symbols.  See symbol legend above.
+// Virtual reels indicate number of stops in total for the respective virtual reel.
+
+// Example with dummy values:
+//	strip[0]	= [0,2,0,4]
+//	numVirtStops[0]	= [5,4,6,2]
+
+//	strip[0][2] 		is 0: Blank
+//	numVirtStops[0][2]	is 6: There are 6 virtual stops for that particular blank.
+
+// numVirtStops[] stops for each physical reel strip stop will be added, in order, to virtReel[].
+// virtReel[] is auto-generated in function initVReels(), and contains physical reel stop numbers.
+
+// Resulting auto-generated virtual reel for above dummy values:
+
+//	virtReel[0]	= [0,0,0,0,0,1,1,1,1,2,2,2,2,2,2,3,3]
+
+//	During game play, the random number generator selects a random element in virtReel[],
+//	and stops the physical reel at the location indicated by the value read.
+
+//	Example: Random number generator selects element 7:
+//	virtReel[0][7]	is 1
+
+//	That value is used to select an element on the correspond physical reel:
+//	strip[0][1]	is 2
+
+//	As a result, the reel will stop at that particular White Bar.
+
+var strip = new Array(numReels);	// Phys. reels
+var numVirtStops = new Array(numReels);	// Virt. reels
 
 // Reel Stop		   0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 2 2
 // Numbers		   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -74,7 +102,7 @@ strip[1] 		= [0,4,0,1,0,7,0,6,0,3,0,4,0,1,0,5,0,3,0,6,0,2];
 numVirtStops[1]		= [4,1,4,4,5,1,7,1,5,3,3,1,3,4,3,1,3,4,5,1,5,4];
 
 strip[2] 		= [0,7,0,1,0,5,0,3,0,2,0,4,0,8,0,5,0,3,0,6,0,2];
-numVirtStops[2]		= [4,1,6,9,3,1,3,3,2,4,4,2,4,3,3,1,3,2,5,1,3,5];
+numVirtStops[2]		= [4,1,6,9,3,1,3,3,2,4,4,2,4,1,5,1,3,2,5,1,3,5];
 
 // Odds of symbol nudging to blank payline space, in symbols[] order
 var nudgeOdds = [0,1,2,3,10,20,30,100,5]
@@ -194,12 +222,17 @@ var dbgRapid = 0;
 // Virtual reel debugging
 var dbgVReel = 0;
 var dbgVReelStops = new Array(numReels);
-dbgVReelStops = [11,17,5];  // Default debugging stops: 3 Wilds
+dbgVReelStops = [10,18,4];  // Default debugging stops: 3 Wilds
 
 // Physical reel debugging
 var dbgSpin = 0;
 var dbgSpinStops = new Array(numReels);
 dbgSpinStops = [3,5,1];  // Default debugging stops: 3 Wilds
+
+// Bonus wheel debugging
+var dbgWheel = 0;
+var dbgWheelStop;
+dbgWheelStop = 7;
 
 var progCnt;
 var progVal;
@@ -432,37 +465,50 @@ function printStats() {
 
 function printDebug() {
 	var debugHtml = "";
-	var maxStop = new Array(strip.length);
-	for ( r = 0; r < strip.length; r++ ) {
-		maxStop[r] = strip[r].length - 1
+	var maxStop = new Array(numReels);
+	var maxVStop = new Array(numReels);
+	for ( r = 0; r < numReels; r++ ) {
+		maxStop[r] = strip[r].length - 1;
+		maxVStop[r] = virtReel[r].length - 1;
 	}
+	var maxWheelStop = wheelStrip.length - 1;
 	
 	//Spin Debugging
-	debugHtml += 'Virtual Reel Debugging: <input type="checkbox" id="vReelDebug" onClick="tgglVReelDbg()" /><br />';
-	debugHtml += "<table><tr>"
+	debugHtml += '<table><tr>';
+	debugHtml += '<td colspan='+numReels+' style="text-align:left">Rapid Mode: <input type="checkbox" id="dbgRapid" onClick="tgglDbgRapid()" /></td>';
+	debugHtml += '</tr><tr>'
+	debugHtml += '<td colspan='+numReels+' style="text-align:left">Virtual Reel Debugging: <input type="checkbox" id="vReelDebug" onClick="tgglVReelDbg()" /></td>';
+	debugHtml += '</tr><tr>'
 	for ( r = 0; r < numReels; r++ ) {
-		debugHtml += '<td>' + r + ': <input type="number" id="dbgVReelStop'+r+'" min=0 max=' + maxStop[r] + ' value='+dbgVReelStops[r]+' style="width:5em" onInput="setVReelStops('+r+')" /</td>';
+		debugHtml += '<td width=33% style="text-align:center">' + r + ': <input type="number" id="dbgVReelStop'+r+'" min=0 max=' + maxVStop[r] + ' value='+dbgVReelStops[r]+' style="width:5em" onInput="setVReelStops('+r+')" /></td>';
 	}
-	debugHtml += "</tr></table>";
-	debugHtml += 'Physical Reel Debugging: <input type="checkbox" id="spinDebug" onClick="tgglSpinDbg()" /><br />';
-	debugHtml += "<table><tr>"
+	debugHtml += '</tr><tr>';
+	debugHtml += '<td colspan='+numReels+' style="text-align:left">Physical Reel Debugging: <input type="checkbox" id="spinDebug" onClick="tgglSpinDbg()" /></td>';
+	debugHtml += '</tr><tr>';
 	for ( r = 0; r < numReels; r++ ) {
-		debugHtml += '<td>' + r + ': <input type="number" id="dbgSpinStop'+r+'" min=0 max=' + maxStop[r] + ' value='+dbgSpinStops[r]+' style="width:5em" onInput="setSpinStops('+r+')" /</td>';
+		debugHtml += '<td width=33% style="text-align:center">' + r + ': <input type="number" id="dbgSpinStop'+r+'" min=0 max=' + maxStop[r] + ' value='+dbgSpinStops[r]+' style="width:5em" onInput="setSpinStops('+r+')" /></td>';
 	}
-	debugHtml += "</tr></table>";
-	debugHtml += "Virtual Reel Stops:";
-	debugHtml += "<table><tr>"
+	debugHtml += '</tr><tr>';
+	debugHtml += '<td colspan='+numReels+' style="text-align:left">Bonus Debugging: <input type="checkbox" id="wheelDebug" onClick="wheelDbg()" /></td>';
+	debugHtml += '</tr><tr>';
+	debugHtml += '<td colspan='+numReels+' style="text-align:left"><input type="number" id="dbgWheelStop" min=0 max=' + maxWheelStop + ' value='+dbgWheelStop+' style="width:5em" onInput="setWheelStop()" /></td>';
+	debugHtml += '</tr><tr>';
+	debugHtml += '<td colspan='+numReels+' style="text-align:left">Virtual Reel Stops:</td>';
+	debugHtml += '</tr><tr>';
 	for ( r = 0; r < numReels; r++ ) {
-		debugHtml += '<td><div id="virtStop' + r + '" style="width:5em">' + r + ": " + virtStop[r] + '</div></td>';
+		debugHtml += '<td width=33% style="text-align:left"><div id="virtStop' + r + '" style="width:5em">' + r + ": " + virtStop[r] + '</div></td>';
 	}
-	debugHtml += "</tr></table>";
-	debugHtml += "Physical Reel Stops:";
-	debugHtml += "<table><tr>"
+	debugHtml += '</tr><tr>';
+	debugHtml += '<td colspan='+numReels+' style="text-align:left">Physical Reel Stops:</td>';
+	debugHtml += '</tr><tr>';
 	for ( r = 0; r < numReels; r++ ) {
-		debugHtml += '<td><div id="reelStop' + r + '" style="width:5em"> ' + r + ": "+ reelStop[r] + '</div></td>';
+		debugHtml += '<td width=33% style="text-align:left"><div id="reelStop' + r + '" style="width:5em"> ' + r + ": "+ reelStop[r] + '</div></td>';
 	}
-	debugHtml += "</tr></table>";
-	debugHtml += 'Rapid Mode: <input type="checkbox" id="dbgRapid" onClick="tgglDbgRapid()" /><br />';
+	debugHtml += '</tr><tr>';
+	debugHtml += '<td colspan='+numReels+' style="text-align:left">Bonus Wheel Stop:</td>';
+	debugHtml += '</tr><tr>';
+	debugHtml += '<td width=33% style="text-align:left"><div id="wheelStop" style="width:5em">' + wheelStop + '</div></td>';
+	debugHtml += '</tr><table>';
 	document.getElementById("miscDataTbl").innerHTML=debugHtml
 }
 
@@ -486,6 +532,14 @@ function tgglVReelDbg() {
 	}
 }
 
+function wheelDbg() {
+	if (document.getElementById('wheelDebug').checked) {
+		dbgWheel = 1;
+	} else {
+		dbgWheel = 0;
+	}
+}
+
 function tgglDbgRapid() {
 	if (document.getElementById('dbgRapid').checked) {
 		dbgRapid = 1;
@@ -500,6 +554,10 @@ function setSpinStops(r) {
 
 function setVReelStops(r) {
 	dbgVReelStops[r] = document.getElementById( "dbgVReelStop" + r ).value;
+}
+
+function setWheelStop() {
+	dbgWheelStop = document.getElementById( "dbgWheelStop" ).value;
 }
 
 // Credit related functions
@@ -612,15 +670,19 @@ function cashOut() {
 function initVReels() {
 	for ( r = 0; r < numReels; r++ ) {
 		var vReelLen = 0;
+		// Count total number of stops for each virtual reel.
 		for ( n = 0; n < numVirtStops[r].length; n++ ) {
 			for ( s = 0; s < numVirtStops[r][n]; s++ ) {
 				vReelLen++;
 			}
 		}
-		var vStop = 0;  // Element number for stops in virtual reels
-		virtReel[r] = new Array(vReelLen);
+		var vStop = 0;	// Element number for stops in virtual reels
+		
+		virtReel[r] = new Array(vReelLen);	// Create new array for each virtual reel.
+		
+		// Generate virtual reel
 		for ( n = 0; n < numVirtStops[r].length; n++ ) {
-			for ( s = 0; s < numVirtStops[r][n]; s++ ) {
+			for ( s = 0; s < numVirtStops[r][n]; s++ ) {	
 				virtReel[r][vStop] = n;
 				vStop++;
 			}
@@ -659,6 +721,7 @@ function setReel(r) {
 	drawReel(r);
 }
 
+// Place symbol images onto playfield according to symbol values in reel[r]
 function drawReel(r) {
 	for ( p = 0; p < numReelPos; p++ ) {
 		symbol = symbols[reel[r][p]];
@@ -1026,13 +1089,23 @@ function wheelSpin() {
 	spinSteps = 0;
 	document.getElementById("wheelmult").innerHTML=Math.pow(2, wheelMult)
 	wheelSteps = Math.floor(Math.random() * wheelStrip.length) + wheelStrip.length;
-	wheelStop = Math.floor(Math.random() * wheelStrip.length);
+	if ( dbgWheel == 1 ) {
+		wheelStop = dbgWheelStop;
+	} else {
+		wheelStop = Math.floor(Math.random() * wheelStrip.length);
+	}
+	if ( dbgMode == 1 ) {
+		document.getElementById("wheelStop").innerHTML=wheelStop;
+	}
 	wheelLoop();
 }
 
 function wheelLoop() {
 	var topPos = wheelStop - wheelPayRow;
-	if ( spinSteps < wheelSteps || wheelTopPos != wheelStop ) {
+	if ( topPos < 0 ) {
+		topPos = wheelStrip.length - 1
+	}
+	if ( spinSteps < wheelSteps || wheelTopPos != topPos ) {
 		advWheel();
 		spinSteps++;
 		if ( spinSteps < wheelSteps ) {
@@ -1061,14 +1134,14 @@ function endWheel() {
 		}, 500)
 	} else {
 		payout = ( wheelPrePay + wheelPay ) * Math.pow(2, wheelMult);
+		winStats( 18, betAmt );
+		payWin(18,payout,0,0)
 	}
-	payWin(18,payout,0,0)
 }
 
 function payWin(wintype,payout,i,paySound) {
 	var loopTime;
 	document.getElementById("win").value=payout;
-	winStats( wintype, betAmt );
 	
 	if (payout >= 300) {
 		loopTime = 25;
