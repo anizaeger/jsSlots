@@ -1020,9 +1020,10 @@ function checkPayline() {
 		}
 		if ( wintype != 0 && wintype != 12 && wintype != 16 ) {
 			payout *= Math.pow(2, wilds);
-			if ( wintype == 18 && betAmt == betLimit) {
-				doBonusSpin(payout,wilds);
-			}
+
+		}
+		if ( wintype == 18 && betAmt == betLimit) {
+			doBonusSpin(payout,wilds);
 		} else {
 			payWin( wintype, payout, 0, 0 );
 		}
