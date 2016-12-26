@@ -22,8 +22,6 @@
  * section 4, provided you include this license notice and a URL
  * through which recipients can access the Corresponding Source.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @licend The above is the entire license notice
  * for the JavaScript code in this page.
@@ -32,20 +30,22 @@
 
 function gplAlert() {
 	var copyText = "";
-	copyText += "Copyright (C) 2016, Anakin-Marc Zaeger\n"
-	copyText += "\n"
-	copyText += "This program is free software: you can redistribute it and/or modify\n"
-	copyText += "it under the terms of the GNU General Public License as published by\n"
-	copyText += "the Free Software Foundation, either version 3 of the License, or\n"
-	copyText += "(at your option) any later version.\n"
-	copyText += "\n"
-	copyText += "This program is distributed in the hope that it will be useful,\n"
-	copyText += "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
-	copyText += "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
-	copyText += "GNU General Public License for more details.\n"
-	copyText += "\n"
-	copyText += "You should have received a copy of the GNU General Public License\n"
-	copyText += "along with this program.  If not, see <http://www.gnu.org/licenses/>.\n"
+	copyTxt += "Copyright (C) 2016 Anakin-Marc Zaeger\n"
+	copyTxt += "\n"
+	copyTxt += "\n"
+	copyTxt += "The JavaScript code in this page is free software: you can\n"
+	copyTxt += "redistribute it and/or modify it under the terms of the GNU\n"
+	copyTxt += "General Public License (GNU GPL) as published by the Free Software\n"
+	copyTxt += "Foundation, either version 3 of the License, or (at your option)\n"
+	copyTxt += "any later version.  The code is distributed WITHOUT ANY WARRANTY;\n"
+	copyTxt += "without even the implied warranty of MERCHANTABILITY or FITNESS\n"
+	copyTxt += "FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.\n"
+	copyTxt += "\n"
+	copyTxt += "As additional permission under GNU GPL version 3 section 7, you\n"
+	copyTxt += "may distribute non-source (e.g., minimized or compacted) forms of\n"
+	copyTxt += "that code without the copy of the GNU GPL normally required by\n"
+	copyTxt += "section 4, provided you include this license notice and a URL\n"
+	copyTxt += "through which recipients can access the Corresponding Source.\n"
 	window.alert(copyText)
 }
 
@@ -596,6 +596,23 @@ function insertBill() {
 	}
 }
 
+function cashOut() {
+	if ( credits == 0 || cashingOut == 1 || betAmt != 0 || lockBtn == 1 ) {
+		return;
+	} else {
+		cashingOut = 1;
+		lastBet = 0;
+		playSound(11);
+		setTimeout(function () {
+			document.getElementById("paid").value=credits;
+			credits = 0;
+			setCookie("credits",credits,expiry)
+			document.getElementById("credits").value=credits;
+			cashingOut = 0;
+		}, 4250 );
+	}
+}
+
 function clearWin() {
 	for (pt = 0; pt < paytable.length; pt++) {
 		for ( w = 0; w < 2; w++ ) {
@@ -651,23 +668,6 @@ function betMax() {
 	setTimeout(function () {
 		betMax();
 	}, 125 )
-}
-
-function cashOut() {
-	if ( credits == 0 || cashingOut == 1 || betAmt != 0 || lockBtn == 1 ) {
-		return;
-	} else {
-		cashingOut = 1;
-		lastBet = 0;
-		playSound(11);
-		setTimeout(function () {
-			document.getElementById("paid").value=credits;
-			credits = 0;
-			setCookie("credits",credits,expiry)
-			document.getElementById("credits").value=credits;
-			cashingOut = 0;
-		}, 4250 );
-	}
 }
 
 /*
@@ -888,7 +888,7 @@ function checkNudge() {
 	}
 	if ( nudge > 0 ) {
 		setTimeout(function() {
-			doNudge(0);
+			doNudge(0,nudge);
 		}, looptime)
 	} else {
 		setTimeout(function() {
@@ -921,14 +921,19 @@ function doNudge(reel) {
 }
 */
 
-function doNudge() {
-	for ( r = 0; r < numReels; r++ ) {
-		var reelNum = r;
-		if ( nudgeVal[reelNum] != 0 ) {
+function doNudge(r,nudge) {
+	for ( ; r < numReels; r++ ) {
+		if ( nudgeVal[r] != 0 ) {
 			reelTopPos[r] += nudgeVal[r];
+			if ( reelTopPos[r] > strip[r].length - 1 ) {
+				reelTopPos[r] = 0
+			} else if ( reelTopPos[r] < 0 ) {
+				reelTopPos[r] = strip[r].length - 1
+			}
 			setReel(r);
 			playSound(6);
-			nudgeVal[reelNum] = 0;
+			nudgeVal[r] = 0;
+			nudge--;
 			break;
 		}
 	}
@@ -938,13 +943,13 @@ function doNudge() {
 		looptime = 250;
 	}
 	
-	if ( reelNum == numReels - 1 ){
+	if ( r == numReels - 1 || nudge == 0 ){
 		setTimeout(function () {
 			checkPayline();
 		}, looptime )
 	} else {
 		setTimeout(function () {
-			doNudge(reel);
+			doNudge(r,nudge);
 		}, looptime )
 	}
 }
@@ -1299,7 +1304,7 @@ function init() {
 	initVReels();
 	initReels();
 	initWheel()
-	clearWin(0);
+	clearWin();
 	cookieRestore();
 	progInit();
 	clearMisc();
