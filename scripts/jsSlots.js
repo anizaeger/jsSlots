@@ -1010,6 +1010,7 @@ function checkPayline() {
 		}
 	}
 	if ( wintype >= 0 ) {
+		winStats( paytable.length, betAmt );
 		for ( w = 0; w < 2; w++ ) {
 			if ( w == 0) {
 				document.getElementById("pt" + wintype + "w" + w).innerHTML="-->";
@@ -1027,6 +1028,7 @@ function checkPayline() {
 			payout *= Math.pow(2, wilds);
 
 		}
+		winStats( wintype, betAmt );
 		if ( wintype == 18 && betAmt == betLimit) {
 			doBonusSpin(payout,wilds);
 		} else {
@@ -1164,7 +1166,6 @@ function endWheel() {
 		}, 500)
 	} else {
 		payout = wheelPrePay + ( wheelPay * Math.pow(2, wheelMult));
-		winStats( 18, betAmt );
 		payWin(18,payout,0,0)
 	}
 }
