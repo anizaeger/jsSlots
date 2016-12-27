@@ -82,13 +82,14 @@ var virtStop = new Array(numReels);	// Stop position for virtual reel.  Randomly
 */
 
 var groups = new Array();
-groups[0] = [4,5,6];
-groups[1] = [1,2,3];
-groups[2] = [1,6];
-groups[3] = [2,5];
-groups[4] = [3,4];
+groups[0] = [4,5,6];	// Any 7
+groups[1] = [1,2,3];	// Any Bar
+groups[2] = [1,6];	// Any Red
+groups[3] = [2,5];	// Any White
+groups[4] = [3,4];	// Any Blue
 
-var grpSym = ["7A", "BA", "Red", "White", "Blue"];	// Group paytable icons
+// Paytable image filename for groups, not including file extension.  Must be PNG format, and in images subdirectory.  Index number is group ID.
+var grpSym = ["7A", "BA", "Red", "White", "Blue"];
 
 // Physical reel strips and virtual reel stops per physical reel stop
 // Physical reel strip elements indicate symbols.  See symbol legend above.
@@ -189,15 +190,15 @@ var wheelStop;
 // Symbol values 100 and higher indicate symbol groups.
 var paytable = new Array();
 paytable[0] = [7,7,7,1000,"3 Wilds"];
-paytable[1] = [6,5,4,300,"Red 7, White 7, Blue 7"];
+paytable[1] = [6,5,4,300,"Red, White, & Blue 7s"];
 paytable[2] = [6,6,6,120,"3 Red Sevens"];
 paytable[3] = [5,5,5,100,"3 White Sevens"];
 paytable[4] = [4,4,4,80,"3 Blue Sevens"];
 paytable[5] = [100,100,100,40,"Any 3 Sevens"];
-paytable[6] = [1,2,3,40,"Red Bar, White Bar, Blue Bar"];
+paytable[6] = [1,2,3,40,"Red, White, & Blue Bars"];
 paytable[7] = [3,3,3,30,"3 Blue Bars"];
 paytable[8] = [2,2,2,20,"3 White Bars"];
-paytable[9] = [102,103,104,20,"Any Red, Any White, Any Blue"];
+paytable[9] = [102,103,104,20,"Any Red, White, & Blue"];
 paytable[10] = [1,1,1,10,"3 Red Bars"];
 paytable[11] = [101,101,101,5,"Any 3 Bars"];
 paytable[12] = [-2,-2,-2,5,"Any 2 Wilds"];
@@ -429,9 +430,10 @@ function resetStats() {
 	Symbol Odds Calculation
 */
 
-var symsNum = new Array(symbols.length);
 var numVirtReelStops = new Array(numReels);
+var symsNums = new Array(symbols.length);
 var symsOdds = new Array(symbols.length);
+var grpNums = new Array(groups.length);
 var grpOdds = new Array(groups.length);
 
 function initSymOdds() {
@@ -439,22 +441,52 @@ function initSymOdds() {
 		numVirtReelStops[r] = virtReel[r].length;
 	}
 	for ( symnum = 0; symnum < symbols.length; symnum++) {
-		symsNum[symnum] = new Array(numReels)
+		symsNums[symnum] = new Array(numReels)
 		symsOdds[symnum] = new Array(numReels)
 		for ( r = 0; r < numReels; r++ ) {
-			symsNum[symnum][r] = 0;
+			symsNums[symnum][r] = 0;
 			for ( s = 0; s < strip[r].length; s++ ) {
-				if ( strip[r][s] == symnum ) {
-					symsNum[symnum][r] += numVirtStops[r][s]
+				if ( strip[r][s] == symnum || ( strip[r][s] == 7 && symnum != 0 && symnum != 8 )) {
+					symsNums[symnum][r] += numVirtStops[r][s]
 				}
 			}
-			symsOdds[symnum][r] = symsNum[symnum][r] / numVirtReelStops[r]
+			symsOdds[symnum][r] = symsNums[symnum][r] / numVirtReelStops[r]
 		}
 	}
 	
 	for ( grpnum = 0; grpnum < groups.length; grpnum++ ) {
-		
+		grpNums[grpnum] = new Array(groups[grpnum].length)
+		grpOdds[grpnum] = new Array(groups[grpnum].length)
+		for ( r = 0; r < numReels; r++ ) {
+			grpNums[grpnum][r] = 0;
+			grpOdds[grpnum][r] = 0;
+			for ( s = 0; s < groups[grpnum].length; s++) {
+				grpNums[grpnum][r] += symsNums[groups[grpnum][s]][r]
+				grpOdds[grpnum][r] += symsOdds[groups[grpnum][s]][r]
+			}
+		}
 	}
+}
+
+var payOdds = new Array(paytable.length)
+
+function initPayOdds() {
+	for ( p = 0; p < paytable.length; p++ ) {
+		payOdds[p] = 1;
+		for ( r = 0; r < numReels; r++ ) {
+			paysym = paytable[p][r]
+			if ( !( isNaN( paysym ))){
+				if ( paysym > 99 ) {
+					payOdds[p] *= grpOdds[paysym - 100][r]
+				} else if ( paysym < 0 ) {
+					payOdds[p] = Math.pow(symsOdds[7][0],Math.abs(paysym))
+				} else {
+					payOdds[p] *= symsOdds[paysym][r]
+				}
+			}
+		}
+	}
+	return;
 }
 
 function printSymOdds() {
@@ -464,7 +496,7 @@ function printSymOdds() {
 	for ( r = 0; r < numReels; r++ ) {
 		symOddsHtml += '<tr><td /><td colspan=2>Reel ' + ( r + 1 ) + ': ' + numVirtReelStops[r] + '</td></tr>';
 	}
-	symOddsHtml += '<tr>';
+	symOddsHtml += '<tr><td colspan=' + ( numReels * 2 + 1 ) + '>Symbols</td></tr>';
 	for ( s = 0; s < symbols.length; s++ ) {
 		symOddsHtml += '<tr>';
 		symbol = symbols[s];
@@ -474,14 +506,18 @@ function printSymOdds() {
 			symOddsHtml += '<td align="center"><image width="' + payIco + '" src=images/'+symbol+'.png /></td>';
 		}
 		for ( r = 0; r < numReels; r++ ) {
-			symOddsHtml += '<td>' + symsNum[s][r] + ': ' + ( Math.round( symsOdds[s][r] * 100000) / 1000 ) + '%</td>';
+			symOddsHtml += '<td>' + symsNums[s][r] + ': ' + ( Math.round( symsOdds[s][r] * 100000) / 1000 ) + '%</td>';
 		}
 		symOddsHtml += '</tr>';
 	}
+	symOddsHtml += '<tr><td colspan=' + ( numReels * 2 + 1 ) + '>Groups</td></tr>';
+	
 	for ( g = 0; g < groups.length; g++ ) {
 		symOddsHtml += '<tr>';
+		group = grpSym[g];
+		symOddsHtml += '<td align="center"><image width="' + payIco + '" src=images/'+group+'.png /></td>';
 		for ( r = 0; r < numReels; r++ ) {
-			
+			symOddsHtml += '<td>' + grpNums[g][r] + ': ' + ( Math.round( grpOdds[g][r] * 100000) / 1000 ) + '%</td>';
 		}
 		symOddsHtml += '</tr>';
 	}
@@ -491,7 +527,12 @@ function printSymOdds() {
 
 function printPayOdds() {
 	var payOddsHtml = "";
-	
+	for ( p = 0; p < paytable.length; p++ ) {
+		payOddsHtml += '<tr>';
+		payOddsHtml += '<td>' + paytable[p][4] + '</td>';
+		payOddsHtml += '<td>' + ( Math.round( payOdds[p] * 10000000) / 100000 ) + '%</td>'
+		payOddsHtml += '</tr>';
+	}
 	document.getElementById("miscDataTbl").innerHTML=payOddsHtml;
 }
 
@@ -535,7 +576,6 @@ function clearMisc() {
 
 function printStats() {
 	var statsHtml = "";
-	statsHtml += '<table>';
 	statsHtml += '<tr><td style="width: 15em" /><td colspan='+maxLineBet+'</tr>';
 	statsHtml += '<tr><td><div style="text-align:right">Spin Count:</div></td><td id="spinCount" colspan=' + maxLineBet + ' style="text-align:left">' + spinCount + '</td></tr>';
 	statsHtml += '<tr><td><div style="text-align:right">Paid In:</div></td><td id="paidIn" colspan=' + maxLineBet + ' style="text-align:left">' + paidIn + '</td></tr>';
@@ -558,7 +598,6 @@ function printStats() {
 		statsHtml += '<td id="payouts'+paytable.length+'c'+ c +'">'+payouts[paytable.length][c]+'</td>';
 	}
 	statsHtml += '</tr>';
-	statsHtml += '</table>';
 	statsHtml += '<button onclick="resetStats()">Reset Stats</button>';
 	statsHtml += '<button onclick="progReset()">Reset Progressive</button><br />';
 	document.getElementById("miscDataTbl").innerHTML=statsHtml;
@@ -572,7 +611,7 @@ function printDebug() {
 	var maxWheelStop = wheelStrip.length - 1;
 	
 	//Spin Debugging
-	debugHtml += '<table><tr>';
+	debugHtml += '<tr>';
 	debugHtml += '<td colspan='+numReels+' style="text-align:left">Rapid Mode: <input type="checkbox" id="dbgRapid" onClick="tgglDbgRapid()" /></td>';
 	debugHtml += '</tr><tr>'
 	debugHtml += '<td colspan='+numReels+' style="text-align:left">Virtual Reel Debugging: <input type="checkbox" id="vReelDebug" onClick="tgglVReelDbg()" /></td>';
@@ -606,7 +645,7 @@ function printDebug() {
 	debugHtml += '<td colspan='+numReels+' style="text-align:left">Bonus Wheel Stop:</td>';
 	debugHtml += '</tr><tr>';
 	debugHtml += '<td width=33% style="text-align:left"><div style="width:5em"><span id="wheelTopPos">' + (wheelTopPos + 1) + '</span>&nbsp;-&gt;&nbsp;<span id="wheelStop">' + (wheelTopPos + 1) + '</span></div></td>';
-	debugHtml += '</tr><table>';
+	debugHtml += '</tr>';
 	document.getElementById("miscDataTbl").innerHTML=debugHtml
 }
 
@@ -1399,6 +1438,7 @@ function init() {
 	initReels();
 	initWheel();
 	initSymOdds();
+	initPayOdds();
 	clearWin();
 	cookieRestore();
 	progInit();
