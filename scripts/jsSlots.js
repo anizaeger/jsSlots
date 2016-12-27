@@ -64,11 +64,31 @@ function gplAlert() {
 		8: Spin
 */
 
+// Image filename for symbols, not including file extension.  Must be PNG format, and in images subdirectory.  Index number is symbol ID.
 var symbols = ["blank","BR", "BW", "BB", "7B", "7W", "7R", "Wild", "Spin"];
 
 var virtReel = new Array(numReels);	// Auto-generated virtual reels.
 var virtStop = new Array(numReels);	// Stop position for virtual reel.  Randomly-selected at spin.
 
+
+/*
+	Group Legend
+		0: Any 7
+		1: Any Bar
+		2: Any Red
+		3: Any White
+		4: Any Blue
+		
+*/
+
+var groups = new Array();
+groups[0] = [4,5,6];
+groups[1] = [1,2,3];
+groups[2] = [1,6];
+groups[3] = [2,5];
+groups[4] = [3,4];
+
+var grpSym = ["7A", "BA", "Red", "White", "Blue"];	// Group paytable icons
 
 // Physical reel strips and virtual reel stops per physical reel stop
 // Physical reel strip elements indicate symbols.  See symbol legend above.
@@ -186,17 +206,7 @@ paytable[14] = [103,103,103,2,"Any 3 Whites"];
 paytable[15] = [104,104,104,2,"Any 3 Blues"];
 paytable[16] = [-1,-1,-1,2,"Any 1 Wild"];
 paytable[17] = [0,0,0,1,"3 Blanks"];
-paytable[18] = ["*","*",8,10,"Spin"];
-
-// Symbol groups
-var groups = new Array();
-groups[0] = ["7A",4,5,6];
-groups[1] = ["BA",1,2,3];
-groups[2] = ["Red",1,6];
-groups[3] = ["White",2,5];
-groups[4] = ["Blue",3,4];
-
-var grpSym = ["7A", "BA", "RA", "WA", "BA"];
+paytable[18] = ["-","-",8,10,"Spin"];
 
 var payline = new Array(numReels);	// Physical reel stop at payline
 var paysym = new Array(numReels);	// Numeric value representing symbol on payline
@@ -301,7 +311,8 @@ function printPaytable() {
 	for (p = 0; p < paytable.length; p++) {
 		if ( paytable[p][0] < 0 ) {  // Print payout name for wild-only combinations.
 			paytext += '<tr><td width="25" id="pt' + p + 'w0">&nbsp;</td>';
-			paytext += '<td align="center" colspan=' + numReels + '>Any ' + Math.abs( paytable[p][0] ) + '<image width="' + payIco + '" src=images/Wild.png /></td>';
+			paytext += '<td valign=middle align="center" colspan=' + ( numReels - 1 ) + '>Any ' + Math.abs( paytable[p][0] ) + '</td>';
+			paytext += '<td><image width="' + payIco + '" src=images/Wild.png /></td>';
 			for ( c = 1; c <= maxLineBet; c++ ) {
 				paytext += '<td id="pt' + p + '" class=c' + c + ' style="fontWeight:normal">' + paytable[p][numReels] * c + '</td>';
 			}
@@ -311,9 +322,9 @@ function printPaytable() {
 			for ( s = 0; s < numReels; s++ ) {
 				if (paytable[p][s] >= 100 ) {
 					var g = paytable[p][s] - 100;
-					paytext += '<td align="center"><image width="' + payIco + '" src=images/' + groups[g][0] + '.png /></td>';
-				} else if ( paytable[p][s] === "*" ) {
-					paytext += '<td align="center">*</td>';
+					paytext += '<td align="center"><image width="' + payIco + '" src=images/' + grpSym[g] + '.png /></td>';
+				} else if ( paytable[p][s] === "-" ) {
+					paytext += '<td valign=middle align="center">-</td>';
 				} else if ( paytable[p][s] == 0 ) {
 					paytext += '<td align="center"><image width="' + payIco + '" src=images/blankico.png /></td>';
 				} else {
@@ -325,7 +336,7 @@ function printPaytable() {
 				if ( p == 0 && c == maxLineBet ) {
 					paytext += '<td colspan=2 id="pt' + p + 'c' + c + '"><input type="number" id="progVal" value=' + progVal + ' style="width:5em"></td>';
 				} else if ( p == 18 && c == maxLineBet ) {
-					paytext += '<td colspan=2 id="pt' + p + 'c' + c + '" class="c' + c + '">' + paytable[p][numReels] * c + ' plus<br />Wheel</td>';
+					paytext += '<td colspan=2 id="pt' + p + 'c' + c + '" class="c' + c + '">' + paytable[p][numReels] * c + ' + Wheel</td>';
 				} else {
 					paytext += '<td id="pt' + p + 'c' + c + '" class="c' + c + '">' + paytable[p][numReels] * c + '</td>';
 				}
@@ -414,23 +425,65 @@ function resetStats() {
 	}
 }
 
-function printSymOdds() {
-	var symOddsHtml = '';
-	var numVirtReelStops = new Array(numReels);
+/*
+	Symbol Odds Calculation
+*/
+
+var symsNum = new Array(symbols.length);
+var numVirtReelStops = new Array(numReels);
+var symsOdds = new Array(symbols.length);
+var grpOdds = new Array(groups.length);
+
+function initSymOdds() {
 	for ( r = 0; r < numReels; r++ ) {
 		numVirtReelStops[r] = virtReel[r].length;
 	}
-	symOddsHtml += '<tr>';
-	symOddsHtml += '<td colspan=' + ( numReels * 2 + 1 ) + '>Number of vReel stops: </td></tr>';
+	for ( symnum = 0; symnum < symbols.length; symnum++) {
+		symsNum[symnum] = new Array(numReels)
+		symsOdds[symnum] = new Array(numReels)
+		for ( r = 0; r < numReels; r++ ) {
+			symsNum[symnum][r] = 0;
+			for ( s = 0; s < strip[r].length; s++ ) {
+				if ( strip[r][s] == symnum ) {
+					symsNum[symnum][r] += numVirtStops[r][s]
+				}
+			}
+			symsOdds[symnum][r] = symsNum[symnum][r] / numVirtReelStops[r]
+		}
+	}
+	
+	for ( grpnum = 0; grpnum < groups.length; grpnum++ ) {
+		
+	}
+}
+
+function printSymOdds() {
+	var symOddsHtml = '';
+
+	symOddsHtml += '<tr><td colspan=' + ( numReels * 2 + 1 ) + '>Number of vReel stops: </td></tr>';
 	for ( r = 0; r < numReels; r++ ) {
 		symOddsHtml += '<tr><td /><td colspan=2>Reel ' + ( r + 1 ) + ': ' + numVirtReelStops[r] + '</td></tr>';
 	}
-	symOddsHtml += '</tr><tr>';
+	symOddsHtml += '<tr>';
 	for ( s = 0; s < symbols.length; s++ ) {
-		
+		symOddsHtml += '<tr>';
+		symbol = symbols[s];
+		if ( s == 0 ) {
+			symOddsHtml += '<td align="center"><image width="' + payIco + '" src=images/blankico.png /></td>';
+		} else {
+			symOddsHtml += '<td align="center"><image width="' + payIco + '" src=images/'+symbol+'.png /></td>';
+		}
+		for ( r = 0; r < numReels; r++ ) {
+			symOddsHtml += '<td>' + symsNum[s][r] + ': ' + ( Math.round( symsOdds[s][r] * 100000) / 1000 ) + '%</td>';
+		}
+		symOddsHtml += '</tr>';
 	}
-	for ( s = 0; s < groups.length; s++ ) {
-		
+	for ( g = 0; g < groups.length; g++ ) {
+		symOddsHtml += '<tr>';
+		for ( r = 0; r < numReels; r++ ) {
+			
+		}
+		symOddsHtml += '</tr>';
 	}
 	symOddsHtml += '</tr>';
 	document.getElementById("miscDataTbl").innerHTML=symOddsHtml;
@@ -1018,9 +1071,12 @@ function checkPayline() {
 			}
 
 			for (r = 0; r < numReels; r++) {
+				if (paysym[r] === "-") {
+					continue;
+				}
 				if (paysym[r] < 100) {
 					if (payline[r] == paysym[r] || payline[r] == 7) {
-						if (r == 2) {
+						if (r == numReels - 1) {
 							wintype = p;
 							p = paytable.length;
 							break;	
@@ -1032,8 +1088,8 @@ function checkPayline() {
 					}
 				} else {
 					gnum = paysym[r] - 100;
-					for ( i = 1; i < groups[gnum].length; i++) {
-						if (payline[r] == groups[gnum][i] || payline[r] == 7) {
+					for ( sym = 0; sym < groups[gnum].length; sym++) {
+						if (payline[r] == groups[gnum][sym] || payline[r] == 7) {
 							match++;
 							if (r == numReels - 1 && match == numReels) {
 								wintype = p;
@@ -1341,7 +1397,8 @@ function init() {
 	printPaytable();
 	initVReels();
 	initReels();
-	initWheel()
+	initWheel();
+	initSymOdds();
 	clearWin();
 	cookieRestore();
 	progInit();
