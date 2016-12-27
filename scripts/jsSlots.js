@@ -210,7 +210,7 @@ paytable[17] = [0,0,0,1,"3 Blanks"];
 paytable[18] = ["-","-",8,10,"Spin"];
 
 var payline = new Array(numReels);	// Physical reel stop at payline
-var paysym = new Array(numReels);	// Numeric value representing symbol on payline
+var paySym = new Array(numReels);	// Numeric value representing symbol on payline
 var paylines = 1;			// Number of paylines.  Must remain set to one.  Included for multiple paylines in the future
 var payIco = 25;			// Paytable icon size
 
@@ -386,7 +386,6 @@ function payStats(pmt) {
 		paidPcnt = "";
 	} else {
 		paidPcnt = ( paidOut / paidIn ) * 100;
-		paidPcnt = (Math.round(paidPcnt * 1000))/1000;
 	}
 	
 	setCookie("paidIn",paidIn,expiry);
@@ -474,14 +473,14 @@ function initPayOdds() {
 	for ( p = 0; p < paytable.length; p++ ) {
 		payOdds[p] = 1;
 		for ( r = 0; r < numReels; r++ ) {
-			paysym = paytable[p][r]
-			if ( !( isNaN( paysym ))){
-				if ( paysym > 99 ) {
-					payOdds[p] *= grpOdds[paysym - 100][r]
-				} else if ( paysym < 0 ) {
-					payOdds[p] = Math.pow(symsOdds[7][0],Math.abs(paysym))
+			s = paytable[p][r]
+			if ( !( isNaN( s ))){
+				if ( s > 99 ) {
+					payOdds[p] *= grpOdds[s - 100][r]
+				} else if ( s < 0 ) {
+					payOdds[p] = Math.pow(symsOdds[7][0],Math.abs( s ))
 				} else {
-					payOdds[p] *= symsOdds[paysym][r]
+					payOdds[p] *= symsOdds[s][r]
 				}
 			}
 		}
@@ -529,8 +528,8 @@ function printPayOdds() {
 	var payOddsHtml = "";
 	for ( p = 0; p < paytable.length; p++ ) {
 		payOddsHtml += '<tr>';
-		payOddsHtml += '<td>' + paytable[p][4] + '</td>';
-		payOddsHtml += '<td>' + ( Math.round( payOdds[p] * 10000000) / 100000 ) + '%</td>'
+		payOddsHtml += '<td>' + paytable[p][4] + '&nbsp;</td>';
+		payOddsHtml += '<td>&nbsp;' + ( Math.round( payOdds[p] * 10000000) / 100000 ) + '%</td>'
 		payOddsHtml += '</tr>';
 	}
 	document.getElementById("miscDataTbl").innerHTML=payOddsHtml;
@@ -581,7 +580,7 @@ function printStats() {
 	statsHtml += '<tr><td><div style="text-align:right">Paid In:</div></td><td id="paidIn" colspan=' + maxLineBet + ' style="text-align:left">' + paidIn + '</td></tr>';
 	statsHtml += '<tr><td><div style="text-align:right">Paid Out:</div></td><td id="paidOut" colspan=' + maxLineBet + ' style="text-align:left">' + paidOut + '</td></tr>';
 	statsHtml += '<tr><td><div style="text-align:right">Net +/-:</div></td><td id="paidNet" colspan=' + maxLineBet + ' style="text-align:left">' + paidNet + '</td></tr>';
-	statsHtml += '<tr><td><div style="text-align:right">Percentage:</div></td><td id="paidPcnt" colspan=' + maxLineBet + ' style="width: 5em; text-align:left">' + paidPcnt + '</td></tr>';
+	statsHtml += '<tr><td><div style="text-align:right">Percentage:</div></td><td id="paidPcnt" colspan=' + maxLineBet + ' style="width: 5em; text-align:left">' + ((Math.round(paidPcnt * 1000))/1000) + '</td></tr>';
 	statsHtml += '<tr><td>Payout Type</td>';
 	for ( c = 1; c <= maxLineBet; c++) {
 		statsHtml = statsHtml + '<td>'+c+'</td>';
@@ -1106,15 +1105,16 @@ function checkPayline() {
 			wintype = p;
 		} else {
 			for (r = 0; r < numReels; r++) {
-				paysym[r] = paytable[p][r];
+				paySym[r] = paytable[p][r];
 			}
 
 			for (r = 0; r < numReels; r++) {
-				if (paysym[r] === "-") {
+				if ( paySym[r] < 0 ) {
+					break;
+				} else if (paySym[r] === "-" ) {
 					continue;
-				}
-				if (paysym[r] < 100) {
-					if (payline[r] == paysym[r] || payline[r] == 7) {
+				} else if (paySym[r] < 100) {
+					if (payline[r] == paySym[r] || payline[r] == 7) {
 						if (r == numReels - 1) {
 							wintype = p;
 							p = paytable.length;
@@ -1126,7 +1126,7 @@ function checkPayline() {
 						break;
 					}
 				} else {
-					gnum = paysym[r] - 100;
+					gnum = paySym[r] - 100;
 					for ( sym = 0; sym < groups[gnum].length; sym++) {
 						if (payline[r] == groups[gnum][sym] || payline[r] == 7) {
 							match++;
