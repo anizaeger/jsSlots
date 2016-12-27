@@ -180,13 +180,13 @@ paytable[8] = [2,2,2,20,"3 White Bars"];
 paytable[9] = [102,103,104,20,"Any Red, Any White, Any Blue"];
 paytable[10] = [1,1,1,10,"3 Red Bars"];
 paytable[11] = [101,101,101,5,"Any 3 Bars"];
-paytable[12] = [-2,-2,-2,5,"2 Wilds"];
+paytable[12] = [-2,-2,-2,5,"Any 2 Wilds"];
 paytable[13] = [102,102,102,2,"Any 3 Reds"];
 paytable[14] = [103,103,103,2,"Any 3 Whites"];
 paytable[15] = [104,104,104,2,"Any 3 Blues"];
-paytable[16] = [-2,-2,-2,2,"1 Wild"];
+paytable[16] = [-1,-1,-1,2,"Any 1 Wild"];
 paytable[17] = [0,0,0,1,"3 Blanks"];
-paytable[18] = [-1,-1,8,10,"Spin"];
+paytable[18] = ["*","*",8,10,"Spin"];
 
 // Symbol groups
 var groups = new Array();
@@ -299,9 +299,9 @@ function printPaytable() {
 	var paytext = "";
 	var g;
 	for (p = 0; p < paytable.length; p++) {
-		if ( paytable[p][0] < -1 ) {  // Print payout name for wild-only combinations.
+		if ( paytable[p][0] < 0 ) {  // Print payout name for wild-only combinations.
 			paytext += '<tr><td width="25" id="pt' + p + 'w0">&nbsp;</td>';
-			paytext += '<td align="center" colspan=' + numReels + '>' + paytable[p][ numReels + 1 ] + '</td>';
+			paytext += '<td align="center" colspan=' + numReels + '>Any ' + Math.abs( paytable[p][0] ) + '<image width="' + payIco + '" src=images/Wild.png /></td>';
 			for ( c = 1; c <= maxLineBet; c++ ) {
 				paytext += '<td id="pt' + p + '" class=c' + c + ' style="fontWeight:normal">' + paytable[p][numReels] * c + '</td>';
 			}
@@ -312,7 +312,7 @@ function printPaytable() {
 				if (paytable[p][s] >= 100 ) {
 					var g = paytable[p][s] - 100;
 					paytext += '<td align="center"><image width="' + payIco + '" src=images/' + groups[g][0] + '.png /></td>';
-				} else if ( paytable[p][s] == -1 ) {
+				} else if ( paytable[p][s] === "*" ) {
 					paytext += '<td align="center">*</td>';
 				} else if ( paytable[p][s] == 0 ) {
 					paytext += '<td align="center"><image width="' + payIco + '" src=images/blankico.png /></td>';
@@ -414,6 +414,34 @@ function resetStats() {
 	}
 }
 
+function printSymOdds() {
+	var symOddsHtml = '';
+	var numVirtReelStops = new Array(numReels);
+	for ( r = 0; r < numReels; r++ ) {
+		numVirtReelStops[r] = virtReel[r].length;
+	}
+	symOddsHtml += '<tr>';
+	symOddsHtml += '<td colspan=' + ( numReels * 2 + 1 ) + '>Number of vReel stops: </td></tr>';
+	for ( r = 0; r < numReels; r++ ) {
+		symOddsHtml += '<tr><td /><td colspan=2>Reel ' + ( r + 1 ) + ': ' + numVirtReelStops[r] + '</td></tr>';
+	}
+	symOddsHtml += '</tr><tr>';
+	for ( s = 0; s < symbols.length; s++ ) {
+		
+	}
+	for ( s = 0; s < groups.length; s++ ) {
+		
+	}
+	symOddsHtml += '</tr>';
+	document.getElementById("miscDataTbl").innerHTML=symOddsHtml;
+}
+
+function printPayOdds() {
+	var payOddsHtml = "";
+	
+	document.getElementById("miscDataTbl").innerHTML=payOddsHtml;
+}
+
 function miscData(value) {
 	dbgMode=0;
 	dbgSpin=0;
@@ -432,6 +460,12 @@ function miscData(value) {
 		document.getElementById('spinDebug').checked = false;
 		document.getElementById('vReelDebug').checked = false;
 		document.getElementById('dbgRapid').checked = false;
+		break;
+	case "symOdds":
+		printSymOdds();
+		break;
+	case "payOdds":
+		printPayOdds();
 		break;
 	default:
 		alert("Error!");
