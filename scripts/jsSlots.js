@@ -194,18 +194,18 @@ paytable[1] = [6,5,4,300,"Red, White, & Blue 7s"];
 paytable[2] = [6,6,6,120,"3 Red Sevens"];
 paytable[3] = [5,5,5,100,"3 White Sevens"];
 paytable[4] = [4,4,4,80,"3 Blue Sevens"];
-paytable[5] = [100,100,100,40,"Any 3 Sevens"];
+paytable[5] = [100,100,100,40,"3 Sevens"];
 paytable[6] = [1,2,3,40,"Red, White, & Blue Bars"];
 paytable[7] = [3,3,3,30,"3 Blue Bars"];
 paytable[8] = [2,2,2,20,"3 White Bars"];
-paytable[9] = [102,103,104,20,"Any Red, White, & Blue"];
+paytable[9] = [102,103,104,20,"Red, White, & Blue"];
 paytable[10] = [1,1,1,10,"3 Red Bars"];
-paytable[11] = [101,101,101,5,"Any 3 Bars"];
-paytable[12] = [-2,-2,-2,5,"Any 2 Wilds"];
-paytable[13] = [102,102,102,2,"Any 3 Reds"];
-paytable[14] = [103,103,103,2,"Any 3 Whites"];
-paytable[15] = [104,104,104,2,"Any 3 Blues"];
-paytable[16] = [-1,-1,-1,2,"Any 1 Wild"];
+paytable[11] = [101,101,101,5,"3 Bars"];
+paytable[12] = [-2,-2,-2,5,"2 Wilds"];
+paytable[13] = [102,102,102,2,"3 Reds"];
+paytable[14] = [103,103,103,2,"3 Whites"];
+paytable[15] = [104,104,104,2,"3 Blues"];
+paytable[16] = [-1,-1,-1,2,"1 Wild"];
 paytable[17] = [0,0,0,1,"3 Blanks"];
 paytable[18] = ["-","-",8,10,"Spin"];
 
@@ -394,7 +394,7 @@ function payStats(pmt) {
 		document.getElementById("paidIn").innerHTML=paidIn;
 		document.getElementById("paidOut").innerHTML=paidOut;
 		document.getElementById("paidNet").innerHTML=paidNet;
-		document.getElementById("paidPcnt").innerHTML=paidPcnt;
+		document.getElementById("paidPcnt").innerHTML=((Math.round(paidPcnt * 1000))/1000);
 	}
 }
 
@@ -467,7 +467,8 @@ function initSymOdds() {
 	}
 }
 
-var payOdds = new Array(paytable.length)
+var payOdds = new Array(paytable.length);
+var payPcnt = new Array(paytable.length);
 
 function initPayOdds() {
 	for ( p = 0; p < paytable.length; p++ ) {
@@ -482,6 +483,7 @@ function initPayOdds() {
 				} else {
 					payOdds[p] *= symsOdds[s][r]
 				}
+				payPcnt[p] = payOdds[p] * paytable[p][numReels];
 			}
 		}
 	}
@@ -491,11 +493,13 @@ function initPayOdds() {
 function printSymOdds() {
 	var symOddsHtml = '';
 
+	symOddsHtml += '<tr><td><table>'
 	symOddsHtml += '<tr><td colspan=' + ( numReels * 2 + 1 ) + '>Number of vReel stops: </td></tr>';
 	for ( r = 0; r < numReels; r++ ) {
 		symOddsHtml += '<tr><td /><td colspan=2>Reel ' + ( r + 1 ) + ': ' + numVirtReelStops[r] + '</td></tr>';
 	}
-	symOddsHtml += '<tr><td colspan=' + ( numReels * 2 + 1 ) + '>Symbols</td></tr>';
+	symOddsHtml += '</table></td></tr>';
+	symOddsHtml += '<tr><td valign=top><table>';
 	for ( s = 0; s < symbols.length; s++ ) {
 		symOddsHtml += '<tr>';
 		symbol = symbols[s];
@@ -505,22 +509,21 @@ function printSymOdds() {
 			symOddsHtml += '<td align="center"><image width="' + payIco + '" src=images/'+symbol+'.png /></td>';
 		}
 		for ( r = 0; r < numReels; r++ ) {
-			symOddsHtml += '<td>' + symsNums[s][r] + ': ' + ( Math.round( symsOdds[s][r] * 100000) / 1000 ) + '%</td>';
+			symOddsHtml += '<td>' + symsNums[s][r] + ':' + numVirtReelStops[r] + '<br />' + ( Math.round( symsOdds[s][r] * 10000) / 100 ) + '%</td>';
 		}
 		symOddsHtml += '</tr>';
-	}
-	symOddsHtml += '<tr><td colspan=' + ( numReels * 2 + 1 ) + '>Groups</td></tr>';
-	
+	}	
+	symOddsHtml += '</table></td><td valign=top><table>'
 	for ( g = 0; g < groups.length; g++ ) {
 		symOddsHtml += '<tr>';
 		group = grpSym[g];
 		symOddsHtml += '<td align="center"><image width="' + payIco + '" src=images/'+group+'.png /></td>';
 		for ( r = 0; r < numReels; r++ ) {
-			symOddsHtml += '<td>' + grpNums[g][r] + ': ' + ( Math.round( grpOdds[g][r] * 100000) / 1000 ) + '%</td>';
+			symOddsHtml += '<td>' + grpNums[g][r] + ':' + numVirtReelStops[r] + '<br />' + ( Math.round( grpOdds[g][r] * 10000) / 100 ) + '%</td>';
 		}
 		symOddsHtml += '</tr>';
 	}
-	symOddsHtml += '</tr>';
+	symOddsHtml += '</tr></table></td></tr>';
 	document.getElementById("miscDataTbl").innerHTML=symOddsHtml;
 }
 
@@ -576,11 +579,9 @@ function clearMisc() {
 function printStats() {
 	var statsHtml = "";
 	statsHtml += '<tr><td style="width: 15em" /><td colspan='+maxLineBet+'</tr>';
-	statsHtml += '<tr><td><div style="text-align:right">Spin Count:</div></td><td id="spinCount" colspan=' + maxLineBet + ' style="text-align:left">' + spinCount + '</td></tr>';
-	statsHtml += '<tr><td><div style="text-align:right">Paid In:</div></td><td id="paidIn" colspan=' + maxLineBet + ' style="text-align:left">' + paidIn + '</td></tr>';
-	statsHtml += '<tr><td><div style="text-align:right">Paid Out:</div></td><td id="paidOut" colspan=' + maxLineBet + ' style="text-align:left">' + paidOut + '</td></tr>';
-	statsHtml += '<tr><td><div style="text-align:right">Net +/-:</div></td><td id="paidNet" colspan=' + maxLineBet + ' style="text-align:left">' + paidNet + '</td></tr>';
-	statsHtml += '<tr><td><div style="text-align:right">Percentage:</div></td><td id="paidPcnt" colspan=' + maxLineBet + ' style="width: 5em; text-align:left">' + ((Math.round(paidPcnt * 1000))/1000) + '</td></tr>';
+	statsHtml += '<tr><td valign=top style="text-align:right"><button onclick="resetStats()">Reset Stats</button>&nbsp;<span>Spin Count:</span></td><td id="spinCount" colspan=' + maxLineBet + ' style="text-align:left">' + spinCount + '</td></tr>';
+	statsHtml += '<tr><td valign=top style="text-align:right"><button onclick="progReset()">Reset Progressive</button>&nbsp;<span>Paid In/Out:</span></td><td colspan=' + maxLineBet + ' style="text-align:left"><span id="paidIn">' + paidIn + '</span> / <span id="paidOut">' + paidOut + '</span></td></tr>';
+	statsHtml += '<tr><td><div style="text-align:right">Machine Net / Payout Percentage:</div></td><td colspan=' + maxLineBet + ' style="text-align:left"><span  id="paidNet">' + paidNet + '</span> / <span id="paidPcnt">' + ((Math.round(paidPcnt * 1000))/1000) + '</span>%</td></tr>';
 	statsHtml += '<tr><td>Payout Type</td>';
 	for ( c = 1; c <= maxLineBet; c++) {
 		statsHtml = statsHtml + '<td>'+c+'</td>';
@@ -597,8 +598,6 @@ function printStats() {
 		statsHtml += '<td id="payouts'+paytable.length+'c'+ c +'">'+payouts[paytable.length][c]+'</td>';
 	}
 	statsHtml += '</tr>';
-	statsHtml += '<button onclick="resetStats()">Reset Stats</button>';
-	statsHtml += '<button onclick="progReset()">Reset Progressive</button><br />';
 	document.getElementById("miscDataTbl").innerHTML=statsHtml;
 }
 
@@ -1094,47 +1093,50 @@ function checkPayline() {
 		}
 	}
 	if ( payline[2] == 8 ) {
+		wintype = paytable.length - 1;
 		doSpin = 1;
-	}
-	for (p = 0; p < paytable.length; p++) {
-		match = 0;
-		if (p == 18 && doSpin == 1 ) {
-			wintype = p;
-		}
-		if ((p == 12 && wilds == 2) || (p == 16 && wilds == 1)) { // Any Wilds
-			wintype = p;
-		} else {
-			for (r = 0; r < numReels; r++) {
-				paySym[r] = paytable[p][r];
-			}
-
-			for (r = 0; r < numReels; r++) {
-				if ( paySym[r] < 0 ) {
-					break;
-				} else if (paySym[r] === "-" ) {
-					continue;
-				} else if (paySym[r] < 100) {
-					if (payline[r] == paySym[r] || payline[r] == 7) {
-						if (r == numReels - 1) {
-							wintype = p;
-							p = paytable.length;
-							break;	
-						} else {
-							continue;
-						}
-					} else {
+	} else {
+		for (p = 0; p < paytable.length - 1; p++) {
+			match = 0;
+			if ( p == 18 && doSpin == 1 ) {
+				wintype = p;
+				break;
+			} else if ( p == 17 && wilds > 0 ) {
+				continue;
+			} else if (( p == 12 && wilds == 2 ) || ( p == 16 && wilds == 1 )) { // Any Wilds
+				wintype = p;
+			} else {
+				for (r = 0; r < numReels; r++) {
+					paySym[r] = paytable[p][r];
+				}
+				for (r = 0; r < numReels; r++) {
+					if ( paySym[r] < 0 ) {
 						break;
-					}
-				} else {
-					gnum = paySym[r] - 100;
-					for ( sym = 0; sym < groups[gnum].length; sym++) {
-						if (payline[r] == groups[gnum][sym] || payline[r] == 7) {
-							match++;
-							if (r == numReels - 1 && match == numReels) {
+					} else if (paySym[r] === "-" ) {
+						continue;
+					} else if (paySym[r] < 100) {
+						if (payline[r] == paySym[r] || payline[r] == 7) {
+							if (r == numReels - 1) {
 								wintype = p;
 								p = paytable.length;
+								break;	
+							} else {
+								continue;
 							}
+						} else {
 							break;
+						}
+					} else {
+						gnum = paySym[r] - 100;
+						for ( sym = 0; sym < groups[gnum].length; sym++) {
+							if (payline[r] == groups[gnum][sym] || payline[r] == 7) {
+								match++;
+								if (r == numReels - 1 && match == numReels) {
+									wintype = p;
+									p = paytable.length;
+								}
+								break;
+							}
 						}
 					}
 				}
