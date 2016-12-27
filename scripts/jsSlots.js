@@ -190,17 +190,18 @@ paytable[18] = [-1,-1,8,10,"Spin"];
 
 // Symbol groups
 var groups = new Array();
-groups[0] = ["Any<br />7",4,5,6];
-groups[1] = ["Any<br />Bar",1,2,3];
-groups[2] = ["Any<br />Red",1,6];
-groups[3] = ["Any<br />White",2,5];
-groups[4] = ["Any<br />Blue",3,4];
+groups[0] = ["7A",4,5,6];
+groups[1] = ["BA",1,2,3];
+groups[2] = ["Red",1,6];
+groups[3] = ["White",2,5];
+groups[4] = ["Blue",3,4];
 
 var grpSym = ["7A", "BA", "RA", "WA", "BA"];
 
-var payline = new Array(numReels);  // Physical reel stop at payline
-var paysym = new Array(numReels);  // Numeric value representing symbol on payline
-var paylines = 1;  // Number of paylines.  Must remain set to one.  Included for multiple paylines in the future.
+var payline = new Array(numReels);	// Physical reel stop at payline
+var paysym = new Array(numReels);	// Numeric value representing symbol on payline
+var paylines = 1;			// Number of paylines.  Must remain set to one.  Included for multiple paylines in the future
+var payIco = 25;			// Paytable icon size
 
 var miscDataType;
 
@@ -310,12 +311,14 @@ function printPaytable() {
 			for ( s = 0; s < numReels; s++ ) {
 				if (paytable[p][s] >= 100 ) {
 					var g = paytable[p][s] - 100;
-					paytext += '<td align="center">' + groups[g][0] + '</td>';
+					paytext += '<td align="center"><image width="' + payIco + '" src=images/' + groups[g][0] + '.png /></td>';
 				} else if ( paytable[p][s] == -1 ) {
 					paytext += '<td align="center">*</td>';
+				} else if ( paytable[p][s] == 0 ) {
+					paytext += '<td align="center"><image width="' + payIco + '" src=images/blankico.png /></td>';
 				} else {
 					symbol = symbols[ paytable[p][s] ];
-					paytext += '<td align="center"><image width="25" src=images/'+symbol+'.png /></td>';
+					paytext += '<td align="center"><image width="' + payIco + '" src=images/'+symbol+'.png /></td>';
 				}
 			}
 			for ( c = 1; c <= maxLineBet; c++ ) {
