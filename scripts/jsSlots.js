@@ -29,7 +29,7 @@
  */
 
 function gplAlert() {
-	var copyText = "";
+	var copyTxt = "";
 	copyTxt += "Copyright (C) 2016 Anakin-Marc Zaeger\n"
 	copyTxt += "\n"
 	copyTxt += "\n"
@@ -46,7 +46,7 @@ function gplAlert() {
 	copyTxt += "that code without the copy of the GNU GPL normally required by\n"
 	copyTxt += "section 4, provided you include this license notice and a URL\n"
 	copyTxt += "through which recipients can access the Corresponding Source.\n"
-	window.alert(copyText)
+	window.alert(copyTxt)
 }
 
 // Slot machine reels
