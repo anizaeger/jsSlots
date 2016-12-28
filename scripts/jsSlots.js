@@ -577,10 +577,13 @@ function clearMisc() {
 
 function printStats() {
 	var statsHtml = "";
-	statsHtml += '<tr><td style="width: 15em" /><td colspan='+maxLineBet+'</tr>';
-	statsHtml += '<tr><td valign=top style="text-align:right"><button onclick="resetStats()">Reset Stats</button>&nbsp;<span>Spin Count:</span></td><td id="spinCount" colspan=' + maxLineBet + ' style="text-align:left">' + spinCount + '</td></tr>';
-	statsHtml += '<tr><td valign=top style="text-align:right"><button onclick="progReset()">Reset Progressive</button>&nbsp;<span>Paid In/Out:</span></td><td colspan=' + maxLineBet + ' style="text-align:left"><span id="paidIn">' + paidIn + '</span> / <span id="paidOut">' + paidOut + '</span></td></tr>';
-	statsHtml += '<tr><td><div style="text-align:right">Machine Net / Payout Percentage:</div></td><td colspan=' + maxLineBet + ' style="text-align:left"><span  id="paidNet">' + paidNet + '</span> / <span id="paidPcnt">' + ((Math.round(paidPcnt * 1000))/1000) + '</span>%</td></tr>';
+	statsHtml += '<tr><td style="width: 15em" /><td colspan=' + maxLineBet + '/></tr>';
+	statsHtml += '<tr><td colspan=' + ( maxLineBet + 1 ) + '>';
+	statsHtml += '<table width=100%>';
+	statsHtml += '<tr><td valign=top style="text-align:right"><span>Spin Count:</span></td><td id="spinCount" style="text-align:left">' + spinCount + '</td></tr>';
+	statsHtml += '<tr><td valign=top style="text-align:right"><span>Paid In/Out:</span></td><td style="text-align:left"><span id="paidIn">' + paidIn + '</span> / <span id="paidOut">' + paidOut + '</span></td></tr>';
+	statsHtml += '<tr><td><div style="text-align:right">Net Gain / Payout %:</div></td><td style="text-align:left"><span  id="paidNet">' + paidNet + '</span> / <span id="paidPcnt">' + ((Math.round(paidPcnt * 1000))/1000) + '</span>%</td></tr>';
+	statsHtml += '</table></td></tr>';
 	statsHtml += '<tr><td>Payout Type</td>';
 	for ( c = 1; c <= maxLineBet; c++) {
 		statsHtml = statsHtml + '<td>'+c+'</td>';
@@ -597,6 +600,7 @@ function printStats() {
 		statsHtml += '<td id="payouts'+paytable.length+'c'+ c +'">'+payouts[paytable.length][c]+'</td>';
 	}
 	statsHtml += '</tr>';
+	statsHtml += '<tr><td><button onclick="resetStats()">Reset Stats</button><button onclick="progReset()">Reset Progressive</button></td></tr>'
 	document.getElementById("miscDataTbl").innerHTML=statsHtml;
 }
 
