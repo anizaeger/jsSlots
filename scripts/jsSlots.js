@@ -154,6 +154,8 @@ for ( r = 0; r < numReels; r++ ) {
 var reelStop = new Array(numReels);
 var reelTopPos = new Array(numReels);
 
+var spinSpeed = 20	// Time in milliseconds between spin steps.  Must be between 10 and 100.  [Default: 20]
+
 // Bonus wheel
 
 /*
@@ -980,7 +982,7 @@ function spinLoop(minSpin) {
 	
 	}
 	
-	if ( spinSteps % 2 == 0 ) {
+	if ( spinSteps % Math.round( 100 / spinSpeed ) == 0 ) {
 		playSound(  Math.floor(Math.random() * 4) + 2  );
 	}
 	spinSteps++;
@@ -991,7 +993,7 @@ function spinLoop(minSpin) {
 	} else {
 		setTimeout(function () {
 			spinLoop(minSpin);
-		}, 50 );
+		}, spinSpeed );
 	}
 }
 
@@ -1454,6 +1456,11 @@ function init() {
 	document.getElementById("gameover").innerHTML="Game Over";
 	document.getElementById("maxcred").innerHTML="Play " + betLimit + " Credits";
 	document.getElementById("miscDataNone").selected = true;
+	if ( spinSpeed < 10 ) {
+		spinSpeed = 10;
+	} else if ( spinSpeed > 100 ){
+		spinSpeed = 100;
+	}
 }
 
 /*
