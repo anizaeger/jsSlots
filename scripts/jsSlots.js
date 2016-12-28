@@ -263,7 +263,6 @@ var progVal;
 
 var i;
 var s;
-var tone;
 
 // Stats
 var paidIn = 0;  // Number of credits taken in by machine
@@ -839,9 +838,9 @@ function initReels() {
 // Advance reels by one step.
 function advReel(minSpin) {
 	for ( r = minSpin; r < numReels; r++ ) {
-		reelTopPos[r]++;
-		if ( reelTopPos[r] > strip[r].length - 1 ) {
-			reelTopPos[r] = 0
+		reelTopPos[r]--;
+		if ( reelTopPos[r] < 0 ) {
+			reelTopPos[r] = strip[r].length - 1
 		}
 		if ( reelTopPos[r] + 1 > strip[r].length - 1 ) {
 			rPos = reelTopPos[r] + 1 - strip[r].length
@@ -922,7 +921,7 @@ function spin() {
 	spinSteps = 0;
 	possWin = 1;
 	for ( r = 0; r < numReels; r++ ) {
-		spinSteps += Math.floor(Math.random() * strip[r].length) + strip[r].length;
+		spinSteps += Math.floor(Math.random() * strip[r].length) + Math.floor(strip[r].length / 2);
 		reelSteps[r] = spinSteps;
 		if ( dbgSpin == 1 ) {
 			reelStop[r] = dbgSpinStops[r];
@@ -981,7 +980,7 @@ function spinLoop(minSpin) {
 	
 	}
 	
-	if ( spinSteps % 5 == 0 ) {
+	if ( spinSteps % 2 == 0 ) {
 		playSound(  Math.floor(Math.random() * 4) + 2  );
 	}
 	spinSteps++;
@@ -992,7 +991,7 @@ function spinLoop(minSpin) {
 	} else {
 		setTimeout(function () {
 			spinLoop(minSpin);
-		}, 20 );
+		}, 50 );
 	}
 }
 
