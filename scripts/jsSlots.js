@@ -212,7 +212,7 @@ paytable[18] = ["-","-",8,10,"Spin"];
 var payline = new Array(numReels);	// Physical reel stop at payline
 var paySym = new Array(numReels);	// Numeric value representing symbol on payline
 var paylines = 1;			// Number of paylines.  Must remain set to one.  Included for multiple paylines in the future
-var payIco = 25;			// Paytable icon size
+var payIco = 35;			// Paytable icon size
 
 var miscDataType;
 
@@ -310,8 +310,8 @@ function printPaytable() {
 	var paytext = "";
 	var g;
 	for (p = 0; p < paytable.length; p++) {
+		paytext += '<tr><td width="25" id="pt' + p + 'w0">&nbsp;</td>';
 		if ( paytable[p][0] < 0 ) {  // Print payout name for wild-only combinations.
-			paytext += '<tr><td width="25" id="pt' + p + 'w0">&nbsp;</td>';
 			paytext += '<td valign=middle align="center" colspan=' + ( numReels - 1 ) + '>Any ' + Math.abs( paytable[p][0] ) + '</td>';
 			paytext += '<td><image width="' + payIco + '" src=images/Wild.png /></td>';
 			for ( c = 1; c <= maxLineBet; c++ ) {
@@ -319,7 +319,6 @@ function printPaytable() {
 			}
 			paytext += '<td width="25" id="pt' + p + 'w1">&nbsp;</td></tr>';
 		} else {
-			paytext += '<tr><td width="25" id="pt' + p + 'w0">&nbsp;</td>';
 			for ( s = 0; s < numReels; s++ ) {
 				if (paytable[p][s] >= 100 ) {
 					var g = paytable[p][s] - 100;
@@ -1194,7 +1193,7 @@ function initWheel() {
 
 function printWheel() {
 	wheeltext = ""
-	wheeltext += "<tr><td /><td width=200 /><td /></tr>"
+	wheeltext += "<tr><td /><td width=150 /><td /></tr>"
 	for ( row = 0; row < wheelRows; row++ ) {
 		wheeltext += "<tr><td id='wp"+row+"c0'><td id='wp"+row+"'></td><td id='wp"+row+"c1'></td></tr>";
 	}
