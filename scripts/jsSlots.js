@@ -136,7 +136,7 @@ strip[2] 		= [0,7,0,1,0,5,0,3,0,2,0,4,0,8,0,5,0,3,0,6,0,2];
 numVirtStops[2]		= [4,1,6,9,3,1,3,3,2,4,4,2,4,1,5,1,3,2,5,1,3,5];
 
 // Odds of symbol nudging to blank payline space, in symbols[] order
-var nudgeOdds = [0,1,2,3,10,20,30,100,5]
+var nudgeOdds = [0,1,2,3,10,20,30,100,50]
 
 var nudgeVal = new Array(numReels);  // Direction, if any, to nudge reels.
 
@@ -1005,7 +1005,7 @@ function checkNudge() {
 		var nudgePos = ( Math.floor(Math.random() * numReelPos));
 		if ( nudgePos == 1 ) { continue; }
 		var nudgeSym = reel[r][nudgePos];
-		var nudgeProb = Math.floor( Math.random() * nudgeOdds[nudgeSym] );
+		var nudgeProb = Math.round( Math.random() * nudgeOdds[nudgeSym] );
 		if ( nudgeProb  == 0 ) {
 			nudgeVal[r] = nudgePos - 1
 			nudge++;
