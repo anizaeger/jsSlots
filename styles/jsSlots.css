@@ -9,10 +9,17 @@ button.large {
 	height:100px;
 }
 button.small { 
-	width:50px; 
-	height:50px;
+	width:75px; 
+	height:75px;
 }
 button.wide { 
 	width:200px; 
 	height:50px;
+}
+button.round { 
+	width:150px; 
+	height:150px;
+	border-radius:150px;
+	background: url(../images/Spin.png);
+	background-size: 150px 150px
 }
