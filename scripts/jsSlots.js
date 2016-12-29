@@ -182,7 +182,7 @@ wheelStrip	= [1,4,2,5,7,6,3,0,4,2,5,6,3,1,4,7,5,6,3,0,4,2,5,6,3,1,4,7,5,2,6,3,0,
 var wheel = [-1,-1,-1,-1,-1];  // Array storing slots for each wheel position: wheel[] = [ top, second, middle (payspot), fourth, bottom ]
 var wheelStop;
 var wheelTopPos;
-var wheelRows = 11;  // Recommend odd values.  Even values will be incremented to the next highest odd integer
+var wheelRows = 13;  // Recommend odd values.  Even values will be incremented to the next highest odd integer
 var wheelPayRow;
 var wheelStop;
 
@@ -1507,7 +1507,7 @@ $(window).keypress(function(e){
 	case 52:
 		insertCoin();
 		return false;
-	case 53:
+	case 27:
 		cashOut();
 		return false;
 	case 54:
