@@ -182,7 +182,7 @@ wheelStrip	= [1,4,2,5,7,6,3,0,4,2,5,6,3,1,4,7,5,6,3,0,4,2,5,6,3,1,4,7,5,2,6,3,0,
 var wheel = [-1,-1,-1,-1,-1];  // Array storing slots for each wheel position: wheel[] = [ top, second, middle (payspot), fourth, bottom ]
 var wheelStop;
 var wheelTopPos;
-var wheelRows = 15;  // Recommend odd values.  Even values will be incremented to the next highest odd integer
+var wheelRows = 11;  // Recommend odd values.  Even values will be incremented to the next highest odd integer
 var wheelPayRow;
 var wheelStop;
 
@@ -256,7 +256,7 @@ dbgVReelStops = [10,18,4];  // Default debugging stops: 3 Wilds
 // Physical reel debugging
 var dbgSpin = 0;
 var dbgSpinStops = new Array(numReels);
-dbgSpinStops = [4,4,13];  // Default debugging stops: 3 Wilds
+dbgSpinStops = [3,5,1];  // Default debugging stops: 3 Wilds
 
 // Bonus wheel debugging
 var dbgWheel = 0;
@@ -757,6 +757,11 @@ function clearWin() {
 	document.getElementById("win").value="";
 	document.getElementById("paid").value="";
 	document.getElementById("wintype").innerHTML="";
+	document.getElementById("reelMult").value=1;
+	document.getElementById("wheelPrepay").value=0;
+	document.getElementById("wheelMult").value=1;
+	document.getElementById("wheelWin").value=0;
+	document.getElementById("wheelPay").value=0
 }
 
 function betOne() {
@@ -1179,8 +1184,10 @@ function checkPayline() {
 			playSound("wheelSpin")
 			wheelPrePay = payout;
 			wheelMult = wilds;
+			document.getElementById("reelMult").value=Math.pow(2, wilds);
+			document.getElementById("wheelPrepay").value=wheelPrePay;
 			setTimeout(function () {
-				playWheelWait();
+				playWheelWait(wilds);
 			}, 1500);
 		} else {
 			payWin( wintype, payout, 0, 0 );
@@ -1205,7 +1212,7 @@ function initWheel() {
 	wheelPayRow = ( wheelRows - 1 ) / 2;
 	wheelTopPos = Math.floor(Math.random() * wheelStrip.length)
 	printWheel();
-	document.getElementById("wheelmult").innerHTML=Math.pow(2, wheelMult);
+	document.getElementById("wheelMult").value=Math.pow(2, wheelMult);
 	setWheel();
 }
 
@@ -1262,15 +1269,16 @@ function drawWheel() {
 	}
 }
 
-function playWheelWait() {
+function playWheelWait(wilds) {
 	wheelRun = 1;
+	document.getElementById("wheelMult").value=Math.pow(2, wilds);
 	createjs.Sound.play("wheelWait",{loop:-1});
 }
 
 function wheelSpin() {
 	spinSteps = 0;
 	wheelRun = 0;
-	document.getElementById("wheelmult").innerHTML=Math.pow(2, wheelMult)
+	document.getElementById("wheelMult").value=Math.pow(2, wheelMult)
 	wheelSteps = Math.floor(Math.random() * wheelStrip.length) + wheelStrip.length;
 	if ( dbgWheel == 1 ) {
 		wheelStop = dbgWheelStop;
@@ -1317,6 +1325,8 @@ function endWheel() {
 		}, 500)
 	} else {
 		payout = wheelPrePay + ( wheelPay * Math.pow(2, wheelMult));
+		document.getElementById("wheelWin").value=( wheelPay * Math.pow(2, wheelMult));
+		document.getElementById("wheelPay").value=payout;
 		payWin(18,payout,0,0)
 	}
 }
