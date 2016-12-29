@@ -186,6 +186,9 @@ var wheelRows = 15;  // Recommend odd values.  Even values will be incremented t
 var wheelPayRow;
 var wheelStop;
 
+var doWheel;
+var wheelRun;
+
 // Paytable
 // Format: [Reel 1 Symbol, Reel 2 Symbol, Reel 3 Symbol, Payout, Win Name]
 // Negative values indicate number of "Wilds" on payline.
@@ -253,7 +256,7 @@ dbgVReelStops = [10,18,4];  // Default debugging stops: 3 Wilds
 // Physical reel debugging
 var dbgSpin = 0;
 var dbgSpinStops = new Array(numReels);
-dbgSpinStops = [3,5,1];  // Default debugging stops: 3 Wilds
+dbgSpinStops = [4,4,13];  // Default debugging stops: 3 Wilds
 
 // Bonus wheel debugging
 var dbgWheel = 0;
@@ -880,10 +883,14 @@ function drawReel(r) {
 // Spin related functions
 
 function startGame() {
-	if ( credits == 0 && betAmt == 0 || lockSpin == 1 ) {
+	if ( credits == 0 && betAmt == 0 || lockSpin == 1 && wheelRun != 1) {
 		return;
 	}
-	if ( betAmt == 0 ) {
+	if ( wheelRun == 1 ) {
+		wheelRun = 0;
+		createjs.Sound.stop();
+		wheelSpin();
+	} else if ( betAmt == 0 ) {
 		rebet();
 	} else {
 		spin();
@@ -1091,7 +1098,7 @@ function checkPayline() {
 	var matches;
 	var gnum;
 	var wintype = -1;
-	var doSpin = 0;
+	var doWheel = 0;
 	for (r = 0; r < numReels; r++) {
 		if (payline[r] == 7) {
 			wilds++;
@@ -1099,11 +1106,11 @@ function checkPayline() {
 	}
 	if ( payline[2] == 8 ) {
 		wintype = paytable.length - 1;
-		doSpin = 1;
+		doWheel = 1;
 	} else {
 		for (p = 0; p < paytable.length - 1; p++) {
 			match = 0;
-			if ( p == 18 && doSpin == 1 ) {
+			if ( p == 18 && doWheel == 1 ) {
 				wintype = p;
 				break;
 			} else if ( p == 17 && wilds > 0 ) {
@@ -1169,7 +1176,12 @@ function checkPayline() {
 		}
 		winStats( wintype, betAmt );
 		if ( wintype == 18 && betAmt == betLimit) {
-			doBonusSpin(payout,wilds);
+			playSound("wheelSpin")
+			wheelPrePay = payout;
+			wheelMult = wilds;
+			setTimeout(function () {
+				playWheelWait();
+			}, 1500);
 		} else {
 			payWin( wintype, payout, 0, 0 );
 		}
@@ -1226,7 +1238,7 @@ function advWheel() {
 	if ( dbgMode == 1 ) {
 		document.getElementById("wheelTopPos").innerHTML=wPos
 	}
-	playSound(20);
+	playSound("wheelTick");
 	setWheel();
 }
 
@@ -1250,14 +1262,14 @@ function drawWheel() {
 	}
 }
 
-function doBonusSpin(prepay,mult) {
-	wheelPrePay = prepay;
-	wheelMult = mult;
-	wheelSpin();
+function playWheelWait() {
+	wheelRun = 1;
+	createjs.Sound.play("wheelWait",{loop:-1});
 }
 
 function wheelSpin() {
 	spinSteps = 0;
+	wheelRun = 0;
 	document.getElementById("wheelmult").innerHTML=Math.pow(2, wheelMult)
 	wheelSteps = Math.floor(Math.random() * wheelStrip.length) + wheelStrip.length;
 	if ( dbgWheel == 1 ) {
@@ -1476,7 +1488,7 @@ $(window).keypress(function(e){
 	case 49:
 		betOne();
 		return false;
-	case 50:
+	case 32:
 		startGame();
 		return false;
 	case 51:
@@ -1508,6 +1520,8 @@ function preloadImage() {
 
 var sounds = ["insertCoin","coinBong","4C","4E","4G","5C","reelStop","possWin0","possWin1","possWin2","jackpot","cashOut","scatter1","scatter2","scatter3","bonusWin","bonusHit1","bonusHit2","bonusHit3","spinWheel","wheelTick"];
 
+var wheelSounds = ["Spin","Wait","Tick"]
+
 var paySounds = 33;
 
 function preloadSound() {
@@ -1516,6 +1530,9 @@ function preloadSound() {
 	};
 	for ( pIndex = 0; pIndex < paySounds; pIndex++ ) {
 		createjs.Sound.registerSound({id:"paySound" + pIndex, src:"sounds/payOut/paySound" + pIndex + ".wav"});
+	};
+	for ( wIndex = 0; wIndex < wheelSounds.length; wIndex++ ) {
+		createjs.Sound.registerSound({id:"wheel" + wheelSounds[wIndex], src:"sounds/wheel" + wheelSounds[wIndex] + ".wav"});
 	};
 }
 
