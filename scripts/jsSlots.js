@@ -1439,6 +1439,7 @@ function init() {
 	var symbol;
 	var symnum;
 	var miscDataType="none";
+	preloadImage();
 	preloadSound();
 	printPaytable();
 	initVReels();
@@ -1494,6 +1495,12 @@ $(window).keypress(function(e){
 		break;
 	}
 });
+
+function preloadImage() {
+	for ( i = 0; i < symbols.length; i++)
+	var img=new Image();
+	img.src='images/' + symbols[i] + '.png';
+}
 
 /*
 	SoundJS Functions
