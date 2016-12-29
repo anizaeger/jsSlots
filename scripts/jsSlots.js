@@ -256,7 +256,7 @@ dbgVReelStops = [10,18,4];  // Default debugging stops: 3 Wilds
 // Physical reel debugging
 var dbgSpin = 0;
 var dbgSpinStops = new Array(numReels);
-dbgSpinStops = [3,5,13];  // Default debugging stops: 3 Wilds
+dbgSpinStops = [3,5,1];  // Default debugging stops: 3 Wilds
 
 // Bonus wheel debugging
 var dbgWheel = 0;
