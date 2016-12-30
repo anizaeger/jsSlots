@@ -757,11 +757,11 @@ function clearWin() {
 	document.getElementById("win").value="";
 	document.getElementById("paid").value="";
 	document.getElementById("wintype").innerHTML="";
-	document.getElementById("reelMult").value=1;
-	document.getElementById("wheelPrepay").value=0;
-	document.getElementById("wheelMult").value=1;
-	document.getElementById("wheelWin").value=0;
-	document.getElementById("wheelPay").value=0
+	document.getElementById("reelMult").value="";
+	document.getElementById("wheelPrepay").value="";
+	document.getElementById("wheelMult").value="";
+	document.getElementById("wheelWin").value="";
+	document.getElementById("wheelPay").value=";"
 }
 
 function betOne() {
