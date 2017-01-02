@@ -218,6 +218,8 @@ var payline = new Array(numReels);	// Physical reel stop at payline
 var paySym = new Array(numReels);	// Numeric value representing symbol on payline
 var paylines = 1;			// Number of paylines.  Must remain set to one.  Included for multiple paylines in the future
 var payIco = 35;			// Paytable icon size
+var payout;
+var payingOut;				// Machine is currently paying out a prize.
 
 var miscDataType;
 
@@ -242,6 +244,7 @@ var betAmt = 0;
 var lastBet = 0;
 var lockBtn = 0;
 var cashingOut = 0;
+var reBet;
 
 var dbgMode = 0;
 
@@ -791,9 +794,10 @@ function betOne() {
 				betAmt = betLimit;
 			}
 			document.getElementById("betAmt").value=betAmt;
-			if ( betAmt == betLimit ) {
-				lockBtn = 1;
-				setTimeout( function() { spin(); }, 500 );
+			if ( betAmt == betLimit && reBet != 1 ) {
+				setTimeout(function() {
+					spin();
+				}, 250 );
 			}
 		}
 	}
@@ -888,13 +892,15 @@ function drawReel(r) {
 // Spin related functions
 
 function startGame() {
-	if ( credits == 0 && betAmt == 0 || lockSpin == 1 && wheelRun != 1) {
+	if ( credits == 0 && betAmt == 0 || lockSpin == 1 && wheelRun != 1 && payingOut != 1 ) {
 		return;
 	}
 	if ( wheelRun == 1 ) {
 		wheelRun = 0;
 		createjs.Sound.stop();
 		wheelSpin();
+	} else if ( payingOut == 1 ) {
+		payingOut = 2;
 	} else if ( betAmt == 0 ) {
 		rebet();
 	} else {
@@ -903,19 +909,19 @@ function startGame() {
 }
 
 function rebet() {
-	if ( lockSpin == 1 || lastBet == 0) {
-		return;
-	}
-	if ( credits <= 0) {
+	reBet = 1;
+	if ( lockSpin == 1 || lastBet == 0 || credits <= 0 ) {
 		return;
 	} else {
 		betOne();
 		if ( betAmt == lastBet ) {
-			spin();
+			setTimeout(function () {
+				spin();
+			}, 250 );
 		} else {
 			setTimeout(function () {
 				rebet();
-			}, 125 )
+			}, 125 );
 		}
 	}
 }
@@ -1181,7 +1187,9 @@ function checkPayline() {
 		}
 		winStats( wintype, betAmt );
 		if ( wintype == 18 && betAmt == betLimit) {
-			playSound("wheelSpin")
+			setTimeout(function () {
+				playSound("wheelSpin")
+			}, 250);
 			wheelPrePay = payout;
 			wheelMult = wilds;
 			document.getElementById("reelMult").value=Math.pow(2, wilds);
@@ -1190,7 +1198,8 @@ function checkPayline() {
 				playWheelWait(wilds);
 			}, 1500);
 		} else {
-			payWin( wintype, payout, 0, 0 );
+			payFinal = payout + credits;
+			payWin( wintype,payout,(payout+credits),0,0 );
 		}
 	} else {
 		winStats( paytable.length, betAmt );
@@ -1327,54 +1336,77 @@ function endWheel() {
 		payout = wheelPrePay + ( wheelPay * Math.pow(2, wheelMult));
 		document.getElementById("wheelWin").value=( wheelPay * Math.pow(2, wheelMult));
 		document.getElementById("wheelPay").value=payout;
-		payWin(18,payout,0,0)
+		payWin(18,payout,(payout+credits),0,0)
 	}
 }
 
-function payWin(wintype,payout,i,paySound) {
-	var loopTime;
-	document.getElementById("win").value=payout;
+function payWin(wintype,payout,payfinal,i,paySound) {
+	if ( payingOut == 2 ) {
+		setTimeout(function () {
+			payComplete( wintype, payout, payfinal);
+		}, 500);
+	} else {
+		payingOut = 1;
+		var loopTime;
+		document.getElementById("win").value=payout;
 	
-	if (payout >= 300) {
-		loopTime = 25;
-	} else {
-		loopTime = 100;
-	}
-	if ( wintype == 0 && betAmt == maxLineBet) {
-		jackpot(0);
-		return;
-	} else {
-		if ( loopTime == 25 ) {
-			if ( i % 4 == 0 ) {
+		if (payout >= 300) {
+			loopTime = 25;
+		} else {
+			loopTime = 100;
+		}
+		if ( wintype == 0 && betAmt == maxLineBet) {
+			jackpot(0);
+			return;
+		} else {
+			if ( loopTime == 25 ) {
+				if ( i % 4 == 0 ) {
+					playSound("paySound" + paySound);
+					paySound++;
+				}
+			} else {
 				playSound("paySound" + paySound);
 				paySound++;
 			}
-		} else {
-			playSound("paySound" + paySound);
-			paySound++;
+			if (paySound == paySounds ) { paySound = 0; }
 		}
-		if (paySound == paySounds ) { paySound = 0; }
-	}
 	
-	i++;
-	credits++
-	setCookie("credits",credits,expiry);
-	document.getElementById("paid").value=i;
-	document.getElementById("credits").value=credits;
-	payStats(-1);
+		i++;
+		credits++
+		setCookie("credits",credits,expiry);
+		document.getElementById("paid").value=i;
+		document.getElementById("credits").value=credits;
+		payStats(-1);
 
-	if ( dbgRapid == 1 ) {
-		loopTime = 0;
-	}
-
-	setTimeout(function () {
-		if (i < payout) {
-			payWin(wintype,payout,i,paySound);
-		} else {
-			document.getElementById("wintype").innerHTML="<marquee>"+paytable[wintype][4]+"</marquee>";
-			endGame();
+		if ( dbgRapid == 1 ) {
+			loopTime = 0;
 		}
-	}, loopTime);
+
+		setTimeout(function () {
+			if ( i < payout ) {
+				payWin( wintype, payout, ( payout + credits ), i, paySound);
+			} else {
+				payout = 0;
+				payingOut = 0;
+				displayWin(wintype);
+			}
+		}, loopTime);
+	}
+}
+
+function payComplete(wintype,payout,payfinal) {
+	credits = payfinal;
+	document.getElementById("paid").value=payout;
+	document.getElementById("credits").value=credits;
+	playSound(1);
+	payout = 0;
+	payingOut = 0;
+	displayWin(wintype);
+}
+
+function displayWin(wintype) {
+	document.getElementById("wintype").innerHTML="<marquee>"+paytable[wintype][4]+"</marquee>";
+	endGame();
 }
 
 /*
@@ -1386,6 +1418,7 @@ function endGame() {
 	lockSpin = 0;
 	lockBtn = 0;
 	betAmt = 0;
+	reBet = 0;
 	document.getElementById("betAmt").value=betAmt;
 	document.getElementById("gameover").innerHTML="<blink>Game Over</blink>";
 }
