@@ -244,7 +244,7 @@ var betAmt = 0;
 var lastBet = 0;
 var lockBtn = 0;
 var cashingOut = 0;
-var reBet;
+var reBet = 0;
 
 var dbgMode = 0;
 
