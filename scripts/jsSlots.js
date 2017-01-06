@@ -234,6 +234,14 @@ var wheelPrePay;
 var wheelMult;
 var wheelSteps;
 
+// Random Numbers
+// Raw random numbers utilized by the game.
+
+var rndReel = new Array(numReels);		// Reel stop randomizer
+var rndNudgePos = new Array(numReels);		// Nudge position randomizer
+var rndNudgeSym = new Array(numReels);		// Symbol nudge probability randomizer
+var rndWheel;					// Bonus wheel randomizer
+
 // Bet related variables
 var maxLineBet = 3;
 var betLimit = maxLineBet * paylines
@@ -895,6 +903,7 @@ function startGame() {
 	if ( credits == 0 && betAmt == 0 || lockSpin == 1 && wheelRun != 1 && payingOut != 1 ) {
 		return;
 	}
+	gameIdle = 0;
 	if ( wheelRun == 1 ) {
 		wheelRun = 0;
 		createjs.Sound.stop();
@@ -932,6 +941,12 @@ function spin() {
 	}
 	lockSpin = 1;
 	lockBtn = 1;
+	for ( r = 0; r < numReels; r++ ) {
+		rndReel[r] = Math.random();
+		rndNudgePos[r] = Math.random();
+		rndNudgeSym[r] = Math.random();
+	}
+	rndWheel = Math.random();
 	spinCount++;
 	if ( miscDataType == "stats") {
 		document.getElementById("spinCount").innerHTML=spinCount;
@@ -950,7 +965,7 @@ function spin() {
 			if ( dbgVReel == 1 ) {
 				virtStop[r] = dbgVReelStops[r];
 			} else {
-				virtStop[r] = Math.floor(Math.random() * virtReel[r].length);
+				virtStop[r] = Math.floor(rndReel[r] * virtReel[r].length);
 			}
 			reelStop[r] = virtReel[r][virtStop[r]];
 		}
@@ -1021,10 +1036,10 @@ function checkNudge() {
 	for ( r = 0; r < numReels; r++ ) {
 		nudgeVal[r] = 0;
 		if ( payline[r] != 0 ) { continue; }
-		var nudgePos = ( Math.floor(Math.random() * numReelPos));
+		var nudgePos = ( Math.floor( rndNudgePos[r] * numReelPos));
 		if ( nudgePos == 1 ) { continue; }
 		var nudgeSym = reel[r][nudgePos];
-		var nudgeProb = Math.round( Math.random() * nudgeOdds[nudgeSym] );
+		var nudgeProb = Math.round( rndNudgeSym[r] * nudgeOdds[nudgeSym] );
 		if ( nudgeProb  == 0 ) {
 			nudgeVal[r] = nudgePos - 1
 			nudge++;
@@ -1419,6 +1434,8 @@ function endGame() {
 	lockBtn = 0;
 	betAmt = 0;
 	reBet = 0;
+	gameIdle = 1;
+	cycleRndSeed();
 	document.getElementById("betAmt").value=betAmt;
 	document.getElementById("gameover").innerHTML="<blink>Game Over</blink>";
 }
@@ -1432,17 +1449,13 @@ function jackpot(c) {
 		}, 625);
 	} else {
 		setTimeout(function () {
-			lastBet = betAmt;
-			lockSpin = 0;
-			lockBtn = 0;
-			betAmt = 0;
 			credits += progVal;
 			setCookie("credits",credits,expiry)
 			payStats(-(progVal));
 			document.getElementById("paid").value=progVal;
 			document.getElementById("credits").value=credits;
-			document.getElementById("betAmt").value=betAmt;
 			progReset();
+			endGame()
 		}, 625)
 	}
 }
@@ -1489,6 +1502,52 @@ function cookieRestore() {
 	}
 }
 
+/*
+	Random Number Generator
+*/
+
+var gameIdle;
+
+function initRNG() {
+	gameIdle = 1;
+	genRndSeed();
+	cycleRndSeed();
+}
+
+function genRndSeed() {
+	var array = new Uint32Array(10);
+	var rndSeed = 0;
+	window.crypto.getRandomValues(array);
+	for (var i = 0; i < array.length; i++) {
+		rndSeed += array[i];
+	}
+	setRndSeed(rndSeed,0)
+	setTimeout(function () {
+		genRndSeed()
+	}, 1000 );
+}
+
+function setRndSeed(seednum,i) {
+	if ( gameIdle == 1 ) {
+		Math.seedrandom(seednum)
+	} else if ( i > 2 ) {
+		return;
+	} else {
+		setTimeout(function () {
+			setRndSeed(seednum,++i)
+		}, 250 );
+	}
+}
+
+function cycleRndSeed() {
+	if ( gameIdle == 1 ) {
+		var n = Math.random();
+		setTimeout(function () {
+			cycleRndSeed();
+		}, 100 );
+	}
+}
+
 function init() {
 	var spinnum;
 	var symbol;
@@ -1497,6 +1556,7 @@ function init() {
 	preloadImage();
 	preloadSound();
 	printPaytable();
+	initRNG();
 	initVReels();
 	initReels();
 	initWheel();
