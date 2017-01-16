@@ -156,6 +156,8 @@ var reelTopPos = new Array(numReels);
 
 var spinSpeed = 20	// Time in milliseconds between spin steps.  Must be between 10 and 100.  [Default: 20]
 
+var symSize = 200	// Size, in pixels, of reel symbols.  [Default: 100]
+
 // Bonus wheel
 
 /*
@@ -780,8 +782,7 @@ function betOne() {
 	if ( lockBtn != 1 ) {
 		if ( credits > 0 ) {
 			clearWin();
-			document.getElementById("gameover").innerHTML=""
-
+			document.getElementById("gameover").innerHTML="";
 			credits--;
 			betAmt++;
 			payStats(1);
@@ -802,7 +803,7 @@ function betOne() {
 				betAmt = betLimit;
 			}
 			document.getElementById("betAmt").value=betAmt;
-			if ( betAmt == betLimit && reBet != 1 ) {
+			if ( betAmt == betLimit ) {
 				setTimeout(function() {
 					spin();
 				}, 250 );
@@ -892,8 +893,13 @@ function setReel(r) {
 // Place symbol images onto playfield according to symbol values in reel[r]
 function drawReel(r) {
 	for ( p = 0; p < numReelPos; p++ ) {
-		symbol = symbols[reel[r][p]];
-		document.getElementById( "r" + r + "p" + p ).innerHTML='<image width="100" src=images/' + symbol + '.png />';
+		symnum = reel[r][p];
+		if ( symnum == 0 ) {
+			document.getElementById( "r" + r + "p" + p ).innerHTML='<image src=images/blank.png />';
+		} else {
+			symbol = symbols[symnum];
+			document.getElementById( "r" + r + "p" + p ).innerHTML='<image width="' + symSize + '" src=images/' + symbol + '.png />';
+		}
 	}
 }
 
@@ -905,7 +911,6 @@ function startGame() {
 	}
 	gameIdle = 0;
 	if ( wheelRun == 1 ) {
-		wheelRun = 0;
 		createjs.Sound.stop();
 		wheelSpin();
 	} else if ( payingOut == 1 ) {
@@ -919,7 +924,7 @@ function startGame() {
 
 function rebet() {
 	reBet = 1;
-	if ( lockSpin == 1 || lastBet == 0 || credits <= 0 ) {
+	if ( lockSpin == 1 || lastBet == 0 || betAmt == betLimit || credits <= 0 ) {
 		return;
 	} else {
 		betOne();
@@ -1567,6 +1572,7 @@ function init() {
 	progInit();
 	clearMisc();
 	payStats(0);
+	endGame();
 	document.getElementById("credits").value=credits;
 	document.getElementById("betAmt").value=betAmt;
 	document.getElementById("progVal").value=progVal;

@@ -22,13 +22,13 @@
 								<!--
 									Playfield Table Layout:
 									|		| r1Dbg	|		| r2Dbg	|		| r3Dbg	|
-									|		| r0p0	| p2s0c0| p2s0c1| r1p0	| p2s1c0| p2s1c1| r2p0	|
-									|			| p4s0c0| p6s0c1|	| p6s1c0| p5s1c1|	|
-									|			| p6s0c0| p4s0c1|	| p5s1c0| p6s1c1|	|
-									|		| r0p1	| p1s0c0| p1s0c1| r1p1	| p1s1c0| p1s1c1| r2p1	|
-									|			| p7s0c0| p5s0c1|	| p4s1c0| p7s1c1|	|
-									|			| p5s0c0| p7s0c1|	| p7s1c0| p4s1c1|	|
-									|		| r0p2	| p3s0c0| p3s0c1| r1p2	| p3s1c0| p3s1c1| r2p2	|
+									|		| r0	| p2s0c0| p2s0c1| r1	| p2s1c0| p2s1c1| r2	|
+									|		| "	| p4s0c0| p6s0c1| "	| p6s1c0| p5s1c1| "	|
+									|		| "	| p6s0c0| p4s0c1| "	| p5s1c0| p6s1c1| "	|
+									|		| "	| p1s0c0| p1s0c1| "	| p1s1c0| p1s1c1| "	|
+									|		| "	| p7s0c0| p5s0c1| "	| p4s1c0| p7s1c1| "	|
+									|		| "	| p5s0c0| p7s0c1| "	| p7s1c0| p4s1c1| "	|
+									|		| "	| p3s0c0| p3s0c1| "	| p3s1c0| p3s1c1| "	|
 									|	|	|	|	|	|	|	|	|	|
 								-->
 								<!-- Upper Playfield Border -->
@@ -49,13 +49,13 @@
 								<!-- Reel Row 1 -->
 								<tr>
 									<td colspan=2 />
-									<td><span id="r0p0"></span></td>
+									<td rowspan=7 valign=middle><div id="r0p0"></div><div id="r0p1"></div><div id="r0p2"></div></td>
 									<td align="right" width=25><span id="p2s0c0">&nbsp;</span></td>
 									<td align="left" width=25><span id="p2s0c1">&nbsp;</span></td>
-									<td><span id="r1p0"></span></td>
+									<td rowspan=7 valign=middle><div id="r1p0"></div><div id="r1p1"></div><div id="r1p2"></div></td>
 									<td width=25><span id="p2s1c0">&nbsp;</span></td>
 									<td width=25><span id="p2s1c1">&nbsp;</span></td>
-									<td><span id="r2p0"></span></td>
+									<td rowspan=7 valign=middle><div id="r2p0"></div><div id="r2p1"></div><div id="r2p2"></div></td>
 								</tr>
 								<tr>
 									<td colspan=3 />
@@ -80,13 +80,10 @@
 									<td>
 										1:
 									</td><td />
-									<td><span id="r0p1">&nbsp;</span></td>
 									<td><div id="p1s0c0" style="text-align:right">-</div></td>
 									<td><div id="p1s0c1" style="text-align:left">-</div></td>
-									<td><span id="r1p1">&nbsp;</span></td>
 									<td><div id="p1s1c0" style="text-align:right">-</div></td>
 									<td><div id="p1s1c1" style="text-align:left">-</div></td>
-									<td><span id="r2p1">&nbsp;</span></td>
 								</tr>
 								<tr>
 									<td colspan=3 />
@@ -109,13 +106,10 @@
 								<!-- Reel Row 3 -->
 								<tr>
 									<td colspan=2 />
-									<td><span id="r0p2"></span></td>
 									<td align="right"><span id="p3s0c0">&nbsp;</span></td>
 									<td align="left"><span id="p3s0c1">&nbsp;</span></td>
-									<td><span id="r1p2"></span></td>
 									<td align="right"><span id="p3s1c0">&nbsp;</span></td>
 									<td align="left"><span id="p3s1c1">&nbsp;</span></td>
-									<td><span id="r2p2"></span></td>
 								</tr>
 								<tr>
 									<!-- Reel 1 -->
