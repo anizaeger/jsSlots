@@ -853,8 +853,10 @@ function initVReels() {
 
 // Set random starting position for physical reels
 function initReels() {
+	var reelHeight = (symSize * 2) + (symSize / 2);
 	for ( r = 0; r < numReels; r++ ) {
-		reelTopPos[r] = Math.floor(Math.random() * strip[r].length)
+		document.getElementById('r' + r).height = reelHeight;
+		reelTopPos[r] = Math.floor(Math.random() * strip[r].length);
 		setReel(r);
 	}
 }
@@ -864,15 +866,15 @@ function advReel(minSpin) {
 	for ( r = minSpin; r < numReels; r++ ) {
 		reelTopPos[r]--;
 		if ( reelTopPos[r] < 0 ) {
-			reelTopPos[r] = strip[r].length - 1
+			reelTopPos[r] = strip[r].length - 1;
 		}
 		if ( reelTopPos[r] + 1 > strip[r].length - 1 ) {
-			rPos = reelTopPos[r] + 1 - strip[r].length
+			rPos = reelTopPos[r] + 1 - strip[r].length;
 		} else {
-			rPos = reelTopPos[r] + 1
+			rPos = reelTopPos[r] + 1;
 		}
 		if ( dbgMode == 1 ) {
-			document.getElementById("reelTopPos" + r).innerHTML=rPos
+			document.getElementById("reelTopPos" + r).innerHTML=rPos;
 		}
 		setReel(r);
 	}
@@ -895,7 +897,7 @@ function drawReel(r) {
 	for ( p = 0; p < numReelPos; p++ ) {
 		symnum = reel[r][p];
 		if ( symnum == 0 ) {
-			document.getElementById( "r" + r + "p" + p ).innerHTML='<image src=images/blank.png />';
+			document.getElementById( "r" + r + "p" + p ).innerHTML='<image width="' + Math.round( symSize / 3 ) + '" src=images/blank.png />';
 		} else {
 			symbol = symbols[symnum];
 			document.getElementById( "r" + r + "p" + p ).innerHTML='<image width="' + symSize + '" src=images/' + symbol + '.png />';
