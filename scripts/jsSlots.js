@@ -154,7 +154,7 @@ for ( r = 0; r < numReels; r++ ) {
 var reelStop = new Array(numReels);
 var reelTopPos = new Array(numReels);
 
-var spinSpeed = 20	// Time in milliseconds between spin steps.  Must be between 10 and 100.  [Default: 20]
+var spinSpeed = 55	// Time in milliseconds between spin steps.  Must be between 10 and 100.  [Default: 55]
 
 var symSize = 200	// Size, in pixels, of reel symbols.  [Default: 100]
 
@@ -219,7 +219,7 @@ paytable[18] = ["-","-",8,10,"Spin"];
 var payline = new Array(numReels);	// Physical reel stop at payline
 var paySym = new Array(numReels);	// Numeric value representing symbol on payline
 var paylines = 1;			// Number of paylines.  Must remain set to one.  Included for multiple paylines in the future
-var payIco = 35;			// Paytable icon size
+var payIco = 35;			// Paytable icon size . [Default: 35]
 var payout;
 var payingOut;				// Machine is currently paying out a prize.
 
