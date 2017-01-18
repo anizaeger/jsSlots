@@ -71,8 +71,8 @@ var wheelRows = 13;
 var symSize = 150;
 
 // Paytable icon size.
-// [Default: 35]
-var payIcoSize = 35;
+// [Default: 25]
+var payIcoSize = 25;
 
 // Time in milliseconds between spin steps.  Must be between 10 and 100.
 // [Default: 55]
