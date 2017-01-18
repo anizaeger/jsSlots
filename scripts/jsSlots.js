@@ -49,6 +49,51 @@ function gplAlert() {
 	window.alert(copyTxt)
 }
 
+/*
+	Configuration
+*/
+
+// Default number of credits when inserting bill.
+// [Defaut: 100]
+var billCredits = 100;
+
+// Default max line bet.
+// [Default: 3]
+var maxLineBet = 3;
+
+
+// Number of rows to display on bonus wheel.  Even values will be incremented to the next odd integer.
+// [Default: 13]
+var wheelRows = 13;
+
+// Size, in pixels, of reel symbols.
+// [Default: 150]
+var symSize = 150;
+
+// Paytable icon size.
+// [Default: 35]
+var payIcoSize = 35;
+
+// Time in milliseconds between spin steps.  Must be between 10 and 100.
+// [Default: 55]
+var spinSpeed = 55;
+
+// Default virtual reel debugging stops.
+// [Default: 10,18,4; 3 Wilds]
+var dbgVReelStops = [10,18,4];
+
+// Default physical reel debugging stops.
+// [Default: 3,5,1; 3 Wilds]
+var dbgSpinStops = [3,5,1];
+
+// Default bonus wheel debugging stop.
+// [Default: 7; Double]
+var dbgWheelStop = 7;
+
+/*
+	Script follows
+*/
+
 // Slot machine reels
 
 /*
@@ -154,10 +199,6 @@ for ( r = 0; r < numReels; r++ ) {
 var reelStop = new Array(numReels);
 var reelTopPos = new Array(numReels);
 
-var spinSpeed = 55	// Time in milliseconds between spin steps.  Must be between 10 and 100.  [Default: 55]
-
-var symSize = 150	// Size, in pixels, of reel symbols.  [Default: 150]
-
 // Bonus wheel
 
 /*
@@ -184,7 +225,6 @@ wheelStrip	= [1,4,2,5,7,6,3,0,4,2,5,6,3,1,4,7,5,6,3,0,4,2,5,6,3,1,4,7,5,2,6,3,0,
 var wheel = [-1,-1,-1,-1,-1];  // Array storing slots for each wheel position: wheel[] = [ top, second, middle (payspot), fourth, bottom ]
 var wheelStop;
 var wheelTopPos;
-var wheelRows = 13;  // Recommend odd values.  Even values will be incremented to the next highest odd integer
 var wheelPayRow;
 var wheelStop;
 
@@ -219,7 +259,6 @@ paytable[18] = ["-","-",8,10,"Spin"];
 var payline = new Array(numReels);	// Physical reel stop at payline
 var paySym = new Array(numReels);	// Numeric value representing symbol on payline
 var paylines = 1;			// Number of paylines.  Must remain set to one.  Included for multiple paylines in the future
-var payIco = 35;			// Paytable icon size . [Default: 35]
 var payout;
 var payingOut;				// Machine is currently paying out a prize.
 
@@ -245,10 +284,8 @@ var rndNudgeSym = new Array(numReels);		// Symbol nudge probability randomizer
 var rndWheel;					// Bonus wheel randomizer
 
 // Bet related variables
-var maxLineBet = 3;
 var betLimit = maxLineBet * paylines
 
-var billCredits = 100;
 var credits = 0;
 var betAmt = 0;
 var lastBet = 0;
@@ -264,17 +301,14 @@ var dbgRapid = 0;
 // Virtual reel debugging
 var dbgVReel = 0;
 var dbgVReelStops = new Array(numReels);
-dbgVReelStops = [10,18,4];  // Default debugging stops: 3 Wilds
 
 // Physical reel debugging
 var dbgSpin = 0;
 var dbgSpinStops = new Array(numReels);
-dbgSpinStops = [3,5,1];  // Default debugging stops: 3 Wilds
 
 // Bonus wheel debugging
 var dbgWheel = 0;
 var dbgWheelStop;
-dbgWheelStop = 7;
 
 var progCnt;
 var progVal;
@@ -330,7 +364,7 @@ function printPaytable() {
 		paytext += '<tr><td width="25" id="pt' + p + 'w0">&nbsp;</td>';
 		if ( paytable[p][0] < 0 ) {  // Print payout name for wild-only combinations.
 			paytext += '<td valign=middle align="center" colspan=' + ( numReels - 1 ) + '>Any ' + Math.abs( paytable[p][0] ) + '</td>';
-			paytext += '<td><image width="' + payIco + '" src=images/Wild.png /></td>';
+			paytext += '<td><image width="' + payIcoSize + '" src=images/Wild.png /></td>';
 			for ( c = 1; c <= maxLineBet; c++ ) {
 				paytext += '<td id="pt' + p + '" class=c' + c + ' style="fontWeight:normal">' + paytable[p][numReels] * c + '</td>';
 			}
@@ -339,14 +373,14 @@ function printPaytable() {
 			for ( s = 0; s < numReels; s++ ) {
 				if (paytable[p][s] >= 100 ) {
 					var g = paytable[p][s] - 100;
-					paytext += '<td align="center"><image width="' + payIco + '" src=images/' + grpSym[g] + '.png /></td>';
+					paytext += '<td align="center"><image width="' + payIcoSize + '" src=images/' + grpSym[g] + '.png /></td>';
 				} else if ( paytable[p][s] === "-" ) {
 					paytext += '<td valign=middle align="center">-</td>';
 				} else if ( paytable[p][s] == 0 ) {
-					paytext += '<td align="center"><image width="' + payIco + '" src=images/blankico.png /></td>';
+					paytext += '<td align="center"><image width="' + payIcoSize + '" src=images/blankico.png /></td>';
 				} else {
 					symbol = symbols[ paytable[p][s] ];
-					paytext += '<td align="center"><image width="' + payIco + '" src=images/'+symbol+'.png /></td>';
+					paytext += '<td align="center"><image width="' + payIcoSize + '" src=images/'+symbol+'.png /></td>';
 				}
 			}
 			for ( c = 1; c <= maxLineBet; c++ ) {
@@ -520,9 +554,9 @@ function printSymOdds() {
 		symOddsHtml += '<tr>';
 		symbol = symbols[s];
 		if ( s == 0 ) {
-			symOddsHtml += '<td align="center"><image width="' + payIco + '" src=images/blankico.png /></td>';
+			symOddsHtml += '<td align="center"><image width="' + payIcoSize + '" src=images/blankico.png /></td>';
 		} else {
-			symOddsHtml += '<td align="center"><image width="' + payIco + '" src=images/'+symbol+'.png /></td>';
+			symOddsHtml += '<td align="center"><image width="' + payIcoSize + '" src=images/'+symbol+'.png /></td>';
 		}
 		for ( r = 0; r < numReels; r++ ) {
 			symOddsHtml += '<td>' + symsNums[s][r] + ':' + numVirtReelStops[r] + '<br />' + ( Math.round( symsOdds[s][r] * 10000) / 100 ) + '%</td>';
@@ -533,7 +567,7 @@ function printSymOdds() {
 	for ( g = 0; g < groups.length; g++ ) {
 		symOddsHtml += '<tr>';
 		group = grpSym[g];
-		symOddsHtml += '<td align="center"><image width="' + payIco + '" src=images/'+group+'.png /></td>';
+		symOddsHtml += '<td align="center"><image width="' + payIcoSize + '" src=images/'+group+'.png /></td>';
 		for ( r = 0; r < numReels; r++ ) {
 			symOddsHtml += '<td>' + grpNums[g][r] + ':' + numVirtReelStops[r] + '<br />' + ( Math.round( grpOdds[g][r] * 10000) / 100 ) + '%</td>';
 		}
