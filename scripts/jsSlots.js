@@ -49,6 +49,51 @@ function gplAlert() {
 	window.alert(copyTxt)
 }
 
+/*
+	Configuration
+*/
+
+// Default number of credits when inserting bill.
+// [Defaut: 100]
+var billCredits = 100;
+
+// Default max line bet.
+// [Default: 3]
+var maxLineBet = 3;
+
+
+// Number of rows to display on bonus wheel.  Even values will be incremented to the next odd integer.
+// [Default: 13]
+var wheelRows = 13;
+
+// Size, in pixels, of reel symbols.
+// [Default: 150]
+var symSize = 150;
+
+// Paytable icon size.
+// [Default: 35]
+var payIcoSize = 35;
+
+// Time in milliseconds between spin steps.  Must be between 10 and 100.
+// [Default: 55]
+var spinSpeed = 55;
+
+// Default virtual reel debugging stops.
+// [Default: 10,18,4; 3 Wilds]
+var dbgVReelStops = [10,18,4];
+
+// Default physical reel debugging stops.
+// [Default: 3,5,1; 3 Wilds]
+var dbgSpinStops = [3,5,1];
+
+// Default bonus wheel debugging stop.
+// [Default: 7; Double]
+var dbgWheelStop = 7;
+
+/*
+	Script follows
+*/
+
 // Slot machine reels
 
 /*
@@ -154,8 +199,6 @@ for ( r = 0; r < numReels; r++ ) {
 var reelStop = new Array(numReels);
 var reelTopPos = new Array(numReels);
 
-var spinSpeed = 20	// Time in milliseconds between spin steps.  Must be between 10 and 100.  [Default: 20]
-
 // Bonus wheel
 
 /*
@@ -182,7 +225,6 @@ wheelStrip	= [1,4,2,5,7,6,3,0,4,2,5,6,3,1,4,7,5,6,3,0,4,2,5,6,3,1,4,7,5,2,6,3,0,
 var wheel = [-1,-1,-1,-1,-1];  // Array storing slots for each wheel position: wheel[] = [ top, second, middle (payspot), fourth, bottom ]
 var wheelStop;
 var wheelTopPos;
-var wheelRows = 13;  // Recommend odd values.  Even values will be incremented to the next highest odd integer
 var wheelPayRow;
 var wheelStop;
 
@@ -217,7 +259,8 @@ paytable[18] = ["-","-",8,10,"Spin"];
 var payline = new Array(numReels);	// Physical reel stop at payline
 var paySym = new Array(numReels);	// Numeric value representing symbol on payline
 var paylines = 1;			// Number of paylines.  Must remain set to one.  Included for multiple paylines in the future
-var payIco = 35;			// Paytable icon size
+var payout;
+var payingOut;				// Machine is currently paying out a prize.
 
 var miscDataType;
 
@@ -232,16 +275,23 @@ var wheelPrePay;
 var wheelMult;
 var wheelSteps;
 
+// Random Numbers
+// Raw random numbers utilized by the game.
+
+var rndReel = new Array(numReels);		// Reel stop randomizer
+var rndNudgePos = new Array(numReels);		// Nudge position randomizer
+var rndNudgeSym = new Array(numReels);		// Symbol nudge probability randomizer
+var rndWheel;					// Bonus wheel randomizer
+
 // Bet related variables
-var maxLineBet = 3;
 var betLimit = maxLineBet * paylines
 
-var billCredits = 100;
 var credits = 0;
 var betAmt = 0;
 var lastBet = 0;
 var lockBtn = 0;
 var cashingOut = 0;
+var reBet = 0;
 
 var dbgMode = 0;
 
@@ -251,17 +301,14 @@ var dbgRapid = 0;
 // Virtual reel debugging
 var dbgVReel = 0;
 var dbgVReelStops = new Array(numReels);
-dbgVReelStops = [10,18,4];  // Default debugging stops: 3 Wilds
 
 // Physical reel debugging
 var dbgSpin = 0;
 var dbgSpinStops = new Array(numReels);
-dbgSpinStops = [3,5,1];  // Default debugging stops: 3 Wilds
 
 // Bonus wheel debugging
 var dbgWheel = 0;
 var dbgWheelStop;
-dbgWheelStop = 7;
 
 var progCnt;
 var progVal;
@@ -317,7 +364,7 @@ function printPaytable() {
 		paytext += '<tr><td width="25" id="pt' + p + 'w0">&nbsp;</td>';
 		if ( paytable[p][0] < 0 ) {  // Print payout name for wild-only combinations.
 			paytext += '<td valign=middle align="center" colspan=' + ( numReels - 1 ) + '>Any ' + Math.abs( paytable[p][0] ) + '</td>';
-			paytext += '<td><image width="' + payIco + '" src=images/Wild.png /></td>';
+			paytext += '<td><image width="' + payIcoSize + '" src=images/Wild.png /></td>';
 			for ( c = 1; c <= maxLineBet; c++ ) {
 				paytext += '<td id="pt' + p + '" class=c' + c + ' style="fontWeight:normal">' + paytable[p][numReels] * c + '</td>';
 			}
@@ -326,14 +373,14 @@ function printPaytable() {
 			for ( s = 0; s < numReels; s++ ) {
 				if (paytable[p][s] >= 100 ) {
 					var g = paytable[p][s] - 100;
-					paytext += '<td align="center"><image width="' + payIco + '" src=images/' + grpSym[g] + '.png /></td>';
+					paytext += '<td align="center"><image width="' + payIcoSize + '" src=images/' + grpSym[g] + '.png /></td>';
 				} else if ( paytable[p][s] === "-" ) {
 					paytext += '<td valign=middle align="center">-</td>';
 				} else if ( paytable[p][s] == 0 ) {
-					paytext += '<td align="center"><image width="' + payIco + '" src=images/blankico.png /></td>';
+					paytext += '<td align="center"><image width="' + payIcoSize + '" src=images/blankico.png /></td>';
 				} else {
 					symbol = symbols[ paytable[p][s] ];
-					paytext += '<td align="center"><image width="' + payIco + '" src=images/'+symbol+'.png /></td>';
+					paytext += '<td align="center"><image width="' + payIcoSize + '" src=images/'+symbol+'.png /></td>';
 				}
 			}
 			for ( c = 1; c <= maxLineBet; c++ ) {
@@ -507,9 +554,9 @@ function printSymOdds() {
 		symOddsHtml += '<tr>';
 		symbol = symbols[s];
 		if ( s == 0 ) {
-			symOddsHtml += '<td align="center"><image width="' + payIco + '" src=images/blankico.png /></td>';
+			symOddsHtml += '<td align="center"><image width="' + payIcoSize + '" src=images/blankico.png /></td>';
 		} else {
-			symOddsHtml += '<td align="center"><image width="' + payIco + '" src=images/'+symbol+'.png /></td>';
+			symOddsHtml += '<td align="center"><image width="' + payIcoSize + '" src=images/'+symbol+'.png /></td>';
 		}
 		for ( r = 0; r < numReels; r++ ) {
 			symOddsHtml += '<td>' + symsNums[s][r] + ':' + numVirtReelStops[r] + '<br />' + ( Math.round( symsOdds[s][r] * 10000) / 100 ) + '%</td>';
@@ -520,7 +567,7 @@ function printSymOdds() {
 	for ( g = 0; g < groups.length; g++ ) {
 		symOddsHtml += '<tr>';
 		group = grpSym[g];
-		symOddsHtml += '<td align="center"><image width="' + payIco + '" src=images/'+group+'.png /></td>';
+		symOddsHtml += '<td align="center"><image width="' + payIcoSize + '" src=images/'+group+'.png /></td>';
 		for ( r = 0; r < numReels; r++ ) {
 			symOddsHtml += '<td>' + grpNums[g][r] + ':' + numVirtReelStops[r] + '<br />' + ( Math.round( grpOdds[g][r] * 10000) / 100 ) + '%</td>';
 		}
@@ -757,11 +804,11 @@ function clearWin() {
 	document.getElementById("win").value="";
 	document.getElementById("paid").value="";
 	document.getElementById("wintype").innerHTML="";
-	document.getElementById("reelMult").value=1;
-	document.getElementById("wheelPrepay").value=0;
-	document.getElementById("wheelMult").value=1;
-	document.getElementById("wheelWin").value=0;
-	document.getElementById("wheelPay").value=0
+	document.getElementById("reelMult").value="";
+	document.getElementById("wheelPrepay").value="";
+	document.getElementById("wheelMult").value="";
+	document.getElementById("wheelWin").value="";
+	document.getElementById("wheelPay").value=";"
 }
 
 function betOne() {
@@ -769,8 +816,7 @@ function betOne() {
 	if ( lockBtn != 1 ) {
 		if ( credits > 0 ) {
 			clearWin();
-			document.getElementById("gameover").innerHTML=""
-
+			document.getElementById("gameover").innerHTML="";
 			credits--;
 			betAmt++;
 			payStats(1);
@@ -792,8 +838,9 @@ function betOne() {
 			}
 			document.getElementById("betAmt").value=betAmt;
 			if ( betAmt == betLimit ) {
-				lockBtn = 1;
-				setTimeout( function() { spin(); }, 500 );
+				setTimeout(function() {
+					spin();
+				}, 250 );
 			}
 		}
 	}
@@ -840,8 +887,10 @@ function initVReels() {
 
 // Set random starting position for physical reels
 function initReels() {
+	var reelHeight = (symSize * 2) + (symSize / 2);
 	for ( r = 0; r < numReels; r++ ) {
-		reelTopPos[r] = Math.floor(Math.random() * strip[r].length)
+		document.getElementById('r' + r).height = reelHeight;
+		reelTopPos[r] = Math.floor(Math.random() * strip[r].length);
 		setReel(r);
 	}
 }
@@ -851,15 +900,15 @@ function advReel(minSpin) {
 	for ( r = minSpin; r < numReels; r++ ) {
 		reelTopPos[r]--;
 		if ( reelTopPos[r] < 0 ) {
-			reelTopPos[r] = strip[r].length - 1
+			reelTopPos[r] = strip[r].length - 1;
 		}
 		if ( reelTopPos[r] + 1 > strip[r].length - 1 ) {
-			rPos = reelTopPos[r] + 1 - strip[r].length
+			rPos = reelTopPos[r] + 1 - strip[r].length;
 		} else {
-			rPos = reelTopPos[r] + 1
+			rPos = reelTopPos[r] + 1;
 		}
 		if ( dbgMode == 1 ) {
-			document.getElementById("reelTopPos" + r).innerHTML=rPos
+			document.getElementById("reelTopPos" + r).innerHTML=rPos;
 		}
 		setReel(r);
 	}
@@ -880,21 +929,28 @@ function setReel(r) {
 // Place symbol images onto playfield according to symbol values in reel[r]
 function drawReel(r) {
 	for ( p = 0; p < numReelPos; p++ ) {
-		symbol = symbols[reel[r][p]];
-		document.getElementById( "r" + r + "p" + p ).innerHTML='<image width="100" src=images/' + symbol + '.png />';
+		symnum = reel[r][p];
+		if ( symnum == 0 ) {
+			document.getElementById( "r" + r + "p" + p ).innerHTML='<image width="' + Math.round( symSize / 3 ) + '" src=images/blank.png />';
+		} else {
+			symbol = symbols[symnum];
+			document.getElementById( "r" + r + "p" + p ).innerHTML='<image width="' + symSize + '" src=images/' + symbol + '.png />';
+		}
 	}
 }
 
 // Spin related functions
 
 function startGame() {
-	if ( credits == 0 && betAmt == 0 || lockSpin == 1 && wheelRun != 1) {
+	if ( credits == 0 && betAmt == 0 || lockSpin == 1 && wheelRun != 1 && payingOut != 1 ) {
 		return;
 	}
+	gameIdle = 0;
 	if ( wheelRun == 1 ) {
-		wheelRun = 0;
 		createjs.Sound.stop();
 		wheelSpin();
+	} else if ( payingOut == 1 ) {
+		payingOut = 2;
 	} else if ( betAmt == 0 ) {
 		rebet();
 	} else {
@@ -903,19 +959,19 @@ function startGame() {
 }
 
 function rebet() {
-	if ( lockSpin == 1 || lastBet == 0) {
-		return;
-	}
-	if ( credits <= 0) {
+	reBet = 1;
+	if ( lockSpin == 1 || lastBet == 0 || betAmt == betLimit || credits <= 0 ) {
 		return;
 	} else {
 		betOne();
 		if ( betAmt == lastBet ) {
-			spin();
+			setTimeout(function () {
+				spin();
+			}, 250 );
 		} else {
 			setTimeout(function () {
 				rebet();
-			}, 125 )
+			}, 125 );
 		}
 	}
 }
@@ -926,6 +982,12 @@ function spin() {
 	}
 	lockSpin = 1;
 	lockBtn = 1;
+	for ( r = 0; r < numReels; r++ ) {
+		rndReel[r] = Math.random();
+		rndNudgePos[r] = Math.random();
+		rndNudgeSym[r] = Math.random();
+	}
+	rndWheel = Math.random();
 	spinCount++;
 	if ( miscDataType == "stats") {
 		document.getElementById("spinCount").innerHTML=spinCount;
@@ -944,7 +1006,7 @@ function spin() {
 			if ( dbgVReel == 1 ) {
 				virtStop[r] = dbgVReelStops[r];
 			} else {
-				virtStop[r] = Math.floor(Math.random() * virtReel[r].length);
+				virtStop[r] = Math.floor(rndReel[r] * virtReel[r].length);
 			}
 			reelStop[r] = virtReel[r][virtStop[r]];
 		}
@@ -1015,10 +1077,10 @@ function checkNudge() {
 	for ( r = 0; r < numReels; r++ ) {
 		nudgeVal[r] = 0;
 		if ( payline[r] != 0 ) { continue; }
-		var nudgePos = ( Math.floor(Math.random() * numReelPos));
+		var nudgePos = ( Math.floor( rndNudgePos[r] * numReelPos));
 		if ( nudgePos == 1 ) { continue; }
 		var nudgeSym = reel[r][nudgePos];
-		var nudgeProb = Math.round( Math.random() * nudgeOdds[nudgeSym] );
+		var nudgeProb = Math.round( rndNudgeSym[r] * nudgeOdds[nudgeSym] );
 		if ( nudgeProb  == 0 ) {
 			nudgeVal[r] = nudgePos - 1
 			nudge++;
@@ -1181,7 +1243,9 @@ function checkPayline() {
 		}
 		winStats( wintype, betAmt );
 		if ( wintype == 18 && betAmt == betLimit) {
-			playSound("wheelSpin")
+			setTimeout(function () {
+				playSound("wheelSpin")
+			}, 250);
 			wheelPrePay = payout;
 			wheelMult = wilds;
 			document.getElementById("reelMult").value=Math.pow(2, wilds);
@@ -1190,7 +1254,8 @@ function checkPayline() {
 				playWheelWait(wilds);
 			}, 1500);
 		} else {
-			payWin( wintype, payout, 0, 0 );
+			payFinal = payout + credits;
+			payWin( wintype,payout,(payout+credits),0,0 );
 		}
 	} else {
 		winStats( paytable.length, betAmt );
@@ -1327,54 +1392,77 @@ function endWheel() {
 		payout = wheelPrePay + ( wheelPay * Math.pow(2, wheelMult));
 		document.getElementById("wheelWin").value=( wheelPay * Math.pow(2, wheelMult));
 		document.getElementById("wheelPay").value=payout;
-		payWin(18,payout,0,0)
+		payWin(18,payout,(payout+credits),0,0)
 	}
 }
 
-function payWin(wintype,payout,i,paySound) {
-	var loopTime;
-	document.getElementById("win").value=payout;
+function payWin(wintype,payout,payfinal,i,paySound) {
+	if ( payingOut == 2 ) {
+		setTimeout(function () {
+			payComplete( wintype, payout, payfinal);
+		}, 500);
+	} else {
+		payingOut = 1;
+		var loopTime;
+		document.getElementById("win").value=payout;
 	
-	if (payout >= 300) {
-		loopTime = 25;
-	} else {
-		loopTime = 100;
-	}
-	if ( wintype == 0 && betAmt == maxLineBet) {
-		jackpot(0);
-		return;
-	} else {
-		if ( loopTime == 25 ) {
-			if ( i % 4 == 0 ) {
+		if (payout >= 300) {
+			loopTime = 25;
+		} else {
+			loopTime = 100;
+		}
+		if ( wintype == 0 && betAmt == maxLineBet) {
+			jackpot(0);
+			return;
+		} else {
+			if ( loopTime == 25 ) {
+				if ( i % 4 == 0 ) {
+					playSound("paySound" + paySound);
+					paySound++;
+				}
+			} else {
 				playSound("paySound" + paySound);
 				paySound++;
 			}
-		} else {
-			playSound("paySound" + paySound);
-			paySound++;
+			if (paySound == paySounds ) { paySound = 0; }
 		}
-		if (paySound == paySounds ) { paySound = 0; }
-	}
 	
-	i++;
-	credits++
-	setCookie("credits",credits,expiry);
-	document.getElementById("paid").value=i;
-	document.getElementById("credits").value=credits;
-	payStats(-1);
+		i++;
+		credits++
+		setCookie("credits",credits,expiry);
+		document.getElementById("paid").value=i;
+		document.getElementById("credits").value=credits;
+		payStats(-1);
 
-	if ( dbgRapid == 1 ) {
-		loopTime = 0;
-	}
-
-	setTimeout(function () {
-		if (i < payout) {
-			payWin(wintype,payout,i,paySound);
-		} else {
-			document.getElementById("wintype").innerHTML="<marquee>"+paytable[wintype][4]+"</marquee>";
-			endGame();
+		if ( dbgRapid == 1 ) {
+			loopTime = 0;
 		}
-	}, loopTime);
+
+		setTimeout(function () {
+			if ( i < payout ) {
+				payWin( wintype, payout, ( payout + credits ), i, paySound);
+			} else {
+				payout = 0;
+				payingOut = 0;
+				displayWin(wintype);
+			}
+		}, loopTime);
+	}
+}
+
+function payComplete(wintype,payout,payfinal) {
+	credits = payfinal;
+	document.getElementById("paid").value=payout;
+	document.getElementById("credits").value=credits;
+	playSound(1);
+	payout = 0;
+	payingOut = 0;
+	displayWin(wintype);
+}
+
+function displayWin(wintype) {
+	document.getElementById("wintype").innerHTML="<marquee>"+paytable[wintype][4]+"</marquee>";
+	endGame();
 }
 
 /*
@@ -1386,6 +1474,9 @@ function endGame() {
 	lockSpin = 0;
 	lockBtn = 0;
 	betAmt = 0;
+	reBet = 0;
+	gameIdle = 1;
+	cycleRndSeed();
 	document.getElementById("betAmt").value=betAmt;
 	document.getElementById("gameover").innerHTML="<blink>Game Over</blink>";
 }
@@ -1399,17 +1490,13 @@ function jackpot(c) {
 		}, 625);
 	} else {
 		setTimeout(function () {
-			lastBet = betAmt;
-			lockSpin = 0;
-			lockBtn = 0;
-			betAmt = 0;
 			credits += progVal;
 			setCookie("credits",credits,expiry)
 			payStats(-(progVal));
 			document.getElementById("paid").value=progVal;
 			document.getElementById("credits").value=credits;
-			document.getElementById("betAmt").value=betAmt;
 			progReset();
+			endGame()
 		}, 625)
 	}
 }
@@ -1456,6 +1543,52 @@ function cookieRestore() {
 	}
 }
 
+/*
+	Random Number Generator
+*/
+
+var gameIdle;
+
+function initRNG() {
+	gameIdle = 1;
+	genRndSeed();
+	cycleRndSeed();
+}
+
+function genRndSeed() {
+	var array = new Uint32Array(10);
+	var rndSeed = 0;
+	window.crypto.getRandomValues(array);
+	for (var i = 0; i < array.length; i++) {
+		rndSeed += array[i];
+	}
+	setRndSeed(rndSeed,0)
+	setTimeout(function () {
+		genRndSeed()
+	}, 1000 );
+}
+
+function setRndSeed(seednum,i) {
+	if ( gameIdle == 1 ) {
+		Math.seedrandom(seednum)
+	} else if ( i > 2 ) {
+		return;
+	} else {
+		setTimeout(function () {
+			setRndSeed(seednum,++i)
+		}, 250 );
+	}
+}
+
+function cycleRndSeed() {
+	if ( gameIdle == 1 ) {
+		var n = Math.random();
+		setTimeout(function () {
+			cycleRndSeed();
+		}, 100 );
+	}
+}
+
 function init() {
 	var spinnum;
 	var symbol;
@@ -1464,6 +1597,7 @@ function init() {
 	preloadImage();
 	preloadSound();
 	printPaytable();
+	initRNG();
 	initVReels();
 	initReels();
 	initWheel();
@@ -1474,6 +1608,7 @@ function init() {
 	progInit();
 	clearMisc();
 	payStats(0);
+	endGame();
 	document.getElementById("credits").value=credits;
 	document.getElementById("betAmt").value=betAmt;
 	document.getElementById("progVal").value=progVal;
