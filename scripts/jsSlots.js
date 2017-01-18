@@ -156,7 +156,7 @@ var reelTopPos = new Array(numReels);
 
 var spinSpeed = 55	// Time in milliseconds between spin steps.  Must be between 10 and 100.  [Default: 55]
 
-var symSize = 200	// Size, in pixels, of reel symbols.  [Default: 100]
+var symSize = 150	// Size, in pixels, of reel symbols.  [Default: 150]
 
 // Bonus wheel
 
