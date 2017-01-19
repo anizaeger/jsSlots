@@ -698,6 +698,10 @@ function printDebug() {
 	debugHtml += '<td colspan='+numReels+' style="text-align:left">Bonus Wheel Stop:</td>';
 	debugHtml += '</tr><tr>';
 	debugHtml += '<td width=33% style="text-align:left"><div style="width:5em"><span id="wheelTopPos">' + (wheelTopPos + 1) + '</span>&nbsp;-&gt;&nbsp;<span id="wheelStop">' + (wheelTopPos + 1) + '</span></div></td>';
+	debugHtml += '</tr><tr>';
+	debugHtml += '<td colspan='+numReels+' style="text-align:left">Seed: <span id="rndSeed"></span></td>';
+	debugHtml += '</tr><tr>';
+	debugHtml += '<td colspan='+numReels+' style="text-align:left">PRNG: <span id="rndNum"></span></td>';
 	debugHtml += '</tr>';
 	document.getElementById("miscDataTbl").innerHTML=debugHtml
 }
@@ -1560,7 +1564,7 @@ function genRndSeed() {
 	var rndSeed = 0;
 	window.crypto.getRandomValues(array);
 	for (var i = 0; i < array.length; i++) {
-		rndSeed += array[i];
+		rndSeed ^= array[i];
 	}
 	setRndSeed(rndSeed,0)
 	setTimeout(function () {
@@ -1571,6 +1575,9 @@ function genRndSeed() {
 function setRndSeed(seednum,i) {
 	if ( gameIdle == 1 ) {
 		Math.seedrandom(seednum)
+		if ( dbgMode == 1 ) {
+			document.getElementById("rndSeed").innerHTML=seednum;
+		}
 	} else if ( i > 2 ) {
 		return;
 	} else {
@@ -1583,6 +1590,9 @@ function setRndSeed(seednum,i) {
 function cycleRndSeed() {
 	if ( gameIdle == 1 ) {
 		var n = Math.random();
+		if ( dbgMode == 1 ) {
+			document.getElementById("rndNum").innerHTML=n;
+		}
 		setTimeout(function () {
 			cycleRndSeed();
 		}, 100 );
