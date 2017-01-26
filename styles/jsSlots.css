@@ -4,6 +4,9 @@ button {
 td {
 	text-align:center;
 }
+td.payCell {
+	padding: 5px;
+}
 button.large { 
 	width:100px; 
 	height:100px;

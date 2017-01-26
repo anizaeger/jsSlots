@@ -1,4 +1,4 @@
-/**
+/** @license
  *
  * @source: https://github.com/anizaeger/jsSlots
  *
@@ -50,8 +50,8 @@ function gplAlert() {
 }
 
 /*
-	Configuration
-*/
+ *	Configuration
+ */
 
 // Default number of credits when inserting bill.
 // [Defaut: 100]
@@ -98,8 +98,8 @@ var dbgSpinStops = [3,5,1];
 var dbgWheelStop = 7;
 
 /*
-	Script follows
-*/
+ *	Constants
+ */
 
 // Slot machine reels
 
@@ -119,12 +119,8 @@ var dbgWheelStop = 7;
 // Image filename for symbols, not including file extension.  Must be PNG format, and in images subdirectory.  Index number is symbol ID.
 var symbols = ["blank","BR", "BW", "BB", "7B", "7W", "7R", "Wild", "Spin"];
 
-var virtReel = new Array(numReels);	// Auto-generated virtual reels.
-var virtStop = new Array(numReels);	// Stop position for virtual reel.  Randomly-selected at spin.
-
-
 /*
-	Group Legend
+	Symbol Group Legend
 		0: Any 7
 		1: Any Bar
 		2: Any Red
@@ -172,8 +168,8 @@ var grpSym = ["7A", "BA", "Red", "White", "Blue"];
 
 //	As a result, the reel will stop at that particular White Bar.
 
-var strip = new Array(numReels);	// Phys. reels
-var numVirtStops = new Array(numReels);	// Virt. reels
+var strip = new Array();  // Phys. reels
+var numVirtStops = new Array();  // Virt. reels
 
 // Reel Stop		   0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 2 2
 // Numbers		   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -190,11 +186,18 @@ numVirtStops[2]		= [4,1,6,9,3,1,3,3,2,4,4,2,4,1,5,1,3,2,5,1,3,5];
 // Odds of symbol nudging to  payline space if selected, in symbols[] order
 var nudgeOdds = [0,1,2,3,10,20,30,100,50]
 
+/*
+	Script follows
+*/
+
+var numReels = strip.length;  // Number of reels
+var virtReel = new Array(numReels);  // Auto-generated virtual reels.
+var virtStop = new Array(numReels);  // Stop position for virtual reel.  Randomly-selected at spin.
+
 var nudgeVal = new Array(numReels);  // Direction, if any, to nudge reels.
 
 
 // Reels and Positions
-var numReels = strip.length;  // Number of reels
 var numReelPos = 3;  // Number of visible reel positions
 var reel = new Array( numReels );  // Array storing symbols for each reel position: reel[r] = [ top, middle, bottom ]
 for ( r = 0; r < numReels; r++ ) {
@@ -354,7 +357,7 @@ function getCookie(cname) {
 			c = c.substring(1);
 		}
 		if (c.indexOf(name) == 0) {
-			return parseInt(c.substring(name.length,c.length));
+			return parseInt(c.substring(name.length,c.length),10);
 		}
 	}
 	return 0;
@@ -365,38 +368,41 @@ function printPaytable() {
 	var paytext = "";
 	var g;
 	for (p = 0; p < paytable.length; p++) {
-		paytext += '<tr><td width="25" id="pt' + p + 'w0">&nbsp;</td>';
+		paytext += '<tr id="payRow' + p + '">';
 		if ( paytable[p][0] < 0 ) {  // Print payout name for wild-only combinations.
-			paytext += '<td valign=middle align="center" colspan=' + ( numReels - 1 ) + '>Any ' + Math.abs( paytable[p][0] ) + '</td>';
-			paytext += '<td><image width="' + payIcoSize + '" src=images/Wild.png /></td>';
+			paytext += '<td class=payCell valign=middle align="center" colspan=' + ( numReels - 1 ) + '>Any ' + Math.abs( paytable[p][0] ) + '</td>';
+			paytext += '<td class=payCell><image width="' + payIcoSize + '" src=images/Wild.png /></td>';
 			for ( c = 1; c <= maxLineBet; c++ ) {
-				paytext += '<td id="pt' + p + '" class=c' + c + ' style="fontWeight:normal">' + paytable[p][numReels] * c + '</td>';
+				paytext += '<td id="pt' + p + '" class="c' + c + ' payCell" style="fontWeight:normal">' + paytable[p][numReels] * c + '</td>';
 			}
-			paytext += '<td width="25" id="pt' + p + 'w1">&nbsp;</td></tr>';
+			paytext += '<td class=payCell width="25" id="pt' + p + 'w1">&nbsp;</td></tr>';
 		} else {
 			for ( s = 0; s < numReels; s++ ) {
 				if (paytable[p][s] >= 100 ) {
 					var g = paytable[p][s] - 100;
-					paytext += '<td align="center"><image width="' + payIcoSize + '" src=images/' + grpSym[g] + '.png /></td>';
+					paytext += '<td class=payCell align="center"><image width="' + payIcoSize + '" src=images/' + grpSym[g] + '.png /></td>';
 				} else if ( paytable[p][s] === "-" ) {
-					paytext += '<td valign=middle align="center">-</td>';
+					paytext += '<td class=payCell valign=middle align="center">-</td>';
 				} else if ( paytable[p][s] == 0 ) {
-					paytext += '<td align="center"><image width="' + payIcoSize + '" src=images/blankico.png /></td>';
+					paytext += '<td class=payCell align="center"><image width="' + payIcoSize + '" src=images/blankico.png /></td>';
 				} else {
 					symbol = symbols[ paytable[p][s] ];
-					paytext += '<td align="center"><image width="' + payIcoSize + '" src=images/'+symbol+'.png /></td>';
+					paytext += '<td class=payCell align="center"><image width="' + payIcoSize + '" src=images/'+symbol+'.png /></td>';
 				}
 			}
 			for ( c = 1; c <= maxLineBet; c++ ) {
 				if ( p == 0 && c == maxLineBet ) {
-					paytext += '<td colspan=2 id="pt' + p + 'c' + c + '"><input type="number" id="progVal" value=' + progVal + ' style="width:7em"></td>';
+					paytext += '<td class=payCell colspan=2 id="pt' + p + 'c' + c + '"><input type="number" id="progVal" value=' + progVal + ' style="width:7em"></td>';
 				} else if ( p == 18 && c == maxLineBet ) {
-					paytext += '<td colspan=2 id="pt' + p + 'c' + c + '" class="c' + c + '">' + paytable[p][numReels] * c + ' + Wheel</td>';
+					paytext += '<td class=payCell colspan=2 id="pt' + p + 'c' + c + '" class="c' + c + ' payCell">Bonus</td>';
 				} else {
-					paytext += '<td id="pt' + p + 'c' + c + '" class="c' + c + '">' + paytable[p][numReels] * c + '</td>';
+					paytext += '<td id="pt' + p + 'c' + c + '" class="c' + c + ' payCell">' + paytable[p][numReels] * c + '</td>';
+					if ( c == maxLineBet ) {
+						paytext += '<td />';
+					}
 				}
 			}
-			paytext += '<td width="25" id="pt' + p + 'w1">&nbsp;</td></tr>';
+			paytext += '</tr>';
 		}
 	}
 	document.getElementById( "paytable" ).innerHTML=paytext;
@@ -911,9 +917,7 @@ function cashOut() {
 
 function clearWin() {
 	for (pt = 0; pt < paytable.length; pt++) {
-		for ( w = 0; w < 2; w++ ) {
-			document.getElementById("pt" + pt + "w" + w).innerHTML="";
-		}
+		document.getElementById("payRow" + pt).style.backgroundColor = "white";
 	}
 	document.getElementById("win").value="";
 	document.getElementById("paid").value="";
@@ -921,6 +925,7 @@ function clearWin() {
 	document.getElementById("reelMult").value="";
 	document.getElementById("wheelPrepay").value="";
 	document.getElementById("wheelMult").value="";
+	document.getElementById("totMult").value="";
 	document.getElementById("wheelWin").value="";
 	document.getElementById("wheelPay").value=";"
 }
@@ -1396,13 +1401,7 @@ function checkPayline() {
 		}
 	}
 	if ( wintype >= 0 ) {
-		for ( w = 0; w < 2; w++ ) {
-			if ( w == 0) {
-				document.getElementById("pt" + wintype + "w" + w).innerHTML="-->";
-			} else {
-				document.getElementById("pt" + wintype + "w" + w).innerHTML="<--";
-			}
-		}
+		document.getElementById("payRow" + wintype).style.backgroundColor = "yellow";
 		if ( wintype == 0 && betAmt == maxLineBet) {
 			payout = progVal;
 		} else {
