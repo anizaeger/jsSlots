@@ -65,6 +65,10 @@ var maxLineBet = 3;
 // [Default: 100000]
 maxProg = 100000;
 
+// Width of bonus wheel.
+// [Default: 150]
+var wheelWidth = 150;
+
 // Number of rows to display on bonus wheel.  Even values will be incremented to the next odd integer.
 // [Default: 13]
 var wheelRows = 13;
@@ -116,18 +120,11 @@ var dbgWheelStop = 7;
 		8: Spin
 */
 
+// Reel symbol names.
+var symName = ["Blank", "Red Bar", "White Bar", "Blue Bar", "Blue 7", "White 7", "Red 7", "Wild", "Spin"]
+
 // Image filename for symbols, not including file extension.  Must be PNG format, and in images subdirectory.  Index number is symbol ID.
 var symbols = ["blank","BR", "BW", "BB", "7B", "7W", "7R", "Wild", "Spin"];
-
-/*
-	Symbol Group Legend
-		0: Any 7
-		1: Any Bar
-		2: Any Red
-		3: Any White
-		4: Any Blue
-		
-*/
 
 var groups = new Array();
 groups[0] = [4,5,6];	// Any 7
@@ -135,6 +132,9 @@ groups[1] = [1,2,3];	// Any Bar
 groups[2] = [1,6];	// Any Red
 groups[3] = [2,5];	// Any White
 groups[4] = [3,4];	// Any Blue
+
+// Symbol-group names.
+var grpName = ["Any 7", "Any Bar", "Any Red", "Any White", "Any Blue"]
 
 // Paytable image filename for groups, not including file extension.  Must be PNG format, and in images subdirectory.  Index number is group ID.
 var grpSym = ["7A", "BA", "Red", "White", "Blue"];
@@ -239,6 +239,16 @@ var wheelStop = new Array(wheelProg);
 
 var doWheel;
 var wheelRun;
+
+/*
+	Symbol Group Legend
+		0: Any 7
+		1: Any Bar
+		2: Any Red
+		3: Any White
+		4: Any Blue
+		
+*/
 
 // Paytable
 // Format: [Reel 1 Symbol, Reel 2 Symbol, Reel 3 Symbol, Payout, Win Name]
@@ -1024,9 +1034,22 @@ function initVReels() {
 	}
 }
 
+// Generate reel display table
+function makeReels() {
+	var reelHtml;
+	for ( r = 0; r < numReels; r++ ) {
+		reelHtml = "";
+		for ( p = 0; p < numReelPos; p++ ) {
+			reelHtml += '<img id="r' + r + 'p' + p + '"></img><br />'
+		}
+		document.getElementById('r'+r).innerHTML = reelHtml;
+	}
+}
+
 // Set random starting position for physical reels
 function initReels() {
-	var reelHeight = (symSize * 2) + (symSize / 2);
+	makeReels();
+	var reelHeight = Math.floor((symSize * 2) + (symSize / 2));
 	for ( r = 0; r < numReels; r++ ) {
 		virtStop[r] = rndReel[r];
 		document.getElementById('r' + r).height = reelHeight;
@@ -1072,13 +1095,16 @@ function setReel(r) {
 // Place symbol images onto playfield according to symbol values in reel[r]
 function drawReel(r) {
 	for ( p = 0; p < numReelPos; p++ ) {
-		symnum = reel[r][p];
+		var symnum = reel[r][p];
+		var symbol = symbols[symnum];
+		var icosize;
 		if ( symnum == 0 ) {
-			document.getElementById( "r" + r + "p" + p ).innerHTML='<image width="' + Math.round( symSize / 3 ) + '" src=images/blank.png />';
+			icosize = Math.round( symSize / 3 );
 		} else {
-			symbol = symbols[symnum];
-			document.getElementById( "r" + r + "p" + p ).innerHTML='<image width="' + symSize + '" src=images/' + symbol + '.png />';
+			icosize = symSize;
 		}
+		document.getElementById( "r" + r + "p" + p ).height = icosize;
+		document.getElementById( "r" + r + "p" + p ).src='images/' + symbol + '.png';
 	}
 }
 
@@ -1458,8 +1484,8 @@ function initWheel() {
 }
 
 function printWheel() {
-	wheeltext = ""
-	wheeltext += "<tr><td /><td width=150 /><td /></tr>"
+	wheeltext = '';
+	wheeltext += '<tr><td /><td width=' + wheelWidth + ' /><td /></tr>'
 	for ( row = 0; row < wheelRows; row++ ) {
 		wheeltext += "<tr><td id='wp"+row+"c0'><td id='wp"+row+"'></td><td id='wp"+row+"c1'></td></tr>";
 	}
