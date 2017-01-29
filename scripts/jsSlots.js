@@ -53,6 +53,10 @@ function gplAlert() {
  *	Configuration
  */
 
+// Number of 32 bit random seeds to generate.  These will be XORed together to generate the final seed.
+// [Default: 10]
+var numSeeds = 10;
+
 // Default number of credits when inserting bill.
 // [Defaut: 100]
 var billCredits = 100;
@@ -66,8 +70,8 @@ var maxLineBet = 3;
 maxProg = 100000;
 
 // Width of bonus wheel.
-// [Default: 150]
-var wheelWidth = 150;
+// [Default: 125]
+var wheelWidth = 125;
 
 // Number of rows to display on bonus wheel.  Even values will be incremented to the next odd integer.
 // [Default: 13]
@@ -314,6 +318,7 @@ var cashingOut = 0;
 var reBet = 0;
 
 var dbgMode = 0;
+var rndDisp = 0;
 
 // Bypass timers to run through spins and payouts instantanously
 var dbgRapid = 0;
@@ -614,6 +619,7 @@ function miscData(value) {
 	dbgMode=0;
 	dbgSpin=0;
 	dbgRapid=0;
+	rndDisp=0;
 	miscDataType=value;
 	switch ( miscDataType ) {
 	case "none":
@@ -628,6 +634,10 @@ function miscData(value) {
 		document.getElementById('spinDebug').checked = false;
 		document.getElementById('vReelDebug').checked = false;
 		document.getElementById('dbgRapid').checked = false;
+		break;
+	case "rndDisp":
+		rndDisp = 1;
+		printRnd();
 		break;
 	case "symOdds":
 		printSymOdds();
@@ -645,6 +655,7 @@ function clearMisc() {
 	dbgMode=0;
 	dbgSpin=0;
 	dbgRapid=0;
+	rndDisp=0;
 	document.getElementById("miscDataTbl").innerHTML="";
 }
 
@@ -696,10 +707,6 @@ function printDebug() {
 	debugHtml += '<tr>';
 	debugHtml += '<td colspan='+numReels+' style="text-align:left">Rapid Mode: <input type="checkbox" id="dbgRapid" onClick="tgglDbgRapid()" /></td>';
 	debugHtml += '</tr><tr>';
-	debugHtml += '<td colspan='+numReels+' style="text-align:left">Seed: <span id="rndSeed"></span></td>';
-	debugHtml += '</tr><tr>';
-	debugHtml += '<td colspan='+numReels+' style="text-align:left">PRNG: <span id="rndNum"></span></td>';
-	debugHtml += '</tr><tr>'
 	debugHtml += '<td colspan='+numReels+' style="text-align:left">Virtual Reel Debugging: <input type="checkbox" id="vReelDebug" onClick="tgglVReelDbg()" /></td>';
 	debugHtml += '</tr><tr>'
 	for ( r = 0; r < numReels; r++ ) {
@@ -766,7 +773,7 @@ function printDebug() {
 		debugHtml += '<td colspan='+numReels+' width=33% style="text-align:left"><span id="wheelStop' + w + '">' + wheelStop[w] + '</span>&nbsp;-&gt;&nbsp;<span id="wheelTopPos' + w + '">' + (wheelTopPos + wheelPayRow) + '</span>, Slot: <span id="dbgWheelSlot' + w + '">'+symbol+'</span></td>';
 		debugHtml += '</tr>';
 	}
-	document.getElementById("miscDataTbl").innerHTML=debugHtml
+	document.getElementById("miscDataTbl").innerHTML=debugHtml;
 }
 
 function tgglSpinDbg() {
@@ -852,6 +859,42 @@ function tgglDbgRapid() {
 	} else {
 		dbgRapid = 0;
 	}
+}
+
+function printRnd() {
+	var rndHtml = "";
+	rndHtml += '<tr><td>';
+	rndHtml += '<table>';
+	for (var s = 0; s < numSeeds; s++) {
+		rndHtml += '<tr id=seed_s' + s + '><td>' + s + ':</td>';
+		for (var b = 31; b >= 0; b--) {
+			rndHtml += '<td id=bit_s' + s + 'b' + b + '>';
+			rndHtml += '&nbsp;';
+			rndHtml += '</td>';
+		}
+		rndHtml += '</tr>';
+	}
+	rndHtml += '<tr><td>XOR</td>';
+	for (var b = 31; b >= 0; b--) {
+		rndHtml += '<td id=xor_b' + b + '>';
+		rndHtml += '&nbsp;';
+		rndHtml += '</td>';
+	}
+	rndHtml += '</tr></table>';
+	rndHtml += '</td>';
+	rndHtml += '</tr>'
+	rndHtml += '<tr><td><table>'
+	for (var s = 0; s< numSeeds; s++) {
+		rndHtml += '<tr><td style="text-align:left">' + s + ':</td><td id=seedNum_s' + s + ' style="text-align:left"></td></tr>';
+	}
+	rndHtml += '<tr><td style="text-align:left">XOR:</td><td id=seedXor style="text-align:left"></td></tr>'
+	rndHtml += '<tr>';
+	rndHtml += '<td style="text-align:left">Set Seed:</td><td id="rndSeed" style="text-align:left"></td>';
+	rndHtml += '</tr><tr>';
+	rndHtml += '<td style="text-align:left">PRNG:</td><td id="rndNum" style="text-align:left"></td>';
+	rndHtml += '</tr></table>'
+	rndHtml += '</td></tr>';
+	document.getElementById("miscDataTbl").innerHTML=rndHtml;
 }
 
 function setSpinStops(r) {
@@ -1689,7 +1732,7 @@ function endGame() {
 	wheelPreMult = -1;
 	wheelMult = -1;
 	gameIdle = 1;
-	cycleRndSeed();
+	cyclePRNG();
 	document.getElementById("betAmt").value=betAmt;
 	document.getElementById("gameover").innerHTML="<blink>Game Over</blink>";
 }
@@ -1772,15 +1815,50 @@ var gameIdle;
 function initRNG() {
 	gameIdle = 1;
 	genRndSeed();
-	cycleRndSeed();
+	cyclePRNG();
 }
 
 function genRndSeed() {
-	var array = new Uint32Array(10);
+	var seedNums = new Uint32Array(numSeeds);
 	var rndSeed = 0;
-	window.crypto.getRandomValues(array);
-	for (var i = 0; i < array.length; i++) {
-		rndSeed ^= array[i];
+	var zerocolor = '#000000';
+	var onecolor = '#00ffff';
+	window.crypto.getRandomValues(seedNums);
+	for (var s = 0; s < seedNums.length; s++) {
+		for (var b = 0; b < 32; b++) {
+			if (seedNums[s] & 1<<b) {
+				bitval = 1;
+				bgc=onecolor;
+			} else {
+				bitval = 0;
+				bgc=zerocolor;
+			}
+			if ( rndDisp == 1 ) {
+				document.getElementById('bit_s' + s + 'b' + b).style.backgroundColor=bgc;
+//				document.getElementById('bit_s' + s + 'b' + b).innerHTML = bitval;
+			}
+		}
+		if ( rndDisp == 1 ) {
+			document.getElementById('seedNum_s' + s).innerHTML = seedNums[s];
+		}
+		rndSeed ^= seedNums[s];
+	}
+	rndSeed = rndSeed>>>0;
+	for (var b = 0; b < 32; b++) {
+		if (rndSeed & 1<<b) {
+			bitval = 1;
+			bgc=onecolor;
+		} else {
+			bitval = 0;
+			bgc=zerocolor;
+		}
+		if ( rndDisp == 1 ) {
+			document.getElementById('xor_b' + b).style.backgroundColor=bgc
+//			document.getElementById('xor_b' + b).innerHTML = bitval;
+		}
+	}
+	if ( rndDisp == 1 ) {
+		document.getElementById("seedXor").innerHTML = rndSeed;
 	}
 	setRndSeed(rndSeed,0)
 	setTimeout(function () {
@@ -1791,7 +1869,7 @@ function genRndSeed() {
 function setRndSeed(seednum,i) {
 	if ( gameIdle == 1 ) {
 		Math.seedrandom(seednum)
-		if ( dbgMode == 1 ) {
+		if ( rndDisp == 1 ) {
 			document.getElementById("rndSeed").innerHTML=seednum;
 		}
 	} else if ( i > 2 ) {
@@ -1803,14 +1881,14 @@ function setRndSeed(seednum,i) {
 	}
 }
 
-function cycleRndSeed() {
+function cyclePRNG() {
 	if ( gameIdle == 1 ) {
 		var n = Math.random();
-		if ( dbgMode == 1 ) {
-			document.getElementById("rndNum").innerHTML=n;
+		if ( rndDisp == 1 ) {
+			document.getElementById("rndNum").innerHTML=n.toExponential();
 		}
 		setTimeout(function () {
-			cycleRndSeed();
+			cyclePRNG();
 		}, 100 );
 	}
 }
