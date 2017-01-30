@@ -58,8 +58,8 @@ function gplAlert() {
 var tickerCells = 40;
 
 // Milliseconds between ticker steps.
-// [Default: 200]
-var tickerTime = 100;
+// [Default: 250]
+var tickerTime = 250;
 
 // Number of 32 bit random seeds to generate.  These will be XORed together to generate the final seed.
 // [Default: 10]
@@ -75,7 +75,7 @@ var maxLineBet = 3;
 
 // Maximum jackpot payout.
 // [Default: 100000]
-maxProg = 100000;
+var maxProg = 100000;
 
 // Width of bonus wheel.
 // [Default: 150]
@@ -90,8 +90,8 @@ var wheelRows = 9;
 var wheelProg = 5;
 
 // Size, in pixels, of reel symbols.
-// [Default: 125]
-var symSize = 125;
+// [Default: 150]
+var symSize = 150;
 
 // Paytable icon size.
 // [Default: 25]
@@ -1978,7 +1978,7 @@ function clearTicker() {
 			tickerTape[c] = '&nbsp;';
 			document.getElementById("ticker_" + c).innerHTML = tickerTape[c];
 		}
-	}, (tickerTime + (tickerTime / 2)) );
+	}, (Math.floor(tickerTime + (tickerTime / 2))) );
 }
 
 function init() {
