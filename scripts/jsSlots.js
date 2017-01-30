@@ -1,4 +1,4 @@
-/**
+/** @license
  *
  * @source: https://github.com/anizaeger/jsSlots
  *
@@ -50,8 +50,20 @@ function gplAlert() {
 }
 
 /*
-	Configuration
-*/
+ *	Configuration
+ */
+
+// Number of cells in message ticker.
+// [Default: 40]
+var tickerCells = 40;
+
+// Milliseconds between ticker steps.
+// [Default: 200]
+var tickerTime = 100;
+
+// Number of 32 bit random seeds to generate.  These will be XORed together to generate the final seed.
+// [Default: 10]
+var numSeeds = 10;
 
 // Default number of credits when inserting bill.
 // [Defaut: 100]
@@ -61,18 +73,29 @@ var billCredits = 100;
 // [Default: 3]
 var maxLineBet = 3;
 
+// Maximum jackpot payout.
+// [Default: 100000]
+maxProg = 100000;
+
+// Width of bonus wheel.
+// [Default: 150]
+var wheelWidth = 150;
 
 // Number of rows to display on bonus wheel.  Even values will be incremented to the next odd integer.
-// [Default: 13]
-var wheelRows = 13;
+// [Default: 9]
+var wheelRows = 9;
+
+// Number of times for wheel to land on double before winning progressive times wild multiplier, or maxProg, whichever is less.
+// [Default: 5]
+var wheelProg = 5;
 
 // Size, in pixels, of reel symbols.
-// [Default: 150]
-var symSize = 150;
+// [Default: 125]
+var symSize = 125;
 
 // Paytable icon size.
-// [Default: 35]
-var payIcoSize = 35;
+// [Default: 25]
+var payIcoSize = 25;
 
 // Time in milliseconds between spin steps.  Must be between 10 and 100.
 // [Default: 55]
@@ -91,8 +114,8 @@ var dbgSpinStops = [3,5,1];
 var dbgWheelStop = 7;
 
 /*
-	Script follows
-*/
+ *	Constants
+ */
 
 // Slot machine reels
 
@@ -109,22 +132,11 @@ var dbgWheelStop = 7;
 		8: Spin
 */
 
+// Reel symbol names.
+var symName = ["Blank", "Red Bar", "White Bar", "Blue Bar", "Blue 7", "White 7", "Red 7", "Wild", "Spin"]
+
 // Image filename for symbols, not including file extension.  Must be PNG format, and in images subdirectory.  Index number is symbol ID.
 var symbols = ["blank","BR", "BW", "BB", "7B", "7W", "7R", "Wild", "Spin"];
-
-var virtReel = new Array(numReels);	// Auto-generated virtual reels.
-var virtStop = new Array(numReels);	// Stop position for virtual reel.  Randomly-selected at spin.
-
-
-/*
-	Group Legend
-		0: Any 7
-		1: Any Bar
-		2: Any Red
-		3: Any White
-		4: Any Blue
-		
-*/
 
 var groups = new Array();
 groups[0] = [4,5,6];	// Any 7
@@ -132,6 +144,9 @@ groups[1] = [1,2,3];	// Any Bar
 groups[2] = [1,6];	// Any Red
 groups[3] = [2,5];	// Any White
 groups[4] = [3,4];	// Any Blue
+
+// Symbol-group names.
+var grpName = ["Any 7", "Any Bar", "Any Red", "Any White", "Any Blue"]
 
 // Paytable image filename for groups, not including file extension.  Must be PNG format, and in images subdirectory.  Index number is group ID.
 var grpSym = ["7A", "BA", "Red", "White", "Blue"];
@@ -165,8 +180,8 @@ var grpSym = ["7A", "BA", "Red", "White", "Blue"];
 
 //	As a result, the reel will stop at that particular White Bar.
 
-var strip = new Array(numReels);	// Phys. reels
-var numVirtStops = new Array(numReels);	// Virt. reels
+var strip = new Array();  // Phys. reels
+var numVirtStops = new Array();  // Virt. reels
 
 // Reel Stop		   0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 2 2
 // Numbers		   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -180,14 +195,21 @@ numVirtStops[1]		= [4,1,4,4,5,1,7,1,5,3,3,1,3,4,3,1,3,4,5,1,5,4];
 strip[2] 		= [0,7,0,1,0,5,0,3,0,2,0,4,0,8,0,5,0,3,0,6,0,2];
 numVirtStops[2]		= [4,1,6,9,3,1,3,3,2,4,4,2,4,1,5,1,3,2,5,1,3,5];
 
-// Odds of symbol nudging to blank payline space, in symbols[] order
+// Odds of symbol nudging to  payline space if selected, in symbols[] order
 var nudgeOdds = [0,1,2,3,10,20,30,100,50]
+
+/*
+	Script follows
+*/
+
+var numReels = strip.length;  // Number of reels
+var virtReel = new Array(numReels);  // Auto-generated virtual reels.
+var virtStop = new Array(numReels);  // Stop position for virtual reel.  Randomly-selected at spin.
 
 var nudgeVal = new Array(numReels);  // Direction, if any, to nudge reels.
 
 
 // Reels and Positions
-var numReels = strip.length;  // Number of reels
 var numReelPos = 3;  // Number of visible reel positions
 var reel = new Array( numReels );  // Array storing symbols for each reel position: reel[r] = [ top, middle, bottom ]
 for ( r = 0; r < numReels; r++ ) {
@@ -223,13 +245,22 @@ wheelStrip	= [1,4,2,5,7,6,3,0,4,2,5,6,3,1,4,7,5,6,3,0,4,2,5,6,3,1,4,7,5,2,6,3,0,
 
 // Wheel Position and Display
 var wheel = [-1,-1,-1,-1,-1];  // Array storing slots for each wheel position: wheel[] = [ top, second, middle (payspot), fourth, bottom ]
-var wheelStop;
 var wheelTopPos;
 var wheelPayRow;
-var wheelStop;
+var wheelStop = new Array(wheelProg);
 
 var doWheel;
 var wheelRun;
+
+/*
+	Symbol Group Legend
+		0: Any 7
+		1: Any Bar
+		2: Any Red
+		3: Any White
+		4: Any Blue
+		
+*/
 
 // Paytable
 // Format: [Reel 1 Symbol, Reel 2 Symbol, Reel 3 Symbol, Payout, Win Name]
@@ -272,6 +303,7 @@ var reelSteps = new Array(numReels);
 var possWin;
 
 var wheelPrePay;
+var wheelPreMult;
 var wheelMult;
 var wheelSteps;
 
@@ -281,7 +313,7 @@ var wheelSteps;
 var rndReel = new Array(numReels);		// Reel stop randomizer
 var rndNudgePos = new Array(numReels);		// Nudge position randomizer
 var rndNudgeSym = new Array(numReels);		// Symbol nudge probability randomizer
-var rndWheel;					// Bonus wheel randomizer
+var rndWheel = new Array(wheelProg);		// Bonus wheel randomizer
 
 // Bet related variables
 var betLimit = maxLineBet * paylines
@@ -294,21 +326,19 @@ var cashingOut = 0;
 var reBet = 0;
 
 var dbgMode = 0;
+var rndDisp = 0;
 
 // Bypass timers to run through spins and payouts instantanously
 var dbgRapid = 0;
 
 // Virtual reel debugging
 var dbgVReel = 0;
-var dbgVReelStops = new Array(numReels);
 
 // Physical reel debugging
 var dbgSpin = 0;
-var dbgSpinStops = new Array(numReels);
 
 // Bonus wheel debugging
 var dbgWheel = 0;
-var dbgWheelStop;
 
 var progCnt;
 var progVal;
@@ -350,7 +380,7 @@ function getCookie(cname) {
 			c = c.substring(1);
 		}
 		if (c.indexOf(name) == 0) {
-			return parseInt(c.substring(name.length,c.length));
+			return parseInt(c.substring(name.length,c.length),10);
 		}
 	}
 	return 0;
@@ -361,39 +391,38 @@ function printPaytable() {
 	var paytext = "";
 	var g;
 	for (p = 0; p < paytable.length; p++) {
-		paytext += '<tr><td width="25" id="pt' + p + 'w0">&nbsp;</td>';
+		paytext += '<tr id="payRow' + p + '">';
 		if ( paytable[p][0] < 0 ) {  // Print payout name for wild-only combinations.
-			paytext += '<td valign=middle align="center" colspan=' + ( numReels - 1 ) + '>Any ' + Math.abs( paytable[p][0] ) + '</td>';
-			paytext += '<td><image width="' + payIcoSize + '" src=images/Wild.png /></td>';
-			for ( c = 1; c <= maxLineBet; c++ ) {
-				paytext += '<td id="pt' + p + '" class=c' + c + ' style="fontWeight:normal">' + paytable[p][numReels] * c + '</td>';
-			}
-			paytext += '<td width="25" id="pt' + p + 'w1">&nbsp;</td></tr>';
+			paytext += '<td class=payCell valign=middle colspan=' + ( numReels - 1 ) + '>Any ' + Math.abs( paytable[p][0] ) + '</td>';
+			paytext += '<td class=payCell><image width="' + payIcoSize + '" src=images/Wild.png /></td>';
 		} else {
 			for ( s = 0; s < numReels; s++ ) {
 				if (paytable[p][s] >= 100 ) {
 					var g = paytable[p][s] - 100;
-					paytext += '<td align="center"><image width="' + payIcoSize + '" src=images/' + grpSym[g] + '.png /></td>';
+					paytext += '<td class=payCell><image width="' + payIcoSize + '" src=images/' + grpSym[g] + '.png /></td>';
 				} else if ( paytable[p][s] === "-" ) {
-					paytext += '<td valign=middle align="center">-</td>';
+					paytext += '<td class=payCell valign=middle>-</td>';
 				} else if ( paytable[p][s] == 0 ) {
-					paytext += '<td align="center"><image width="' + payIcoSize + '" src=images/blankico.png /></td>';
+					paytext += '<td class=payCell><image width="' + payIcoSize + '" src=images/blankico.png /></td>';
 				} else {
 					symbol = symbols[ paytable[p][s] ];
-					paytext += '<td align="center"><image width="' + payIcoSize + '" src=images/'+symbol+'.png /></td>';
+					paytext += '<td class=payCell><image width="' + payIcoSize + '" src=images/'+symbol+'.png /></td>';
 				}
 			}
-			for ( c = 1; c <= maxLineBet; c++ ) {
-				if ( p == 0 && c == maxLineBet ) {
-					paytext += '<td colspan=2 id="pt' + p + 'c' + c + '"><input type="number" id="progVal" value=' + progVal + ' style="width:7em"></td>';
-				} else if ( p == 18 && c == maxLineBet ) {
-					paytext += '<td colspan=2 id="pt' + p + 'c' + c + '" class="c' + c + '">' + paytable[p][numReels] * c + ' + Wheel</td>';
-				} else {
-					paytext += '<td id="pt' + p + 'c' + c + '" class="c' + c + '">' + paytable[p][numReels] * c + '</td>';
-				}
-			}
-			paytext += '<td width="25" id="pt' + p + 'w1">&nbsp;</td></tr>';
 		}
+		for ( c = 1; c <= maxLineBet; c++ ) {
+			if ( p == 0 && c == maxLineBet ) {
+				paytext += '<td class="payCell" id="pt' + p + 'c' + c + '" colspan=2 style="text-align:left;"><span class="ledDispl" id="progVal">&nbsp;</span></td>';
+			} else if ( p == 18 && c == maxLineBet ) {
+				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" colspan=2 style="text-align:left;">SPIN</td>';
+			} else {
+				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" width=32>' + paytable[p][numReels] * c + '</td>';
+				if ( c == maxLineBet ) {
+					paytext += '<td />';
+				}
+			}
+		}
+		paytext += '</tr>';
 	}
 	document.getElementById( "paytable" ).innerHTML=paytext;
 }
@@ -425,6 +454,7 @@ function populatePaytable() {
 }
 */
 function payStats(pmt) {
+	if ( dbgSpin == 1 || dbgVReel == 1 ) { return ; }
 	if ( pmt > 0 ) {
 		paidIn = paidIn + pmt;
 	} else {
@@ -449,6 +479,7 @@ function payStats(pmt) {
 }
 
 function winStats(w,c) {
+	if ( dbgSpin == 1 || dbgVReel == 1 ) { return ; }
 	cIndex = c - 1;
 	payouts[w][ cIndex ]++;
 	setCookie("payouts"+w+"c"+cIndex,payouts[w][ cIndex ],expiry);
@@ -592,6 +623,7 @@ function miscData(value) {
 	dbgMode=0;
 	dbgSpin=0;
 	dbgRapid=0;
+	rndDisp=0;
 	miscDataType=value;
 	switch ( miscDataType ) {
 	case "none":
@@ -606,6 +638,10 @@ function miscData(value) {
 		document.getElementById('spinDebug').checked = false;
 		document.getElementById('vReelDebug').checked = false;
 		document.getElementById('dbgRapid').checked = false;
+		break;
+	case "rndDisp":
+		rndDisp = 1;
+		printRnd();
 		break;
 	case "symOdds":
 		printSymOdds();
@@ -623,6 +659,7 @@ function clearMisc() {
 	dbgMode=0;
 	dbgSpin=0;
 	dbgRapid=0;
+	rndDisp=0;
 	document.getElementById("miscDataTbl").innerHTML="";
 }
 
@@ -661,27 +698,30 @@ function printDebug() {
 	var debugHtml = "";
 	var maxStop = new Array(numReels);
 	var maxVStop = new Array(numReels);
+	var paypos;
+	var symnum;
+	var symbol;
+	for ( r = 0; r < numReels; r++ ) {
+		maxStop[r] = strip[r].length - 1;
+		maxVStop[r] = virtReel[r].length - 1;
+	}
 	var maxWheelStop = wheelStrip.length - 1;
 	
 	//Spin Debugging
 	debugHtml += '<tr>';
 	debugHtml += '<td colspan='+numReels+' style="text-align:left">Rapid Mode: <input type="checkbox" id="dbgRapid" onClick="tgglDbgRapid()" /></td>';
-	debugHtml += '</tr><tr>'
+	debugHtml += '</tr><tr>';
 	debugHtml += '<td colspan='+numReels+' style="text-align:left">Virtual Reel Debugging: <input type="checkbox" id="vReelDebug" onClick="tgglVReelDbg()" /></td>';
 	debugHtml += '</tr><tr>'
 	for ( r = 0; r < numReels; r++ ) {
-		debugHtml += '<td width=33% style="text-align:center">' + r + ': <input type="number" id="dbgVReelStop'+r+'" min=0 max=' + maxVStop[r] + ' value='+dbgVReelStops[r]+' style="width:5em" onInput="setVReelStops('+r+')" /></td>';
+		debugHtml += '<td width=33% style="text-align:center">' + r + ': <input type="number" id="dbgVReelStop'+r+'" min=0 max=' + maxVStop[r] + ' value='+dbgVReelStops[r]+' style="width:5em" onInput="setVReelStops('+r+')" disabled /></td>';
 	}
 	debugHtml += '</tr><tr>';
 	debugHtml += '<td colspan='+numReels+' style="text-align:left">Physical Reel Debugging: <input type="checkbox" id="spinDebug" onClick="tgglSpinDbg()" /></td>';
 	debugHtml += '</tr><tr>';
 	for ( r = 0; r < numReels; r++ ) {
-		debugHtml += '<td width=33% style="text-align:center">' + r + ': <input type="number" id="dbgSpinStop'+r+'" min=0 max=' + maxStop[r] + ' value='+dbgSpinStops[r]+' style="width:5em" onInput="setSpinStops('+r+')" /></td>';
+		debugHtml += '<td width=33% style="text-align:center">' + r + ': <input type="number" id="dbgSpinStop'+r+'" min=0 max=' + maxStop[r] + ' value='+dbgSpinStops[r]+' style="width:5em" onInput="setSpinStops('+r+')" disabled /></td>';
 	}
-	debugHtml += '</tr><tr>';
-	debugHtml += '<td colspan='+numReels+' style="text-align:left">Bonus Debugging: <input type="checkbox" id="wheelDebug" onClick="wheelDbg()" /></td>';
-	debugHtml += '</tr><tr>';
-	debugHtml += '<td colspan='+numReels+' style="text-align:left"><input type="number" id="dbgWheelStop" min=0 max=' + maxWheelStop + ' value='+dbgWheelStop+' style="width:5em" onInput="setWheelStop()" /></td>';
 	debugHtml += '</tr><tr>';
 	debugHtml += '<td colspan='+numReels+' style="text-align:left">Virtual Reel Stops:</td>';
 	debugHtml += '</tr><tr>';
@@ -692,41 +732,128 @@ function printDebug() {
 	debugHtml += '<td colspan='+numReels+' style="text-align:left">Physical Reel Stops:</td>';
 	debugHtml += '</tr><tr>';
 	for ( r = 0; r < numReels; r++ ) {
-		debugHtml += '<td width=33% style="text-align:left"><div style="width:5em">' + r + ': <span id="reelTopPos' + r + '">' + (reelTopPos[r] + 1) + '</span>&nbsp;-&gt;&nbsp;<span id="reelStop' + r + '"> ' + (reelTopPos[r] + 1) + '</span></div></td>';
+		debugHtml += '<td width=33% style="text-align:left"><div style="width:5em">' + r + ': <span id="reelStop' + r + '">' + (reelTopPos[r] + 1) + '</span>&nbsp;-&gt;&nbsp;<span id="reelTopPos' + r + '"> ' + (reelTopPos[r] + 1) + '</span></div></td>';
 	}
 	debugHtml += '</tr><tr>';
-	debugHtml += '<td colspan='+numReels+' style="text-align:left">Bonus Wheel Stop:</td>';
+	for ( r = 0; r < numReels; r++ ) {
+		payPos = reelTopPos[r] + 1;
+		if ( payPos >= strip[r].length ) {
+			payPos = 0;
+		}
+		symnum = strip[r][payPos];
+		if ( symnum == 0 ) {
+			symbol = "blankico"
+		} else {
+			symbol = symbols[symnum];
+		}
+		debugHtml+= '<td width=33% style="text-align:left"><div style="width:5em"><image id="dbgReelSym' + r + '" width="' + payIcoSize + '" src=images/'+symbol+'.png /></div></td>';
+	}
 	debugHtml += '</tr><tr>';
-	debugHtml += '<td width=33% style="text-align:left"><div style="width:5em"><span id="wheelTopPos">' + (wheelTopPos + 1) + '</span>&nbsp;-&gt;&nbsp;<span id="wheelStop">' + (wheelTopPos + 1) + '</span></div></td>';
+	debugHtml += '<td colspan='+numReels+' style="text-align:left">Reel Nudging:</td>';
+	debugHtml += '</tr><tr>';
+	for ( r = 0; r < numReels; r++ ) {
+		debugHtml += '<td width=33% style="text-align:left"><div style="width:5em">' + r + ': <span id="nudgePos' + r + '"></span></div></td>';
+	}
+	debugHtml += '</tr><tr>';
+	
+	for ( r = 0; r < numReels; r++ ) {
+		debugHtml += '<td width=33% style="text-align:left"><div style="width:5em"><image id="nudgeSym' + r + '" width="' + payIcoSize + '" src=images/blank.png /></div></td>';
+	}
+	debugHtml += '</tr><tr>';
+	debugHtml += '<td colspan='+numReels+' style="text-align:left">Bonus Debugging: <input type="checkbox" id="wheelDebug" onClick="wheelDbg()" /></td>';
+	debugHtml += '</tr><tr>';
+	debugHtml += '<td colspan='+numReels+' style="text-align:left"><input type="number" id="dbgWheelStop" min=0 max=' + maxWheelStop + ' value='+dbgWheelStop+' style="width:5em" onInput="setWheelStop()" disabled /></td>';
+	debugHtml += '</tr><tr>';
+	
+	debugHtml += '<td colspan='+numReels+' style="text-align:left">Bonus Wheel Stop:</td>';
 	debugHtml += '</tr>';
-	document.getElementById("miscDataTbl").innerHTML=debugHtml
+
+	for ( w = 0; w < wheelProg; w++ ) {
+		wheelStop[w] = rndWheel[w];
+		symnum = wheelStrip[wheelStop[w]];
+		symbol = wheelSlotVals[symnum];
+		
+		debugHtml += '<tr>';
+		debugHtml += '<td colspan='+numReels+' width=33% style="text-align:left"><span id="wheelStop' + w + '">' + wheelStop[w] + '</span>&nbsp;-&gt;&nbsp;<span id="wheelTopPos' + w + '">' + (wheelTopPos + wheelPayRow) + '</span>, Slot: <span id="dbgWheelSlot' + w + '">'+symbol+'</span></td>';
+		debugHtml += '</tr>';
+	}
+	document.getElementById("miscDataTbl").innerHTML=debugHtml;
 }
 
 function tgglSpinDbg() {
 	if (document.getElementById('spinDebug').checked) {
 		document.getElementById('vReelDebug').checked = false;
+		for ( r = 0; r < numReels; r++ ) {
+			document.getElementById("dbgSpinStop" + r).disabled = false;
+			document.getElementById("dbgVReelStop" + r).disabled = true;
+			setSpinStops(r);
+		}
 		dbgVReel = 0;
 		dbgSpin = 1;
 	} else {
 		dbgSpin = 0;
+		for ( r = 0; r < numReels; r++ ) {
+			document.getElementById("dbgSpinStop" + r).disabled = true;
+			payPos = reelTopPos[r] + 1;
+			if ( payPos >= strip[r].length ) {
+				payPos = 0;
+			}
+			symnum = strip[r][payPos];
+			if ( symnum == 0  ) {
+				symbol = "blankico"
+			} else {
+				symbol = symbols[ symnum ];
+			}
+			document.getElementById( "dbgReelSym" + r ).src='images/'+symbol+'.png'
+		}
 	}
 }
 
 function tgglVReelDbg() {
 	if (document.getElementById('vReelDebug').checked) {
 		document.getElementById('spinDebug').checked = false;
+		for ( r = 0; r < numReels; r++ ) {
+			document.getElementById("dbgVReelStop" + r).disabled = false;
+			document.getElementById("dbgSpinStop" + r).disabled = true;
+			setVReelStops(r);
+		}
 		dbgSpin = 0;
 		dbgVReel = 1;
 	} else {
 		dbgVReel = 0;
+		for ( r = 0; r < numReels; r++ ) {
+			document.getElementById("dbgVReelStop" + r).disabled = true;
+			payPos = reelTopPos[r] + 1;
+			if ( payPos >= strip[r].length ) {
+				payPos = 0;
+			}
+			symnum = strip[r][payPos];
+			if ( symnum == 0  ) {
+				symbol = "blankico";
+			} else {
+				symbol = symbols[ symnum ];
+			}
+			document.getElementById( "dbgReelSym" + r ).src='images/'+symbol+'.png'
+		}
 	}
 }
 
 function wheelDbg() {
 	if (document.getElementById('wheelDebug').checked) {
 		dbgWheel = 1;
+		document.getElementById("dbgWheelStop").disabled = false;
+		setWheelStop();
 	} else {
 		dbgWheel = 0;
+		document.getElementById("dbgWheelStop").disabled = true;
+		wheelStop[(wheelMult + 1)] = rndWheel[w];
+		payPos = wheelTopPos + wheelPayRow;
+		if ( payPos >= wheelStrip.length ) {
+			payPos -= wheelStrip.length;
+		}
+		symnum = wheelStrip[payPos];
+		symbol = wheelSlotVals[symnum];
+		document.getElementById( "dbgWheelSlot" + (wheelMult + 1)).innerHTML = symbol;
 	}
 }
 
@@ -738,16 +865,66 @@ function tgglDbgRapid() {
 	}
 }
 
+function printRnd() {
+	var rndHtml = "";
+	rndHtml += '<tr><td>';
+	rndHtml += '<table>';
+	for (var s = 0; s < numSeeds; s++) {
+		rndHtml += '<tr id=seed_s' + s + '><td>' + s + ':</td>';
+		for (var b = 31; b >= 0; b--) {
+			rndHtml += '<td id=bit_s' + s + 'b' + b + '>';
+			rndHtml += '&nbsp;';
+			rndHtml += '</td>';
+		}
+		rndHtml += '</tr>';
+	}
+	rndHtml += '<tr><td>XOR</td>';
+	for (var b = 31; b >= 0; b--) {
+		rndHtml += '<td id=xor_b' + b + '>';
+		rndHtml += '&nbsp;';
+		rndHtml += '</td>';
+	}
+	rndHtml += '</tr></table>';
+	rndHtml += '</td>';
+	rndHtml += '</tr>'
+	rndHtml += '<tr><td><table>'
+	for (var s = 0; s< numSeeds; s++) {
+		rndHtml += '<tr><td style="text-align:left">' + s + ':</td><td id=seedNum_s' + s + ' style="text-align:left"></td></tr>';
+	}
+	rndHtml += '<tr><td style="text-align:left">XOR:</td><td id=seedXor style="text-align:left"></td></tr>'
+	rndHtml += '<tr>';
+	rndHtml += '<td style="text-align:left">Set Seed:</td><td id="rndSeed" style="text-align:left"></td>';
+	rndHtml += '</tr><tr>';
+	rndHtml += '<td style="text-align:left">PRNG:</td><td id="rndNum" style="text-align:left"></td>';
+	rndHtml += '</tr></table>'
+	rndHtml += '</td></tr>';
+	document.getElementById("miscDataTbl").innerHTML=rndHtml;
+}
+
 function setSpinStops(r) {
 	dbgSpinStops[r] = document.getElementById( "dbgSpinStop" + r ).value;
+	var symnum = strip[r][dbgSpinStops[r]];
+	if ( symnum == 0  ) {
+		var symbol = "blankico"
+	} else {
+		var symbol = symbols[ symnum ];
+	}
+	document.getElementById( "dbgReelSym" + r ).src='images/'+symbol+'.png'
 }
 
 function setVReelStops(r) {
-	dbgVReelStops[r] = document.getElementById( "dbgVReelStop" + r ).value;
+	dbgVReelStops[r] = document.getElementById( "dbgVReelStop" + r ).value
+	document.getElementById( "dbgSpinStop" + r ).value = virtReel[r][dbgVReelStops[r]];
+	setSpinStops(r);
 }
 
 function setWheelStop() {
 	dbgWheelStop = document.getElementById( "dbgWheelStop" ).value;
+	wheelStop[(wheelMult + 1)] = dbgWheelStop;
+	var symnum = wheelStrip[dbgWheelStop];
+	var symbol = wheelSlotVals[symnum];
+	var symColor = wheelSlotColors[symnum];
+	document.getElementById( "dbgWheelSlot" + (wheelMult + 1) ).innerHTML = symbol;
 }
 
 // Credit related functions
@@ -772,7 +949,7 @@ function insertBill() {
 	} else {
 		clearWin();
 		credits = credits + billCredits;
-		document.getElementById("credits").value=credits;
+		document.getElementById("credits").innerHTML=credits;
 		setCookie("credits",credits,expiry);
 		playSound(1);
 	}
@@ -786,10 +963,10 @@ function cashOut() {
 		lastBet = 0;
 		playSound(11);
 		setTimeout(function () {
-			document.getElementById("paid").value=credits;
+			document.getElementById("paid").innerHTML=credits;
 			credits = 0;
 			setCookie("credits",credits,expiry)
-			document.getElementById("credits").value=credits;
+			document.getElementById("credits").innerHTML=credits;
 			cashingOut = 0;
 		}, 4250 );
 	}
@@ -797,18 +974,17 @@ function cashOut() {
 
 function clearWin() {
 	for (pt = 0; pt < paytable.length; pt++) {
-		for ( w = 0; w < 2; w++ ) {
-			document.getElementById("pt" + pt + "w" + w).innerHTML="";
-		}
+		document.getElementById("payRow" + pt).style.backgroundColor = "white";
 	}
-	document.getElementById("win").value="";
-	document.getElementById("paid").value="";
-	document.getElementById("wintype").innerHTML="";
-	document.getElementById("reelMult").value="";
-	document.getElementById("wheelPrepay").value="";
-	document.getElementById("wheelMult").value="";
-	document.getElementById("wheelWin").value="";
-	document.getElementById("wheelPay").value=";"
+	document.getElementById("win").innerHTML="";
+	document.getElementById("paid").innerHTML="";
+	document.getElementById("reelMult").innerHTML="";
+	document.getElementById("wheelPrepay").innerHTML="";
+	document.getElementById("wheelMult").innerHTML="";
+	document.getElementById("totMult").innerHTML="";
+	document.getElementById("wheelWin").innerHTML="";
+	document.getElementById("wheelPay").innerHTML="";
+	clearTicker();
 }
 
 function betOne() {
@@ -831,13 +1007,16 @@ function betOne() {
 					x[i].style.fontWeight = weight;
 				}
 			}
-			document.getElementById("credits").value=credits;
+			document.getElementById("progVal").style.color = "#ff0000";
+			document.getElementById("credits").innerHTML=credits;
 			playSound(1);
 			if ( betAmt >= betLimit ) {
 				betAmt = betLimit;
 			}
-			document.getElementById("betAmt").value=betAmt;
+			document.getElementById("betAmt").innerHTML=betAmt;
 			if ( betAmt == betLimit ) {
+				document.getElementById("progVal").style.color = "#00ff00";
+				reBet = 0;
 				setTimeout(function() {
 					spin();
 				}, 250 );
@@ -846,10 +1025,29 @@ function betOne() {
 	}
 }
 
+function rebet() {
+	if ( reBet == 0 || lockSpin == 1 || lastBet == 0 || betAmt == betLimit || credits <= 0 ) {
+		return;
+	} else {
+		betOne();
+	}
+	if ( betAmt == lastBet ) {
+		reBet = 0;
+		setTimeout(function () {
+			spin();
+		}, 250 );
+	} else {
+		setTimeout(function () {
+			rebet();
+		}, 125 );
+	}
+}
+
 function betMax() {
 	if ( betAmt >= betLimit || credits <= 0) {
 		return;
 	} else {
+		gameIdle = 0;
 		betOne();
 	}
 	setTimeout(function () {
@@ -885,12 +1083,29 @@ function initVReels() {
 	}
 }
 
+// Generate reel display table
+function makeReels() {
+	var reelHtml;
+	for ( r = 0; r < numReels; r++ ) {
+		reelHtml = "";
+		for ( p = 0; p < numReelPos; p++ ) {
+			reelHtml += '<img id="r' + r + 'p' + p + '"></img><br />'
+		}
+		document.getElementById('r'+r).innerHTML = reelHtml;
+	}
+}
+
 // Set random starting position for physical reels
 function initReels() {
-	var reelHeight = (symSize * 2) + (symSize / 2);
+	makeReels();
+	var reelHeight = Math.floor((symSize * 2) + (symSize / 2));
 	for ( r = 0; r < numReels; r++ ) {
+		virtStop[r] = rndReel[r];
 		document.getElementById('r' + r).height = reelHeight;
-		reelTopPos[r] = Math.floor(Math.random() * strip[r].length);
+		reelTopPos[r] = virtReel[r][virtStop[r]] - 1;
+		if ( reelTopPos[r] < 0 ) {
+			reelTopPos[r] = strip[r].length - 1;
+		}
 		setReel(r);
 	}
 }
@@ -929,13 +1144,16 @@ function setReel(r) {
 // Place symbol images onto playfield according to symbol values in reel[r]
 function drawReel(r) {
 	for ( p = 0; p < numReelPos; p++ ) {
-		symnum = reel[r][p];
+		var symnum = reel[r][p];
+		var symbol = symbols[symnum];
+		var icosize;
 		if ( symnum == 0 ) {
-			document.getElementById( "r" + r + "p" + p ).innerHTML='<image width="' + Math.round( symSize / 3 ) + '" src=images/blank.png />';
+			icosize = Math.round( symSize / 3 );
 		} else {
-			symbol = symbols[symnum];
-			document.getElementById( "r" + r + "p" + p ).innerHTML='<image width="' + symSize + '" src=images/' + symbol + '.png />';
+			icosize = symSize;
 		}
+		document.getElementById( "r" + r + "p" + p ).height = icosize;
+		document.getElementById( "r" + r + "p" + p ).src='images/' + symbol + '.png';
 	}
 }
 
@@ -944,35 +1162,19 @@ function drawReel(r) {
 function startGame() {
 	if ( credits == 0 && betAmt == 0 || lockSpin == 1 && wheelRun != 1 && payingOut != 1 ) {
 		return;
+	} else {
+		gameIdle = 0;
 	}
-	gameIdle = 0;
 	if ( wheelRun == 1 ) {
 		createjs.Sound.stop();
 		wheelSpin();
 	} else if ( payingOut == 1 ) {
 		payingOut = 2;
 	} else if ( betAmt == 0 ) {
+		reBet = 1;
 		rebet();
 	} else {
 		spin();
-	}
-}
-
-function rebet() {
-	reBet = 1;
-	if ( lockSpin == 1 || lastBet == 0 || betAmt == betLimit || credits <= 0 ) {
-		return;
-	} else {
-		betOne();
-		if ( betAmt == lastBet ) {
-			setTimeout(function () {
-				spin();
-			}, 250 );
-		} else {
-			setTimeout(function () {
-				rebet();
-			}, 125 );
-		}
 	}
 }
 
@@ -980,14 +1182,10 @@ function spin() {
 	if ( lockSpin == 1 || betAmt <= 0) {
 		return;
 	}
+	gameIdle = 0;
 	lockSpin = 1;
 	lockBtn = 1;
-	for ( r = 0; r < numReels; r++ ) {
-		rndReel[r] = Math.random();
-		rndNudgePos[r] = Math.random();
-		rndNudgeSym[r] = Math.random();
-	}
-	rndWheel = Math.random();
+	popRnd();
 	spinCount++;
 	if ( miscDataType == "stats") {
 		document.getElementById("spinCount").innerHTML=spinCount;
@@ -997,6 +1195,14 @@ function spin() {
 	progInc(betAmt);
 	spinSteps = 0;
 	possWin = 1;
+	wheelMult = -1;
+	wheelPreMult = 0;
+	var payPos;
+	var sumPos;
+	var symnum;
+	var symbol;
+	var nudgeSymPos;
+	var nudgeSymNum;
 	for ( r = 0; r < numReels; r++ ) {
 		spinSteps += Math.floor(Math.random() * strip[r].length) + Math.floor(strip[r].length / 2);
 		reelSteps[r] = spinSteps;
@@ -1006,13 +1212,60 @@ function spin() {
 			if ( dbgVReel == 1 ) {
 				virtStop[r] = dbgVReelStops[r];
 			} else {
-				virtStop[r] = Math.floor(rndReel[r] * virtReel[r].length);
+				virtStop[r] = rndReel[r];
 			}
 			reelStop[r] = virtReel[r][virtStop[r]];
 		}
 		if ( dbgMode == 1 ) {
 			document.getElementById("virtStop" + r ).innerHTML=virtStop[r];
 			document.getElementById("reelStop" + r ).innerHTML=reelStop[r];
+			document.getElementById("nudgePos" + r).innerHTML=rndNudgePos[r];
+			symPos = reelStop[r];
+			symnum = strip[r][symPos];
+			if ( symnum == 0  ) {
+				symbol = "blankico"
+			} else {
+				symbol = symbols[ symnum ];
+			}
+			document.getElementById("dbgReelSym" + r ).src='images/' + symbol + '.png';
+			if ( rndNudgePos[r] != 1 ) {
+				if ( rndNudgePos[r] < 1 ) {
+					document.getElementById("nudgePos" + r).innerHTML="Top";
+				} else {
+					document.getElementById("nudgePos" + r).innerHTML="Btm";
+				}
+			} else {
+				document.getElementById("nudgePos" + r).innerHTML="Mid";
+			}
+			nudgeSymPos = symPos + rndNudgePos[r] - 1;
+			if ( nudgeSymPos >= strip[r].length ) {
+				nudgeSymPos = 0;
+			} else if ( nudgeSymPos < 0 ) {
+				nudgeSymPos = strip[r].length - 1;
+			}
+			nudgeSymNum = strip[r][nudgeSymPos];
+			if ( nudgeSymNum == 0  ) {
+				symbol = "blankico"
+			} else {
+				symbol = symbols[ nudgeSymNum ];
+			}
+			document.getElementById("nudgeSym" + r ).src='images/' + symbol + '.png';
+
+			rndNudgeSym[r] = Math.round( rndNudgeSym[r] * nudgeOdds[nudgeSymNum] )
+			
+		}
+	}
+	for ( w = 0; w < wheelProg; w++ ) {
+		if ( dbgWheel == 1 && w == 0) {
+			wheelStop[w] = dbgWheelStop;
+		} else {
+			wheelStop[w] = rndWheel[w];
+		}
+		if ( dbgMode == 1 ) {
+			document.getElementById("wheelStop" + w).innerHTML=wheelStop[w];
+			symnum = wheelStrip[wheelStop[w]];
+			symbol = wheelSlotVals[symnum];
+			document.getElementById("dbgWheelSlot" + w).innerHTML=symbol;
 		}
 	}
 	spinSteps = 0;
@@ -1077,10 +1330,10 @@ function checkNudge() {
 	for ( r = 0; r < numReels; r++ ) {
 		nudgeVal[r] = 0;
 		if ( payline[r] != 0 ) { continue; }
-		var nudgePos = ( Math.floor( rndNudgePos[r] * numReelPos));
+		var nudgePos = rndNudgePos[r];
 		if ( nudgePos == 1 ) { continue; }
 		var nudgeSym = reel[r][nudgePos];
-		var nudgeProb = Math.round( rndNudgeSym[r] * nudgeOdds[nudgeSym] );
+		var nudgeProb = rndNudgeSym[r];
 		if ( nudgeProb  == 0 ) {
 			nudgeVal[r] = nudgePos - 1
 			nudge++;
@@ -1223,14 +1476,7 @@ function checkPayline() {
 		}
 	}
 	if ( wintype >= 0 ) {
-		winStats( paytable.length, betAmt );
-		for ( w = 0; w < 2; w++ ) {
-			if ( w == 0) {
-				document.getElementById("pt" + wintype + "w" + w).innerHTML="-->";
-			} else {
-				document.getElementById("pt" + wintype + "w" + w).innerHTML="<--";
-			}
-		}
+		document.getElementById("payRow" + wintype).style.backgroundColor = "yellow";
 		if ( wintype == 0 && betAmt == maxLineBet) {
 			payout = progVal;
 		} else {
@@ -1247,11 +1493,12 @@ function checkPayline() {
 				playSound("wheelSpin")
 			}, 250);
 			wheelPrePay = payout;
-			wheelMult = wilds;
-			document.getElementById("reelMult").value=Math.pow(2, wilds);
-			document.getElementById("wheelPrepay").value=wheelPrePay;
+			wheelPreMult = wilds;
+			wheelMult = 0;
+			document.getElementById("reelMult").innerHTML=Math.pow(2, wheelPreMult);
+			document.getElementById("wheelPrepay").innerHTML=wheelPrePay;
 			setTimeout(function () {
-				playWheelWait(wilds);
+				playWheelWait();
 			}, 1500);
 		} else {
 			payFinal = payout + credits;
@@ -1270,20 +1517,24 @@ function checkPayline() {
 // Set random starting position for bonus wheel
 
 function initWheel() {
-	wheelMult = 0;
+	wheelMult = -1;
+	wheelPreMut = 0;
 	if ( wheelRows % 2 == 0 ) {
 		wheelRows++
 	}
 	wheelPayRow = ( wheelRows - 1 ) / 2;
-	wheelTopPos = Math.floor(Math.random() * wheelStrip.length)
+	wheelTopPos = rndWheel[0] - wheelPayRow;
+	if ( wheelTopPos < 0 ) {
+		wheelTopPos = wheelStrip.length - 1
+	}
 	printWheel();
-	document.getElementById("wheelMult").value=Math.pow(2, wheelMult);
+	document.getElementById("wheelMult").innerHTML=Math.pow(2, wheelMult);
 	setWheel();
 }
 
 function printWheel() {
-	wheeltext = ""
-	wheeltext += "<tr><td /><td width=150 /><td /></tr>"
+	wheeltext = '';
+	wheeltext += '<tr><td /><td width=' + wheelWidth + ' /><td /></tr>'
 	for ( row = 0; row < wheelRows; row++ ) {
 		wheeltext += "<tr><td id='wp"+row+"c0'><td id='wp"+row+"'></td><td id='wp"+row+"c1'></td></tr>";
 	}
@@ -1308,7 +1559,7 @@ function advWheel() {
 		wPos = wheelTopPos + wheelPayRow
 	}
 	if ( dbgMode == 1 ) {
-		document.getElementById("wheelTopPos").innerHTML=wPos
+		document.getElementById("wheelTopPos" + wheelMult).innerHTML=wPos;
 	}
 	playSound("wheelTick");
 	setWheel();
@@ -1334,35 +1585,44 @@ function drawWheel() {
 	}
 }
 
-function playWheelWait(wilds) {
+function playWheelWait() {
 	wheelRun = 1;
-	document.getElementById("wheelMult").value=Math.pow(2, wilds);
+	wheelTotMult = wheelPreMult + wheelMult;
+	document.getElementById("wheelMult").innerHTML=Math.pow(2, wheelMult);
+	document.getElementById("totMult").innerHTML=Math.pow(2, wheelTotMult);
 	createjs.Sound.play("wheelWait",{loop:-1});
 }
 
 function wheelSpin() {
+	if ( dbgWheel == 1 ) {
+		document.getElementById("wheelStop" + (wheelMult + 1)).innerHTML=wheelStop[wheelMult];
+		symnum = wheelStrip[wheelStop[wheelMult]];
+		symbol = wheelSlotVals[symnum];
+		document.getElementById("dbgWheelSlot" + (wheelMult + 1)).innerHTML=symbol;
+	}
 	spinSteps = 0;
 	wheelRun = 0;
-	document.getElementById("wheelMult").value=Math.pow(2, wheelMult)
+	wheelTotMult = wheelPreMult + wheelMult;
+	document.getElementById("wheelMult").innerHTML=Math.pow(2, wheelMult);
+	document.getElementById("totMult").innerHTML=Math.pow(2, wheelTotMult);
 	wheelSteps = Math.floor(Math.random() * wheelStrip.length) + wheelStrip.length;
-	if ( dbgWheel == 1 ) {
-		wheelStop = dbgWheelStop;
-	} else {
-		wheelStop = Math.floor(Math.random() * wheelStrip.length);
-	}
-	if ( dbgMode == 1 ) {
-		document.getElementById("wheelStop").innerHTML=wheelStop;
-	}
 	wheelLoop();
 }
 
 function wheelLoop() {
-	var topPos = wheelStop - wheelPayRow;
+	var topPos = wheelStop[wheelMult] - wheelPayRow;
+	var paysym;
 	if ( topPos < 0 ) {
 		topPos = wheelStrip.length - 1
 	}
 	if ( spinSteps < wheelSteps || wheelTopPos != topPos ) {
 		advWheel();
+		paysym = wheelSlotVals[wheel[wheelPayRow]];
+		if ( isNaN(paysym) ) {
+			document.getElementById("wheelWin").innerHTML=paysym;
+		} else {
+			document.getElementById("wheelWin").innerHTML=wheelSlotVals[wheel[wheelPayRow]] * Math.pow(2, wheelTotMult);
+		}
 		spinSteps++;
 		if ( spinSteps < wheelSteps ) {
 			loopTime = 50;
@@ -1379,19 +1639,27 @@ function wheelLoop() {
 
 function endWheel() {
 	payslot = wheel[wheelPayRow];
+	var totMult = wheelPreMult + wheelMult;
 	if ( payslot == 0 ) {
 		payout *= 2
 	}
 	wheelPay = wheelSlotVals[payslot];
 	if ( wheelPay  == "Double" ) {
-		wheelMult++
-		setTimeout(function () {
-			wheelSpin()
-		}, 500)
+		wheelMult++;
+		if ( wheelMult == wheelProg ) {
+			jackpot(0,wheelPreMult);
+		} else {
+			setTimeout(function () {
+				wheelSpin()
+			}, 500);
+		}
 	} else {
-		payout = wheelPrePay + ( wheelPay * Math.pow(2, wheelMult));
-		document.getElementById("wheelWin").value=( wheelPay * Math.pow(2, wheelMult));
-		document.getElementById("wheelPay").value=payout;
+		wheelTotMult = wheelPreMult + wheelMult;
+		document.getElementById("totMult").innerHTML=Math.pow(2, wheelTotMult);
+		payout = wheelPay * Math.pow(2, wheelTotMult);
+		document.getElementById("wheelWin").innerHTML=payout;
+		payout += wheelPrePay;
+		document.getElementById("wheelPay").innerHTML=payout;
 		payWin(18,payout,(payout+credits),0,0)
 	}
 }
@@ -1404,7 +1672,7 @@ function payWin(wintype,payout,payfinal,i,paySound) {
 	} else {
 		payingOut = 1;
 		var loopTime;
-		document.getElementById("win").value=payout;
+		document.getElementById("win").innerHTML=payout;
 	
 		if (payout >= 300) {
 			loopTime = 25;
@@ -1412,7 +1680,7 @@ function payWin(wintype,payout,payfinal,i,paySound) {
 			loopTime = 100;
 		}
 		if ( wintype == 0 && betAmt == maxLineBet) {
-			jackpot(0);
+			jackpot(0,1);
 			return;
 		} else {
 			if ( loopTime == 25 ) {
@@ -1430,8 +1698,8 @@ function payWin(wintype,payout,payfinal,i,paySound) {
 		i++;
 		credits++
 		setCookie("credits",credits,expiry);
-		document.getElementById("paid").value=i;
-		document.getElementById("credits").value=credits;
+		document.getElementById("paid").innerHTML=i;
+		document.getElementById("credits").innerHTML=credits;
 		payStats(-1);
 
 		if ( dbgRapid == 1 ) {
@@ -1452,8 +1720,8 @@ function payWin(wintype,payout,payfinal,i,paySound) {
 
 function payComplete(wintype,payout,payfinal) {
 	credits = payfinal;
-	document.getElementById("paid").value=payout;
-	document.getElementById("credits").value=credits;
+	document.getElementById("paid").innerHTML=payout;
+	document.getElementById("credits").innerHTML=credits;
 	playSound(1);
 	payout = 0;
 	payingOut = 0;
@@ -1461,7 +1729,7 @@ function payComplete(wintype,payout,payfinal) {
 }
 
 function displayWin(wintype) {
-	document.getElementById("wintype").innerHTML="<marquee>"+paytable[wintype][4]+"</marquee>";
+	startTicker(paytable[wintype][4]);
 	endGame();
 }
 
@@ -1474,27 +1742,33 @@ function endGame() {
 	lockSpin = 0;
 	lockBtn = 0;
 	betAmt = 0;
-	reBet = 0;
+	wheelPreMult = -1;
+	wheelMult = -1;
 	gameIdle = 1;
-	cycleRndSeed();
-	document.getElementById("betAmt").value=betAmt;
+	cyclePRNG();
+	document.getElementById("betAmt").innerHTML=betAmt;
 	document.getElementById("gameover").innerHTML="<blink>Game Over</blink>";
 }
 
-function jackpot(c) {
+function jackpot(c,m) {
 	playSound(10);
 	if ( c < 9 ) {
 		c++;
 		setTimeout(function () {
-			jackpot(c);
+			jackpot(c,m);
 		}, 625);
 	} else {
+		if ( (progVal * m) > maxProg ) {
+			progVal = maxProg
+		} else {
+			progVal *= m;
+		}
 		setTimeout(function () {
 			credits += progVal;
 			setCookie("credits",credits,expiry)
 			payStats(-(progVal));
-			document.getElementById("paid").value=progVal;
-			document.getElementById("credits").value=credits;
+			document.getElementById("paid").innerHTML=progVal;
+			document.getElementById("credits").innerHTML=credits;
 			progReset();
 			endGame()
 		}, 625)
@@ -1506,9 +1780,11 @@ function progInc (steps) {
 		progCnt++
 		if ( progCnt == 5 ) {
 			progCnt = 0;
-			progVal++;
+			if ( progVal < maxProg ) {
+				progVal++;
+			}
 			setCookie("progVal",progVal,expiry);
-			document.getElementById("progVal").value=progVal;
+			document.getElementById("progVal").innerHTML=progVal;
 		}
 	}
 }
@@ -1519,7 +1795,7 @@ function progInit() {
 		progVal = paytable[0][numReels] * maxLineBet * 5/3;
 		setCookie("progCnt",progCnt,expiry)
 		setCookie("progVal",progVal,expiry)
-		document.getElementById("progVal").value=progVal;
+		document.getElementById("progVal").innerHTML=progVal;
 	}
 }
 
@@ -1536,7 +1812,7 @@ function cookieRestore() {
 	paidOut=getCookie("paidOut");
 	progCnt=getCookie("progCnt");
 	progVal=getCookie("progVal");
-	for ( p = 0; p<paytable.length; p++ ) {
+	for ( p = 0; p<paytable.length+1; p++ ) {
 		for ( c = 0; c<maxLineBet; c++ ) {
 			payouts[p][c] = getCookie("payouts"+p+"c"+c);
 		}
@@ -1552,15 +1828,52 @@ var gameIdle;
 function initRNG() {
 	gameIdle = 1;
 	genRndSeed();
-	cycleRndSeed();
+	cyclePRNG();
 }
 
 function genRndSeed() {
-	var array = new Uint32Array(10);
+	var seedNums = new Uint32Array(numSeeds);
 	var rndSeed = 0;
-	window.crypto.getRandomValues(array);
-	for (var i = 0; i < array.length; i++) {
-		rndSeed += array[i];
+	var zerotxt = '<small>.</small>';
+	var zerocolor = '#ff0000';
+	var onetxt = '<small>!</small>';
+	var onecolor = '#00ff00';
+	window.crypto.getRandomValues(seedNums);
+	for (var s = 0; s < seedNums.length; s++) {
+		for (var b = 0; b < 32; b++) {
+			if (seedNums[s] & 1<<b) {
+				bitval = onetxt;
+				bgc=onecolor;
+			} else {
+				bitval = zerotxt;
+				bgc=zerocolor;
+			}
+			if ( rndDisp == 1 ) {
+				document.getElementById('bit_s' + s + 'b' + b).style.backgroundColor=bgc;
+				document.getElementById('bit_s' + s + 'b' + b).innerHTML = bitval;
+			}
+		}
+		if ( rndDisp == 1 ) {
+			document.getElementById('seedNum_s' + s).innerHTML = seedNums[s];
+		}
+		rndSeed ^= seedNums[s];
+	}
+	rndSeed = rndSeed>>>0;
+	for (var b = 0; b < 32; b++) {
+		if (rndSeed & 1<<b) {
+			bitval = onetxt;
+			bgc=onecolor;
+		} else {
+			bitval = zerotxt;
+			bgc=zerocolor;
+		}
+		if ( rndDisp == 1 ) {
+			document.getElementById('xor_b' + b).style.backgroundColor=bgc
+			document.getElementById('xor_b' + b).innerHTML = bitval;
+		}
+	}
+	if ( rndDisp == 1 ) {
+		document.getElementById("seedXor").innerHTML = rndSeed;
 	}
 	setRndSeed(rndSeed,0)
 	setTimeout(function () {
@@ -1571,6 +1884,9 @@ function genRndSeed() {
 function setRndSeed(seednum,i) {
 	if ( gameIdle == 1 ) {
 		Math.seedrandom(seednum)
+		if ( rndDisp == 1 ) {
+			document.getElementById("rndSeed").innerHTML=seednum;
+		}
 	} else if ( i > 2 ) {
 		return;
 	} else {
@@ -1580,13 +1896,89 @@ function setRndSeed(seednum,i) {
 	}
 }
 
-function cycleRndSeed() {
+function cyclePRNG() {
 	if ( gameIdle == 1 ) {
 		var n = Math.random();
+		if ( rndDisp == 1 ) {
+			document.getElementById("rndNum").innerHTML=n.toExponential();
+		}
 		setTimeout(function () {
-			cycleRndSeed();
+			cyclePRNG();
 		}, 100 );
 	}
+}
+
+function popRnd() {
+	for ( r = 0; r < numReels; r++ ) {
+		rndReel[r] = Math.floor(Math.random() * virtReel[r].length);
+		rndNudgePos[r] = Math.floor( Math.random() * numReelPos);
+		rndNudgeSym[r] = Math.random();
+	}
+	for ( w = 0; w < wheelProg; w++ ) {
+		rndWheel[w] = Math.floor( Math.random() * wheelStrip.length);
+	}
+}
+
+// Message ticker
+
+var tickerTape = new Array(tickerCells);
+var runTicker;
+function initTicker() {
+	var tickerHtml = ""
+	runTicker = 0;
+	tickerHtml += '<tr cellpadding=0>';
+	for (var c = tickerCells - 1; c >= 0; c--) {
+		tickerTape[c] = '';
+		tickerHtml += '<td width=50 id="ticker_' + c + '">';
+		tickerHtml += '&nbsp;';
+		tickerHtml += '</td>';
+	}
+	tickerHtml += '</tr>';
+	document.getElementById("tickerTape").innerHTML=tickerHtml;
+}
+
+function startTicker(tickerText) {
+	runTicker = 1;
+	tickerLoop(tickerText,0);
+}
+
+function tickerLoop(tickerText,tickerStep) {
+	if (runTicker == 0) {
+		clearTicker();
+	} else {
+		var msgTxt = tickerText.split('');
+		var nextCell;
+		if (tickerStep >= (tickerText.length + tickerCells)) {
+			tickerStep = 0
+		}
+		if (tickerStep < tickerText.length && tickerText[tickerStep] != ' ') {
+			nextCell = tickerText[tickerStep]
+		} else {
+			nextCell = '&nbsp;';
+		}
+		for (var c = tickerCells - 1; c >= 0; c--) {
+			if ( c == 0 ) {
+				tickerTape[c] = nextCell;
+			} else {
+				tickerTape[c] = tickerTape[(c-1)];
+			}
+			document.getElementById("ticker_" + c).innerHTML = tickerTape[c]
+		}
+		tickerStep++;
+		setTimeout(function () {
+			tickerLoop(tickerText,tickerStep);
+		}, tickerTime );
+	}
+}
+
+function clearTicker() {
+	runTicker = 0;
+	setTimeout(function () {
+		for (c = 0; c < tickerCells; c++) {
+			tickerTape[c] = '&nbsp;';
+			document.getElementById("ticker_" + c).innerHTML = tickerTape[c];
+		}
+	}, (tickerTime + (tickerTime / 2)) );
 }
 
 function init() {
@@ -1599,19 +1991,21 @@ function init() {
 	printPaytable();
 	initRNG();
 	initVReels();
+	popRnd();
 	initReels();
 	initWheel();
 	initSymOdds();
 	initPayOdds();
+	initTicker();
 	clearWin();
 	cookieRestore();
 	progInit();
 	clearMisc();
 	payStats(0);
 	endGame();
-	document.getElementById("credits").value=credits;
-	document.getElementById("betAmt").value=betAmt;
-	document.getElementById("progVal").value=progVal;
+	document.getElementById("credits").innerHTML=credits;
+	document.getElementById("betAmt").innerHTML=betAmt;
+	document.getElementById("progVal").innerHTML=progVal;
 	document.getElementById("gameover").innerHTML="Game Over";
 	document.getElementById("maxcred").innerHTML="Play " + betLimit + " Credits";
 	document.getElementById("miscDataNone").selected = true;

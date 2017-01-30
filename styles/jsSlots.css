@@ -1,7 +1,23 @@
+@font-face {
+	font-family: Ultra;
+	src: url(Ultra.ttf);
+}
+@font-face {
+	font-family: LCD;
+	src: url(LCD.ttf);
+}
+@font-face {
+	font-family: DMD;
+	src: url(DMD.ttf);
+}
 button {
 	text-align:center;
 }
 td {
+	text-align:center;
+}
+td.payCell {
+	padding: 5px;
 	text-align:center;
 }
 button.large { 
@@ -17,9 +33,23 @@ button.wide {
 	height:50px;
 }
 button.round { 
-	width:150px; 
-	height:150px;
-	border-radius:150px;
+	width:125px; 
+	height:125px;
+	border-radius:125px;
 	background: url(../images/Spin.png);
-	background-size: 150px 150px
+	background-size: 125px 125px
+}
+.ledLabel {
+	font-family: Ultra;
+	font-size: 14pt;
+}
+.ledDispl {
+	font-family: LCD;
+	font-size: 14pt;
+	color:red;
+}
+
+.dotDispl {
+	font-family: DMD;
+	color:red;
 }
