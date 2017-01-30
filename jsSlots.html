@@ -147,15 +147,24 @@
 						<td>
 							<table>
 								<tr>
-									<td valign="top" style="text-align:right">Wild Mult.:</td>
-									<td valign="top" style="text-align:left">
-										<input type="number" id="reelMult" readonly style="width: 7em"/>
+									<td colspan=2 valign="top" align=center><span class="ledLabel">Multipliers</span></td>
+								</tr>
+								<tr>
+									<td valign="top" style="text-align:right"><span class="ledLabel">Prepay:</span></td>
+									<td valign="top" width=100 style="text-align:left">
+										<span class="ledDispl" id="reelMult"></span>
 									</td>
 								</tr>
-									<td valign="top" style="text-align:right">Prepay:</td>
-									</td>
+								<tr>
+									<td valign="top" style="text-align:right"><span class="ledLabel">Wheel:</span></td>
 									<td valign="top" style="text-align:left">
-										<input type="number" id="wheelPrepay" readonly style="width: 7em"/><br />
+										<span class="ledDispl" id="wheelMult"></span>
+									</td>
+								</tr>
+								<tr>
+									<td valign="top" style="text-align:right"><span class="ledLabel">Total:</span></td>
+									<td valign="top" style="text-align:left">
+										<span class="ledDispl" id="totMult"></span>
 									</td>
 								</tr>
 								<tr>
@@ -163,27 +172,26 @@
 										<table id="bonusWheel"></table>
 									</td>
 								</tr>
-									<td valign="top" style="text-align:right">Wheel Mult.</td>
+								<tr>
+									<td colspan=2 valign="top" align=center><span class="ledLabel">Wins</span></td>
+								</tr>
+								<tr>
+									<td valign="top" style="text-align:right"><span class="ledLabel">Prepay:</span></td>
 									<td valign="top" style="text-align:left">
-										<input type="number" id="wheelMult" readonly style="width: 7em"/>
+										<span class="ledDispl" id="wheelPrepay"></span>
 									</td>
 								</tr>
 								<tr>
-									<td valign="top" style="text-align:right">Total Mult.</td>
+									<td valign="top" style="text-align:right"><span class="ledLabel">Wheel:</span></td>
 									<td valign="top" style="text-align:left">
-										<input type="number" id="totMult" readonly style="width: 7em"/>
+										<span class="ledDispl" id="wheelWin"></span>
 									</td>
 								</tr>
 								<tr>
-									<td valign="top" style="text-align:right">Wheel Win:</td>
-									<td valign="top" style="text-align:left">
-										<input type="number" id="wheelWin" readonly style="width: 7em"/>
-									</td>
-								</tr>
-									<td valign="top" style="text-align:right">Prepay + Wheel:</td>
+									<td valign="top" style="text-align:right"><span class="ledLabel">Total:</span></td>
 									</td>
 									<td valign="top" style="text-align:left">
-										<input type="number" id="wheelPay" readonly style="width: 7em"/><br />
+										<span class="ledDispl" id="wheelPay"></span>
 									</td>
 								</tr>
 							</table>
@@ -192,34 +200,34 @@
 				</table>
 				<table width="100%">
 					<tr>
-						<td colspan="3" align="center">
-							<span id="wintype">&nbsp;</span><br />
-						</td><td />
+						<td colspan="4" align="center">
+							<center><table class="dotDispl" id="tickerTape" style="color:orange;border-collapse:collapse;"></table></center>
+						</td>
 					</tr>
 					<tr>
 						<td style="text-align:right">
-							Coins In:<br />
-							Credits:<br />
+							<span class="ledLabel">Coins In:</span><br />
+							<span class="ledLabel">Credits:</span><br />
 						</td>
 						<td style="text-align:left">
-							<input type="number" id="betAmt" readonly style="width: 3em"/><br />
-							<input type="number" id="credits" readonly style="width: 7em"/><br />
+							<span class="ledDispl" id="betAmt"></span><br />
+							<span class="ledDispl" id="credits"></span><br />
 						</td>
 						<td style="text-align:right">
-							Win:<br />
-							Winner Paid:<br />
+							<span class="ledLabel">Win:</span><br />
+							<span class="ledLabel">Winner Paid:</span><br />
 						</td>
 						<td style="text-align:left">
-							<input type="number" id="win" readonly style="width: 7em"/><br />
-							<input type="number" id="paid" readonly style="width: 7em"/><br />
+							<span class="ledDispl" id="win"></span><br />
+							<span class="ledDispl" id="paid"></span><br />
 						</td>
 					</tr>
 					<tr>
 						<td colspan="2" align="center">
-							<span id="maxcred">&nbsp;</span>
+							<span class="ledLabel" id="maxcred">&nbsp;</span>
 						</td>
 						<td colspan="2" align="center">
-							<span id="gameover">&nbsp;</span>
+							<span class="ledLabel" id="gameover">&nbsp;</span>
 						</td>
 					</tr>
 					<tr>
@@ -245,12 +253,10 @@
 
 					</tr>
 				</table>
-				<table>
+				<table width=100%>
 					<tr>
-						<td>
-							<a href="about/licenses.html" rel="jslicense">JavaScript license information</a><br />
-							<button onclick="gplAlert()">About</button>
-						</td>
+						<td><button onclick="gplAlert()">About</button></td>
+						<td><a href="about/licenses.html" rel="jslicense">Licensing</a></td>
 					</tr>
 				</table>
 			</td>

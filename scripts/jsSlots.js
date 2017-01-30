@@ -53,6 +53,14 @@ function gplAlert() {
  *	Configuration
  */
 
+// Number of cells in message ticker.
+// [Default: 40]
+var tickerCells = 40;
+
+// Milliseconds between ticker steps.
+// [Default: 200]
+var tickerTime = 100;
+
 // Number of 32 bit random seeds to generate.  These will be XORed together to generate the final seed.
 // [Default: 10]
 var numSeeds = 10;
@@ -70,20 +78,20 @@ var maxLineBet = 3;
 maxProg = 100000;
 
 // Width of bonus wheel.
-// [Default: 125]
-var wheelWidth = 125;
+// [Default: 150]
+var wheelWidth = 150;
 
 // Number of rows to display on bonus wheel.  Even values will be incremented to the next odd integer.
-// [Default: 13]
-var wheelRows = 13;
+// [Default: 9]
+var wheelRows = 9;
 
 // Number of times for wheel to land on double before winning progressive times wild multiplier, or maxProg, whichever is less.
 // [Default: 5]
 var wheelProg = 5;
 
 // Size, in pixels, of reel symbols.
-// [Default: 150]
-var symSize = 150;
+// [Default: 125]
+var symSize = 125;
 
 // Paytable icon size.
 // [Default: 25]
@@ -385,40 +393,36 @@ function printPaytable() {
 	for (p = 0; p < paytable.length; p++) {
 		paytext += '<tr id="payRow' + p + '">';
 		if ( paytable[p][0] < 0 ) {  // Print payout name for wild-only combinations.
-			paytext += '<td class=payCell valign=middle align="center" colspan=' + ( numReels - 1 ) + '>Any ' + Math.abs( paytable[p][0] ) + '</td>';
+			paytext += '<td class=payCell valign=middle colspan=' + ( numReels - 1 ) + '>Any ' + Math.abs( paytable[p][0] ) + '</td>';
 			paytext += '<td class=payCell><image width="' + payIcoSize + '" src=images/Wild.png /></td>';
-			for ( c = 1; c <= maxLineBet; c++ ) {
-				paytext += '<td id="pt' + p + '" class="c' + c + ' payCell" style="fontWeight:normal">' + paytable[p][numReels] * c + '</td>';
-			}
-			paytext += '<td class=payCell width="25" id="pt' + p + 'w1">&nbsp;</td></tr>';
 		} else {
 			for ( s = 0; s < numReels; s++ ) {
 				if (paytable[p][s] >= 100 ) {
 					var g = paytable[p][s] - 100;
-					paytext += '<td class=payCell align="center"><image width="' + payIcoSize + '" src=images/' + grpSym[g] + '.png /></td>';
+					paytext += '<td class=payCell><image width="' + payIcoSize + '" src=images/' + grpSym[g] + '.png /></td>';
 				} else if ( paytable[p][s] === "-" ) {
-					paytext += '<td class=payCell valign=middle align="center">-</td>';
+					paytext += '<td class=payCell valign=middle>-</td>';
 				} else if ( paytable[p][s] == 0 ) {
-					paytext += '<td class=payCell align="center"><image width="' + payIcoSize + '" src=images/blankico.png /></td>';
+					paytext += '<td class=payCell><image width="' + payIcoSize + '" src=images/blankico.png /></td>';
 				} else {
 					symbol = symbols[ paytable[p][s] ];
-					paytext += '<td class=payCell align="center"><image width="' + payIcoSize + '" src=images/'+symbol+'.png /></td>';
+					paytext += '<td class=payCell><image width="' + payIcoSize + '" src=images/'+symbol+'.png /></td>';
 				}
 			}
-			for ( c = 1; c <= maxLineBet; c++ ) {
-				if ( p == 0 && c == maxLineBet ) {
-					paytext += '<td class=payCell colspan=2 id="pt' + p + 'c' + c + '"><input type="number" id="progVal" value=' + progVal + ' style="width:7em"></td>';
-				} else if ( p == 18 && c == maxLineBet ) {
-					paytext += '<td class=payCell colspan=2 id="pt' + p + 'c' + c + '" class="c' + c + ' payCell">Bonus</td>';
-				} else {
-					paytext += '<td id="pt' + p + 'c' + c + '" class="c' + c + ' payCell">' + paytable[p][numReels] * c + '</td>';
-					if ( c == maxLineBet ) {
-						paytext += '<td />';
-					}
-				}
-			}
-			paytext += '</tr>';
 		}
+		for ( c = 1; c <= maxLineBet; c++ ) {
+			if ( p == 0 && c == maxLineBet ) {
+				paytext += '<td class="payCell" id="pt' + p + 'c' + c + '" colspan=2 style="text-align:left;"><span class="ledDispl" id="progVal">&nbsp;</span></td>';
+			} else if ( p == 18 && c == maxLineBet ) {
+				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" colspan=2 style="text-align:left;">SPIN</td>';
+			} else {
+				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" width=32>' + paytable[p][numReels] * c + '</td>';
+				if ( c == maxLineBet ) {
+					paytext += '<td />';
+				}
+			}
+		}
+		paytext += '</tr>';
 	}
 	document.getElementById( "paytable" ).innerHTML=paytext;
 }
@@ -945,7 +949,7 @@ function insertBill() {
 	} else {
 		clearWin();
 		credits = credits + billCredits;
-		document.getElementById("credits").value=credits;
+		document.getElementById("credits").innerHTML=credits;
 		setCookie("credits",credits,expiry);
 		playSound(1);
 	}
@@ -959,10 +963,10 @@ function cashOut() {
 		lastBet = 0;
 		playSound(11);
 		setTimeout(function () {
-			document.getElementById("paid").value=credits;
+			document.getElementById("paid").innerHTML=credits;
 			credits = 0;
 			setCookie("credits",credits,expiry)
-			document.getElementById("credits").value=credits;
+			document.getElementById("credits").innerHTML=credits;
 			cashingOut = 0;
 		}, 4250 );
 	}
@@ -972,15 +976,15 @@ function clearWin() {
 	for (pt = 0; pt < paytable.length; pt++) {
 		document.getElementById("payRow" + pt).style.backgroundColor = "white";
 	}
-	document.getElementById("win").value="";
-	document.getElementById("paid").value="";
-	document.getElementById("wintype").innerHTML="";
-	document.getElementById("reelMult").value="";
-	document.getElementById("wheelPrepay").value="";
-	document.getElementById("wheelMult").value="";
-	document.getElementById("totMult").value="";
-	document.getElementById("wheelWin").value="";
-	document.getElementById("wheelPay").value=";"
+	document.getElementById("win").innerHTML="";
+	document.getElementById("paid").innerHTML="";
+	document.getElementById("reelMult").innerHTML="";
+	document.getElementById("wheelPrepay").innerHTML="";
+	document.getElementById("wheelMult").innerHTML="";
+	document.getElementById("totMult").innerHTML="";
+	document.getElementById("wheelWin").innerHTML="";
+	document.getElementById("wheelPay").innerHTML="";
+	clearTicker();
 }
 
 function betOne() {
@@ -1003,13 +1007,15 @@ function betOne() {
 					x[i].style.fontWeight = weight;
 				}
 			}
-			document.getElementById("credits").value=credits;
+			document.getElementById("progVal").style.color = "#ff0000";
+			document.getElementById("credits").innerHTML=credits;
 			playSound(1);
 			if ( betAmt >= betLimit ) {
 				betAmt = betLimit;
 			}
-			document.getElementById("betAmt").value=betAmt;
+			document.getElementById("betAmt").innerHTML=betAmt;
 			if ( betAmt == betLimit ) {
+				document.getElementById("progVal").style.color = "#00ff00";
 				reBet = 0;
 				setTimeout(function() {
 					spin();
@@ -1489,8 +1495,8 @@ function checkPayline() {
 			wheelPrePay = payout;
 			wheelPreMult = wilds;
 			wheelMult = 0;
-			document.getElementById("reelMult").value=Math.pow(2, wheelPreMult);
-			document.getElementById("wheelPrepay").value=wheelPrePay;
+			document.getElementById("reelMult").innerHTML=Math.pow(2, wheelPreMult);
+			document.getElementById("wheelPrepay").innerHTML=wheelPrePay;
 			setTimeout(function () {
 				playWheelWait();
 			}, 1500);
@@ -1522,7 +1528,7 @@ function initWheel() {
 		wheelTopPos = wheelStrip.length - 1
 	}
 	printWheel();
-	document.getElementById("wheelMult").value=Math.pow(2, wheelMult);
+	document.getElementById("wheelMult").innerHTML=Math.pow(2, wheelMult);
 	setWheel();
 }
 
@@ -1582,8 +1588,8 @@ function drawWheel() {
 function playWheelWait() {
 	wheelRun = 1;
 	wheelTotMult = wheelPreMult + wheelMult;
-	document.getElementById("wheelMult").value=Math.pow(2, wheelMult);
-	document.getElementById("totMult").value=Math.pow(2, wheelTotMult);
+	document.getElementById("wheelMult").innerHTML=Math.pow(2, wheelMult);
+	document.getElementById("totMult").innerHTML=Math.pow(2, wheelTotMult);
 	createjs.Sound.play("wheelWait",{loop:-1});
 }
 
@@ -1597,19 +1603,26 @@ function wheelSpin() {
 	spinSteps = 0;
 	wheelRun = 0;
 	wheelTotMult = wheelPreMult + wheelMult;
-	document.getElementById("wheelMult").value=Math.pow(2, wheelMult);
-	document.getElementById("totMult").value=Math.pow(2, wheelTotMult);
+	document.getElementById("wheelMult").innerHTML=Math.pow(2, wheelMult);
+	document.getElementById("totMult").innerHTML=Math.pow(2, wheelTotMult);
 	wheelSteps = Math.floor(Math.random() * wheelStrip.length) + wheelStrip.length;
 	wheelLoop();
 }
 
 function wheelLoop() {
 	var topPos = wheelStop[wheelMult] - wheelPayRow;
+	var paysym;
 	if ( topPos < 0 ) {
 		topPos = wheelStrip.length - 1
 	}
 	if ( spinSteps < wheelSteps || wheelTopPos != topPos ) {
 		advWheel();
+		paysym = wheelSlotVals[wheel[wheelPayRow]];
+		if ( isNaN(paysym) ) {
+			document.getElementById("wheelWin").innerHTML=paysym;
+		} else {
+			document.getElementById("wheelWin").innerHTML=wheelSlotVals[wheel[wheelPayRow]] * Math.pow(2, wheelTotMult);
+		}
 		spinSteps++;
 		if ( spinSteps < wheelSteps ) {
 			loopTime = 50;
@@ -1642,11 +1655,11 @@ function endWheel() {
 		}
 	} else {
 		wheelTotMult = wheelPreMult + wheelMult;
-		document.getElementById("totMult").value=Math.pow(2, wheelTotMult);
-		payout = wheelPay * Math.pow(2, wheelTotMult)
-		document.getElementById("wheelWin").value=payout;
+		document.getElementById("totMult").innerHTML=Math.pow(2, wheelTotMult);
+		payout = wheelPay * Math.pow(2, wheelTotMult);
+		document.getElementById("wheelWin").innerHTML=payout;
 		payout += wheelPrePay;
-		document.getElementById("wheelPay").value=payout;
+		document.getElementById("wheelPay").innerHTML=payout;
 		payWin(18,payout,(payout+credits),0,0)
 	}
 }
@@ -1659,7 +1672,7 @@ function payWin(wintype,payout,payfinal,i,paySound) {
 	} else {
 		payingOut = 1;
 		var loopTime;
-		document.getElementById("win").value=payout;
+		document.getElementById("win").innerHTML=payout;
 	
 		if (payout >= 300) {
 			loopTime = 25;
@@ -1685,8 +1698,8 @@ function payWin(wintype,payout,payfinal,i,paySound) {
 		i++;
 		credits++
 		setCookie("credits",credits,expiry);
-		document.getElementById("paid").value=i;
-		document.getElementById("credits").value=credits;
+		document.getElementById("paid").innerHTML=i;
+		document.getElementById("credits").innerHTML=credits;
 		payStats(-1);
 
 		if ( dbgRapid == 1 ) {
@@ -1707,8 +1720,8 @@ function payWin(wintype,payout,payfinal,i,paySound) {
 
 function payComplete(wintype,payout,payfinal) {
 	credits = payfinal;
-	document.getElementById("paid").value=payout;
-	document.getElementById("credits").value=credits;
+	document.getElementById("paid").innerHTML=payout;
+	document.getElementById("credits").innerHTML=credits;
 	playSound(1);
 	payout = 0;
 	payingOut = 0;
@@ -1716,7 +1729,7 @@ function payComplete(wintype,payout,payfinal) {
 }
 
 function displayWin(wintype) {
-	document.getElementById("wintype").innerHTML="<marquee>"+paytable[wintype][4]+"</marquee>";
+	startTicker(paytable[wintype][4]);
 	endGame();
 }
 
@@ -1733,7 +1746,7 @@ function endGame() {
 	wheelMult = -1;
 	gameIdle = 1;
 	cyclePRNG();
-	document.getElementById("betAmt").value=betAmt;
+	document.getElementById("betAmt").innerHTML=betAmt;
 	document.getElementById("gameover").innerHTML="<blink>Game Over</blink>";
 }
 
@@ -1754,8 +1767,8 @@ function jackpot(c,m) {
 			credits += progVal;
 			setCookie("credits",credits,expiry)
 			payStats(-(progVal));
-			document.getElementById("paid").value=progVal;
-			document.getElementById("credits").value=credits;
+			document.getElementById("paid").innerHTML=progVal;
+			document.getElementById("credits").innerHTML=credits;
 			progReset();
 			endGame()
 		}, 625)
@@ -1771,7 +1784,7 @@ function progInc (steps) {
 				progVal++;
 			}
 			setCookie("progVal",progVal,expiry);
-			document.getElementById("progVal").value=progVal;
+			document.getElementById("progVal").innerHTML=progVal;
 		}
 	}
 }
@@ -1782,7 +1795,7 @@ function progInit() {
 		progVal = paytable[0][numReels] * maxLineBet * 5/3;
 		setCookie("progCnt",progCnt,expiry)
 		setCookie("progVal",progVal,expiry)
-		document.getElementById("progVal").value=progVal;
+		document.getElementById("progVal").innerHTML=progVal;
 	}
 }
 
@@ -1821,21 +1834,23 @@ function initRNG() {
 function genRndSeed() {
 	var seedNums = new Uint32Array(numSeeds);
 	var rndSeed = 0;
-	var zerocolor = '#000000';
-	var onecolor = '#00ffff';
+	var zerotxt = '<small>.</small>';
+	var zerocolor = '#ff0000';
+	var onetxt = '<small>!</small>';
+	var onecolor = '#00ff00';
 	window.crypto.getRandomValues(seedNums);
 	for (var s = 0; s < seedNums.length; s++) {
 		for (var b = 0; b < 32; b++) {
 			if (seedNums[s] & 1<<b) {
-				bitval = 1;
+				bitval = onetxt;
 				bgc=onecolor;
 			} else {
-				bitval = 0;
+				bitval = zerotxt;
 				bgc=zerocolor;
 			}
 			if ( rndDisp == 1 ) {
 				document.getElementById('bit_s' + s + 'b' + b).style.backgroundColor=bgc;
-//				document.getElementById('bit_s' + s + 'b' + b).innerHTML = bitval;
+				document.getElementById('bit_s' + s + 'b' + b).innerHTML = bitval;
 			}
 		}
 		if ( rndDisp == 1 ) {
@@ -1846,15 +1861,15 @@ function genRndSeed() {
 	rndSeed = rndSeed>>>0;
 	for (var b = 0; b < 32; b++) {
 		if (rndSeed & 1<<b) {
-			bitval = 1;
+			bitval = onetxt;
 			bgc=onecolor;
 		} else {
-			bitval = 0;
+			bitval = zerotxt;
 			bgc=zerocolor;
 		}
 		if ( rndDisp == 1 ) {
 			document.getElementById('xor_b' + b).style.backgroundColor=bgc
-//			document.getElementById('xor_b' + b).innerHTML = bitval;
+			document.getElementById('xor_b' + b).innerHTML = bitval;
 		}
 	}
 	if ( rndDisp == 1 ) {
@@ -1904,6 +1919,68 @@ function popRnd() {
 	}
 }
 
+// Message ticker
+
+var tickerTape = new Array(tickerCells);
+var runTicker;
+function initTicker() {
+	var tickerHtml = ""
+	runTicker = 0;
+	tickerHtml += '<tr cellpadding=0>';
+	for (var c = tickerCells - 1; c >= 0; c--) {
+		tickerTape[c] = '';
+		tickerHtml += '<td width=50 id="ticker_' + c + '">';
+		tickerHtml += '&nbsp;';
+		tickerHtml += '</td>';
+	}
+	tickerHtml += '</tr>';
+	document.getElementById("tickerTape").innerHTML=tickerHtml;
+}
+
+function startTicker(tickerText) {
+	runTicker = 1;
+	tickerLoop(tickerText,0);
+}
+
+function tickerLoop(tickerText,tickerStep) {
+	if (runTicker == 0) {
+		clearTicker();
+	} else {
+		var msgTxt = tickerText.split('');
+		var nextCell;
+		if (tickerStep >= (tickerText.length + tickerCells)) {
+			tickerStep = 0
+		}
+		if (tickerStep < tickerText.length && tickerText[tickerStep] != ' ') {
+			nextCell = tickerText[tickerStep]
+		} else {
+			nextCell = '&nbsp;';
+		}
+		for (var c = tickerCells - 1; c >= 0; c--) {
+			if ( c == 0 ) {
+				tickerTape[c] = nextCell;
+			} else {
+				tickerTape[c] = tickerTape[(c-1)];
+			}
+			document.getElementById("ticker_" + c).innerHTML = tickerTape[c]
+		}
+		tickerStep++;
+		setTimeout(function () {
+			tickerLoop(tickerText,tickerStep);
+		}, tickerTime );
+	}
+}
+
+function clearTicker() {
+	runTicker = 0;
+	setTimeout(function () {
+		for (c = 0; c < tickerCells; c++) {
+			tickerTape[c] = '&nbsp;';
+			document.getElementById("ticker_" + c).innerHTML = tickerTape[c];
+		}
+	}, (tickerTime + (tickerTime / 2)) );
+}
+
 function init() {
 	var spinnum;
 	var symbol;
@@ -1919,15 +1996,16 @@ function init() {
 	initWheel();
 	initSymOdds();
 	initPayOdds();
+	initTicker();
 	clearWin();
 	cookieRestore();
 	progInit();
 	clearMisc();
 	payStats(0);
 	endGame();
-	document.getElementById("credits").value=credits;
-	document.getElementById("betAmt").value=betAmt;
-	document.getElementById("progVal").value=progVal;
+	document.getElementById("credits").innerHTML=credits;
+	document.getElementById("betAmt").innerHTML=betAmt;
+	document.getElementById("progVal").innerHTML=progVal;
 	document.getElementById("gameover").innerHTML="Game Over";
 	document.getElementById("maxcred").innerHTML="Play " + betLimit + " Credits";
 	document.getElementById("miscDataNone").selected = true;
