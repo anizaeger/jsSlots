@@ -3,12 +3,8 @@
 	src: url(Ultra.ttf);
 }
 @font-face {
-	font-family: LCD;
-	src: url(LCD.ttf);
-}
-@font-face {
-	font-family: DMD;
-	src: url(DMD.ttf);
+	font-family: LED;
+	src: url(LED.ttf);
 }
 button {
 	text-align:center;
@@ -44,12 +40,7 @@ button.round {
 	font-size: 14pt;
 }
 .ledDispl {
-	font-family: LCD;
+	font-family: LED;
 	font-size: 14pt;
-	color:red;
-}
-
-.dotDispl {
-	font-family: DMD;
 	color:red;
 }
