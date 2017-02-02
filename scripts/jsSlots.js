@@ -893,6 +893,8 @@ function printRnd() {
 	}
 	rndHtml += '<tr><td style="text-align:left">XOR:</td><td id=seedXor style="text-align:left"></td></tr>'
 	rndHtml += '<tr>';
+	rndHtml += '<tr><td style="text-align:left">Float:</td><td id=seedFloat style="text-align:left"></td></tr>'
+	rndHtml += '<tr>';
 	rndHtml += '<td style="text-align:left">Set Seed:</td><td id="rndSeed" style="text-align:left"></td>';
 	rndHtml += '</tr><tr>';
 	rndHtml += '<td style="text-align:left">PRNG:</td><td id="rndNum" style="text-align:left"></td>';
@@ -1859,6 +1861,7 @@ function genRndSeed() {
 		rndSeed ^= seedNums[s];
 	}
 	rndSeed = rndSeed>>>0;
+	floatSeed = rndSeed / Math.pow(2,32);
 	for (var b = 0; b < 32; b++) {
 		if (rndSeed & 1<<b) {
 			bitval = onetxt;
@@ -1874,8 +1877,9 @@ function genRndSeed() {
 	}
 	if ( rndDisp == 1 ) {
 		document.getElementById("seedXor").innerHTML = rndSeed;
+		document.getElementById("seedFloat").innerHTML = floatSeed.toExponential();;
 	}
-	setRndSeed(rndSeed,0)
+	setRndSeed(floatSeed,0)
 	setTimeout(function () {
 		genRndSeed()
 	}, 1000 );
@@ -1885,7 +1889,7 @@ function setRndSeed(seednum,i) {
 	if ( gameIdle == 1 ) {
 		Math.seedrandom(seednum)
 		if ( rndDisp == 1 ) {
-			document.getElementById("rndSeed").innerHTML=seednum;
+			document.getElementById("rndSeed").innerHTML=seednum.toExponential();;
 		}
 	} else if ( i > 2 ) {
 		return;
