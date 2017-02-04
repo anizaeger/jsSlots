@@ -576,11 +576,14 @@ function printSymOdds() {
 
 	symOddsHtml += '<tr><td><table>'
 	symOddsHtml += '<tr><td colspan=' + ( numReels * 2 + 1 ) + '>Number of vReel stops: </td></tr>';
+	symOddsHtml += '<tr>';
 	for ( r = 0; r < numReels; r++ ) {
-		symOddsHtml += '<tr><td /><td colspan=2>Reel ' + ( r + 1 ) + ': ' + numVirtReelStops[r] + '</td></tr>';
+		symOddsHtml += '<td>' + numVirtReelStops[r] + '</td>';
 	}
+	symOddsHtml += '</tr>';
 	symOddsHtml += '</table></td></tr>';
 	symOddsHtml += '<tr><td valign=top><table>';
+	symOddsHtml += '<tr><td>Symbols:</td></tr>';
 	for ( s = 0; s < symbols.length; s++ ) {
 		symOddsHtml += '<tr>';
 		symbol = symbols[s];
@@ -594,7 +597,8 @@ function printSymOdds() {
 		}
 		symOddsHtml += '</tr>';
 	}	
-	symOddsHtml += '</table></td><td valign=top><table>'
+	symOddsHtml += '</table><table>'
+	symOddsHtml += '<tr><td>Groups:</td></tr>';
 	for ( g = 0; g < groups.length; g++ ) {
 		symOddsHtml += '<tr>';
 		group = grpSym[g];
