@@ -55,7 +55,7 @@ function gplAlert() {
 
 // Number of cells in message ticker.
 // [Default: 40]
-var tickerCells = 40;
+var tickerCells = 45;
 
 // Milliseconds between ticker steps.
 // [Default: 250]
@@ -1790,7 +1790,7 @@ function progInc (steps) {
 				progVal++;
 			}
 			setCookie("progVal",progVal,expiry);
-			document.getElementById("progVal").innerHTML=padNumber(progVal,6);
+			document.getElementById("progVal").innerHTML=padNumber(progVal,6,'',1);
 		}
 	}
 }
@@ -1801,8 +1801,8 @@ function progInit() {
 		progVal = paytable[0][numReels] * maxLineBet * 5/3;
 		setCookie("progCnt",progCnt,expiry)
 		setCookie("progVal",progVal,expiry)
-		document.getElementById("progVal").innerHTML=padNumber(progVal,6);
 	}
+	document.getElementById("progVal").innerHTML=padNumber(progVal,6,'',1);
 }
 
 function progReset() {
@@ -1927,30 +1927,6 @@ function popRnd() {
 	}
 }
 
-// Number padding
-
-/*
-	The following function, padNumber() is derived in part from a function shared on StackOverflow
-	URL: http://stackoverflow.com/questions/1267283/how-can-i-create-a-zerofilled-value-using-javascript
-	Contributer: coderjoe <http://stackoverflow.com/users/127792>
-	License: Creative Commons CC-BY-SA https://creativecommons.org/licenses/by-sa/3.0/deed.en
- */
-
-function padNumber(num, padLen, pad) {
-	var padChar = ( pad || "&nbsp" );
-	var n = Math.abs(num);
-	var padding = Math.max(0, padLen - Math.floor(n).toString().length );
-	var padString = ""
-	if( num < 0 ) {
-		--padding
-	}
-	for ( p = 0; p < padding; p++ ) {
-		padString += padChar;
-	}
-
-	return padString+n;
-}
-
 // Message ticker
 
 var tickerTape = new Array(tickerCells);
@@ -2013,6 +1989,38 @@ function clearTicker() {
 	}, (Math.floor(tickerTime + (tickerTime / 2))) );
 }
 
+// Number padding
+
+/*
+	The following function, padNumber() is derived in part from a function shared on StackOverflow
+	URL: http://stackoverflow.com/questions/1267283/how-can-i-create-a-zerofilled-value-using-javascript
+	Contributer: coderjoe <http://stackoverflow.com/users/127792>
+	License: Creative Commons CC-BY-SA https://creativecommons.org/licenses/by-sa/3.0/deed.en
+ */
+
+function padNumber(num, padLen, char, just) {
+	var padChar = ( char || "&nbsp" );
+	if ( just ) {
+		var justify = "left";
+	} else {
+		var justify = "right";
+	}
+	var n = Math.abs(num);
+	var padding = Math.max(0, padLen - Math.floor(n).toString().length );
+	var padString = ""
+	if( num < 0 ) {
+		--padding
+	}
+	for ( p = 0; p < padding; p++ ) {
+		padString += padChar;
+	}
+	if ( justify == "left" ) {
+		return n+padString;
+	} else {
+		return padString+n;
+	}
+}
+
 function init() {
 	var spinnum;
 	var symbol;
@@ -2037,7 +2045,6 @@ function init() {
 	endGame();
 	document.getElementById("credits").innerHTML=padNumber(credits,6);
 	document.getElementById("betAmt").innerHTML=padNumber(betAmt,2);
-	document.getElementById("progVal").innerHTML=padNumber(progVal,6);
 	document.getElementById("gameover").innerHTML="Game Over";
 	document.getElementById("maxcred").innerHTML="Play " + betLimit + " Credits";
 	document.getElementById("miscDataNone").selected = true;
