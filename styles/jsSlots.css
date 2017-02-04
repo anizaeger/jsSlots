@@ -43,4 +43,10 @@ button.round {
 	font-family: LED;
 	font-size: 14pt;
 	color:red;
+	background:#3f0000;
+}
+.reel {
+	border-style: solid;
+	border-width: 3px;
+	border-color: black;
 }

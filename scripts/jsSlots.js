@@ -951,7 +951,7 @@ function insertBill() {
 	} else {
 		clearWin();
 		credits = credits + billCredits;
-		document.getElementById("credits").innerHTML=credits;
+		document.getElementById("credits").innerHTML=padNumber(credits,6);
 		setCookie("credits",credits,expiry);
 		playSound(1);
 	}
@@ -965,10 +965,10 @@ function cashOut() {
 		lastBet = 0;
 		playSound(11);
 		setTimeout(function () {
-			document.getElementById("paid").innerHTML=credits;
+			document.getElementById("paid").innerHTML=padNumber(credits,6);
 			credits = 0;
 			setCookie("credits",credits,expiry)
-			document.getElementById("credits").innerHTML=credits;
+			document.getElementById("credits").innerHTML=padNumber(credits,6);
 			cashingOut = 0;
 		}, 4250 );
 	}
@@ -978,14 +978,14 @@ function clearWin() {
 	for (pt = 0; pt < paytable.length; pt++) {
 		document.getElementById("payRow" + pt).style.backgroundColor = "white";
 	}
-	document.getElementById("win").innerHTML="";
-	document.getElementById("paid").innerHTML="";
-	document.getElementById("reelMult").innerHTML="";
-	document.getElementById("wheelPrepay").innerHTML="";
-	document.getElementById("wheelMult").innerHTML="";
-	document.getElementById("totMult").innerHTML="";
-	document.getElementById("wheelWin").innerHTML="";
-	document.getElementById("wheelPay").innerHTML="";
+	document.getElementById("win").innerHTML=padNumber("",6);
+	document.getElementById("paid").innerHTML=padNumber("",6);
+	document.getElementById("reelMult").innerHTML=padNumber("",2);
+	document.getElementById("wheelPrepay").innerHTML=padNumber("",3);
+	document.getElementById("wheelMult").innerHTML=padNumber("",2);
+	document.getElementById("totMult").innerHTML=padNumber("",2);
+	document.getElementById("wheelWin").innerHTML=padNumber("",6);
+	document.getElementById("wheelPay").innerHTML=padNumber("",6);
 	clearTicker();
 }
 
@@ -1010,12 +1010,12 @@ function betOne() {
 				}
 			}
 			document.getElementById("progVal").style.color = "#ff0000";
-			document.getElementById("credits").innerHTML=credits;
+			document.getElementById("credits").innerHTML=padNumber(credits,6);
 			playSound(1);
 			if ( betAmt >= betLimit ) {
 				betAmt = betLimit;
 			}
-			document.getElementById("betAmt").innerHTML=betAmt;
+			document.getElementById("betAmt").innerHTML=padNumber(betAmt,2);
 			if ( betAmt == betLimit ) {
 				document.getElementById("progVal").style.color = "#00ff00";
 				reBet = 0;
@@ -1497,8 +1497,8 @@ function checkPayline() {
 			wheelPrePay = payout;
 			wheelPreMult = wilds;
 			wheelMult = 0;
-			document.getElementById("reelMult").innerHTML=Math.pow(2, wheelPreMult);
-			document.getElementById("wheelPrepay").innerHTML=wheelPrePay;
+			document.getElementById("reelMult").innerHTML=padNumber(Math.pow(2, wheelPreMult),2);
+			document.getElementById("wheelPrepay").innerHTML=padNumber(wheelPrePay,3);
 			setTimeout(function () {
 				playWheelWait();
 			}, 1500);
@@ -1530,7 +1530,7 @@ function initWheel() {
 		wheelTopPos = wheelStrip.length - 1
 	}
 	printWheel();
-	document.getElementById("wheelMult").innerHTML=Math.pow(2, wheelMult);
+	document.getElementById("wheelMult").innerHTML=padNumber((Math.pow(2, wheelMult)),2);
 	setWheel();
 }
 
@@ -1590,8 +1590,8 @@ function drawWheel() {
 function playWheelWait() {
 	wheelRun = 1;
 	wheelTotMult = wheelPreMult + wheelMult;
-	document.getElementById("wheelMult").innerHTML=Math.pow(2, wheelMult);
-	document.getElementById("totMult").innerHTML=Math.pow(2, wheelTotMult);
+	document.getElementById("wheelMult").innerHTML=padNumber((Math.pow(2, wheelMult)),2);
+	document.getElementById("totMult").innerHTML=padNumber((Math.pow(2, wheelTotMult)),2);
 	createjs.Sound.play("wheelWait",{loop:-1});
 }
 
@@ -1605,8 +1605,8 @@ function wheelSpin() {
 	spinSteps = 0;
 	wheelRun = 0;
 	wheelTotMult = wheelPreMult + wheelMult;
-	document.getElementById("wheelMult").innerHTML=Math.pow(2, wheelMult);
-	document.getElementById("totMult").innerHTML=Math.pow(2, wheelTotMult);
+	document.getElementById("wheelMult").innerHTML=padNumber((Math.pow(2, wheelMult)),2);
+	document.getElementById("totMult").innerHTML=padNumber((Math.pow(2, wheelTotMult)),2);
 	wheelSteps = Math.floor(Math.random() * wheelStrip.length) + wheelStrip.length;
 	wheelLoop();
 }
@@ -1623,7 +1623,7 @@ function wheelLoop() {
 		if ( isNaN(paysym) ) {
 			document.getElementById("wheelWin").innerHTML=paysym;
 		} else {
-			document.getElementById("wheelWin").innerHTML=wheelSlotVals[wheel[wheelPayRow]] * Math.pow(2, wheelTotMult);
+			document.getElementById("wheelWin").innerHTML=padNumber(wheelSlotVals[wheel[wheelPayRow]] * Math.pow(2, wheelTotMult),6);
 		}
 		spinSteps++;
 		if ( spinSteps < wheelSteps ) {
@@ -1657,11 +1657,11 @@ function endWheel() {
 		}
 	} else {
 		wheelTotMult = wheelPreMult + wheelMult;
-		document.getElementById("totMult").innerHTML=Math.pow(2, wheelTotMult);
+		document.getElementById("totMult").innerHTML=padNumber(Math.pow(2, wheelTotMult),2);
 		payout = wheelPay * Math.pow(2, wheelTotMult);
-		document.getElementById("wheelWin").innerHTML=payout;
+		document.getElementById("wheelWin").innerHTML=padNumber(payout,6);
 		payout += wheelPrePay;
-		document.getElementById("wheelPay").innerHTML=payout;
+		document.getElementById("wheelPay").innerHTML=padNumber(payout,6);
 		payWin(18,payout,(payout+credits),0,0)
 	}
 }
@@ -1674,7 +1674,7 @@ function payWin(wintype,payout,payfinal,i,paySound) {
 	} else {
 		payingOut = 1;
 		var loopTime;
-		document.getElementById("win").innerHTML=payout;
+		document.getElementById("win").innerHTML=padNumber(payout,6);
 	
 		if (payout >= 300) {
 			loopTime = 25;
@@ -1700,8 +1700,8 @@ function payWin(wintype,payout,payfinal,i,paySound) {
 		i++;
 		credits++
 		setCookie("credits",credits,expiry);
-		document.getElementById("paid").innerHTML=i;
-		document.getElementById("credits").innerHTML=credits;
+		document.getElementById("paid").innerHTML=padNumber(i,6);
+		document.getElementById("credits").innerHTML=padNumber(credits,6);
 		payStats(-1);
 
 		if ( dbgRapid == 1 ) {
@@ -1722,8 +1722,8 @@ function payWin(wintype,payout,payfinal,i,paySound) {
 
 function payComplete(wintype,payout,payfinal) {
 	credits = payfinal;
-	document.getElementById("paid").innerHTML=payout;
-	document.getElementById("credits").innerHTML=credits;
+	document.getElementById("paid").innerHTML=padNumber(payout,6);
+	document.getElementById("credits").innerHTML=padNumber(credits,6);
 	playSound(1);
 	payout = 0;
 	payingOut = 0;
@@ -1748,7 +1748,7 @@ function endGame() {
 	wheelMult = -1;
 	gameIdle = 1;
 	cyclePRNG();
-	document.getElementById("betAmt").innerHTML=betAmt;
+	document.getElementById("betAmt").innerHTML=padNumber(betAmt,2);
 	document.getElementById("gameover").innerHTML="<blink>Game Over</blink>";
 }
 
@@ -1769,8 +1769,8 @@ function jackpot(c,m) {
 			credits += progVal;
 			setCookie("credits",credits,expiry)
 			payStats(-(progVal));
-			document.getElementById("paid").innerHTML=progVal;
-			document.getElementById("credits").innerHTML=credits;
+			document.getElementById("paid").innerHTML=padNumber(progVal, 6);
+			document.getElementById("credits").innerHTML=padNumber(credits, 6);
 			progReset();
 			endGame()
 		}, 625)
@@ -1786,7 +1786,7 @@ function progInc (steps) {
 				progVal++;
 			}
 			setCookie("progVal",progVal,expiry);
-			document.getElementById("progVal").innerHTML=progVal;
+			document.getElementById("progVal").innerHTML=padNumber(progVal,6);
 		}
 	}
 }
@@ -1797,7 +1797,7 @@ function progInit() {
 		progVal = paytable[0][numReels] * maxLineBet * 5/3;
 		setCookie("progCnt",progCnt,expiry)
 		setCookie("progVal",progVal,expiry)
-		document.getElementById("progVal").innerHTML=progVal;
+		document.getElementById("progVal").innerHTML=padNumber(progVal,6);
 	}
 }
 
@@ -1923,6 +1923,30 @@ function popRnd() {
 	}
 }
 
+// Number padding
+
+/*
+	The following function, padNumber() is derived in part from a function shared on StackOverflow
+	URL: http://stackoverflow.com/questions/1267283/how-can-i-create-a-zerofilled-value-using-javascript
+	Contributer: coderjoe <http://stackoverflow.com/users/127792>
+	License: Creative Commons CC-BY-SA https://creativecommons.org/licenses/by-sa/3.0/deed.en
+ */
+
+function padNumber(num, padLen, pad) {
+	var padChar = ( pad || "&nbsp" );
+	var n = Math.abs(num);
+	var padding = Math.max(0, padLen - Math.floor(n).toString().length );
+	var padString = ""
+	if( num < 0 ) {
+		--padding
+	}
+	for ( p = 0; p < padding; p++ ) {
+		padString += padChar;
+	}
+
+	return padString+n;
+}
+
 // Message ticker
 
 var tickerTape = new Array(tickerCells);
@@ -2007,9 +2031,9 @@ function init() {
 	clearMisc();
 	payStats(0);
 	endGame();
-	document.getElementById("credits").innerHTML=credits;
-	document.getElementById("betAmt").innerHTML=betAmt;
-	document.getElementById("progVal").innerHTML=progVal;
+	document.getElementById("credits").innerHTML=padNumber(credits,6);
+	document.getElementById("betAmt").innerHTML=padNumber(betAmt,2);
+	document.getElementById("progVal").innerHTML=padNumber(progVal,6);
 	document.getElementById("gameover").innerHTML="Game Over";
 	document.getElementById("maxcred").innerHTML="Play " + betLimit + " Credits";
 	document.getElementById("miscDataNone").selected = true;
