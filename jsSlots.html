@@ -219,25 +219,31 @@
 							</table>
 						</td>
 						<td>
-							<table>
+							<table style="border-collapse:collapse;">
 								<tr>
 									<td colspan=2 valign="top" align=center><span class="ledLabel">Multipliers</span></td>
 								</tr>
 								<tr>
-									<td valign="top" style="text-align:right"><span class="ledLabel">Prepay:</span></td>
-									<td valign="top" width=100 style="text-align:left">
+									<td class="top bottom left" valign="top" style="text-align:right">
+										<span class="ledLabel">Prepay:</span>
+									</td>
+									<td class="top bottom right" valign="top" width=100 style="text-align:left">
 										<span class="ledDispl" id="reelMult"></span>
 									</td>
 								</tr>
 								<tr>
-									<td valign="top" style="text-align:right"><span class="ledLabel">Wheel:</span></td>
-									<td valign="top" style="text-align:left">
+									<td class="top bottom left" valign="top" style="text-align:right">
+										<span class="ledLabel">Wheel:</span>
+									</td>
+									<td class="top bottom right" valign="top" style="text-align:left">
 										<span class="ledDispl" id="wheelMult"></span>
 									</td>
 								</tr>
 								<tr>
-									<td valign="top" style="text-align:right"><span class="ledLabel">Total:</span></td>
-									<td valign="top" style="text-align:left">
+									<td class="top bottom left" valign="top" style="text-align:right">
+										<span class="ledLabel">Total:</span>
+									</td>
+									<td class="top bottom right" valign="top" style="text-align:left">
 										<span class="ledDispl" id="totMult"></span>
 									</td>
 								</tr>
@@ -247,24 +253,32 @@
 									</td>
 								</tr>
 								<tr>
-									<td colspan=2 valign="top" align=center><span class="ledLabel">Wins</span></td>
+									<td colspan=2 valign="top" align=center>
+										<span class="ledLabel">Wins</span>
+									</td>
 								</tr>
 								<tr>
-									<td valign="top" style="text-align:right"><span class="ledLabel">Prepay:</span></td>
-									<td valign="top" style="text-align:left">
+									<td class="top bottom left" valign="top" style="text-align:right">
+										<span class="ledLabel">Prepay:</span>
+									</td>
+									<td class="top bottom right" valign="top" style="text-align:left">
 										<span class="ledDispl" id="wheelPrepay"></span>
 									</td>
 								</tr>
 								<tr>
-									<td valign="top" style="text-align:right"><span class="ledLabel">Wheel:</span></td>
-									<td valign="top" style="text-align:left">
+									<td class="top bottom left" valign="top" style="text-align:right">
+										<span class="ledLabel">Wheel:</span>
+									</td>
+									<td class="top bottom right" valign="top" style="text-align:left">
 										<span class="ledDispl" id="wheelWin"></span>
 									</td>
 								</tr>
 								<tr>
-									<td valign="top" style="text-align:right"><span class="ledLabel">Total:</span></td>
+									<td class="top bottom left" valign="top" style="text-align:right">
+										<span class="ledLabel">Total:</span>
 									</td>
-									<td valign="top" style="text-align:left">
+									</td>
+									<td class="top bottom right" valign="top" style="text-align:left">
 										<span class="ledDispl" id="wheelPay"></span>
 									</td>
 								</tr>
@@ -272,28 +286,38 @@
 						</td>
 					</tr>
 				</table>
-				<table width="100%">
+				<table width="100%" style="border-collapse:collapse;">
 					<tr>
 						<td colspan="4" align="center">
-							<center><table class="ledDispl" id="tickerTape" style="color:orange;border-collapse:collapse;"></table></center>
+							<center><table class="ledTicker" id="tickerTape"></table></center>
 						</td>
 					</tr>
 					<tr>
-						<td style="text-align:right">
-							<span class="ledLabel">Coins In:</span><br />
-							<span class="ledLabel">Credits:</span><br />
+						<td class="top bottom left" style="text-align:right">
+							<span class="ledLabel">Coins In:</span>
 						</td>
-						<td style="text-align:left">
-							<span class="ledDispl" id="betAmt"></span><br />
-							<span class="ledDispl" id="credits"></span><br />
+						<td class="top bottom right" style="text-align:left">
+							<span class="ledDispl" id="betAmt"></span>
 						</td>
-						<td style="text-align:right">
-							<span class="ledLabel">Win:</span><br />
-							<span class="ledLabel">Winner Paid:</span><br />
+						<td class="top bottom left" style="text-align:right">
+							<span class="ledLabel">Win:</span>
 						</td>
-						<td style="text-align:left">
-							<span class="ledDispl" id="win"></span><br />
-							<span class="ledDispl" id="paid"></span><br />
+						<td class="top bottom right" style="text-align:left">
+							<span class="ledDispl" id="win"></span>
+						</td>
+					</tr>
+					<tr>
+						<td class="top bottom left" style="text-align:right">
+							<span class="ledLabel">Credits:</span>
+						</td>
+						<td class="top bottom right" style="text-align:left">
+							<span class="ledDispl" id="credits"></span>
+						</td>
+						<td class="top bottom left" style="text-align:right">
+							<span class="ledLabel">Winner Paid:</span>
+						</td>
+						<td class="top bottom right" style="text-align:left">
+							<span class="ledDispl" id="paid"></span>
 						</td>
 					</tr>
 					<tr>

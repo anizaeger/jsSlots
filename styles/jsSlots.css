@@ -45,7 +45,27 @@ button.round {
 	color:red;
 	background:#3f0000;
 }
+.top {
+	border-top:1px solid black;
+}
+.bottom {
+	border-bottom:1px solid black;
+}
+.left {
+	border-left:1px solid black;
+}
+.right {
+	border-right:1px solid black;
+}
+.ledTicker {
+	font-family: LED;
+	font-size: 14pt;
+	color:#ff7f00;
+	background:#3f1f00;
+	border-collapse:collapse;
+}
 .reel {
+	background: #bfbfbf;
 	border-style: solid;
 	border-width: 3px;
 	border-color: black;

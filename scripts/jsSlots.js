@@ -5,7 +5,7 @@
  * @licstart  The following is the entire license notice for the 
  * JavaScript code in this page.
  *
- * Copyright (C) 2016 Anakin-Marc Zaeger
+ * Copyright (C) 2016-2017 Anakin-Marc Zaeger
  *
  *
  * The JavaScript code in this page is free software: you can
@@ -30,7 +30,7 @@
 
 function gplAlert() {
 	var copyTxt = "";
-	copyTxt += "Copyright (C) 2016 Anakin-Marc Zaeger\n"
+	copyTxt += "Copyright (C) 2016-2017 Anakin-Marc Zaeger\n"
 	copyTxt += "\n"
 	copyTxt += "\n"
 	copyTxt += "The JavaScript code in this page is free software: you can\n"
@@ -479,8 +479,8 @@ function payStats(pmt) {
 }
 
 function winStats(w,c) {
-	if ( dbgSpin == 1 || dbgVReel == 1 ) { return ; }
-	cIndex = c - 1;
+	if ( dbgSpin == 1 || dbgVReel == 1 ) { return; }
+	var cIndex = c - 1;
 	payouts[w][ cIndex ]++;
 	setCookie("payouts"+w+"c"+cIndex,payouts[w][ cIndex ],expiry);
 	if ( miscDataType == "stats") {
@@ -979,8 +979,13 @@ function cashOut() {
 }
 
 function clearWin() {
-	for (pt = 0; pt < paytable.length; pt++) {
+	for (var pt = 0; pt < paytable.length; pt++) {
 		document.getElementById("payRow" + pt).style.backgroundColor = "white";
+	}
+	for ( var r = 0; r < numReels; r++ ) {
+		for ( var p = 0; p < numReelPos; p++ ) {
+			lightReel(r,p,0);
+		}
 	}
 	document.getElementById("win").innerHTML=padNumber("",6);
 	document.getElementById("paid").innerHTML=padNumber("",6);
@@ -1163,8 +1168,22 @@ function drawReel(r) {
 	}
 }
 
-// Spin related functions
+// Control lighting effects for individual reel positions
 
+function lightReel(reelNum,posNum,toggle) {
+	var toggle = ( toggle || 0 );
+	var color;
+	var bright;
+	if ( toggle == 1 ) {
+		bright=100;
+	} else {
+		bright=50;
+	}
+	document.getElementById("r" + reelNum + "p" + posNum).style.backgroundColor = color;
+	document.getElementById("r" + reelNum + "p" + posNum).style.WebkitFilter="brightness(" + bright + "%)" 
+}
+
+// Spin related functions
 function startGame() {
 	if ( credits == 0 && betAmt == 0 || lockSpin == 1 && wheelRun != 1 && payingOut != 1 ) {
 		return;
@@ -1308,8 +1327,12 @@ function spinLoop(minSpin) {
 		if ( possWin == 1 ) {
 			if ( payline[minSpin] == 7 ) {
 				playSound(minSpin+7);
+				lightReel(minSpin,1,1);
 			} else {
 				possWin = 0;
+				for ( var r = 0; r < numReels; r++ ) {
+					lightReel(r,1,0);
+				}
 			}
 		}
 		minSpin++
@@ -1482,6 +1505,17 @@ function checkPayline() {
 		}
 	}
 	if ( wintype >= 0 ) {
+		if ( wintype != 17 ) {
+			for ( var r = 0; r < numReels; r++ ) {
+				if ( (wintype == 12 || wintype == 16 ) && ( payline[r]) != 7 ) {
+					continue
+				}
+				if ( wintype == 18 && r != 2 ) {
+					continue
+				}
+				lightReel( r, 1 , 1 );
+			}
+		}
 		document.getElementById("payRow" + wintype).style.backgroundColor = "yellow";
 		if ( wintype == 0 && betAmt == maxLineBet) {
 			payout = progVal;
@@ -1540,18 +1574,12 @@ function initWheel() {
 
 function printWheel() {
 	wheeltext = '';
-	wheeltext += '<tr><td /><td width=' + wheelWidth + ' /><td /></tr>'
+	wheeltext += '<tr><td>--&gt;</td><td class="reel" width=' + wheelWidth + '><table width=100%>';
 	for ( row = 0; row < wheelRows; row++ ) {
-		wheeltext += "<tr><td id='wp"+row+"c0'><td id='wp"+row+"'></td><td id='wp"+row+"c1'></td></tr>";
+		wheeltext += "<tr><td id='wp"+row+"'></td></tr>";
 	}
+	wheeltext += '</table><td>&lt;--</td></tr>';
 	document.getElementById("bonusWheel").innerHTML=wheeltext;
-	for ( c = 0; c < 2; c++ ) {
-		if ( c == 0) {
-			document.getElementById("wp" + wheelPayRow + "c" + c).innerHTML="-->";
-		} else {
-			document.getElementById("wp" + wheelPayRow + "c" + c).innerHTML="<--";
-		}
-	}
 }
 
 function advWheel() {
