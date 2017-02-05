@@ -1502,6 +1502,7 @@ function checkPayline() {
 			}, 1500);
 		} else {
 			payFinal = payout + credits;
+			payStats( payout * -1 );
 			payWin( wintype,payout,(payout+credits),0,0 );
 		}
 	} else {
@@ -1660,6 +1661,7 @@ function endWheel() {
 		document.getElementById("wheelWin").innerHTML=payout;
 		payout += wheelPrePay;
 		document.getElementById("wheelPay").innerHTML=payout;
+		payStats( payout * -1 );
 		payWin(18,payout,(payout+credits),0,0)
 	}
 }
@@ -1700,7 +1702,6 @@ function payWin(wintype,payout,payfinal,i,paySound) {
 		setCookie("credits",credits,expiry);
 		document.getElementById("paid").innerHTML=i;
 		document.getElementById("credits").innerHTML=credits;
-		payStats(-1);
 
 		if ( dbgRapid == 1 ) {
 			loopTime = 0;
