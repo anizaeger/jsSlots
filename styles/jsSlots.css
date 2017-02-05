@@ -70,3 +70,9 @@ button.round {
 	border-width: 3px;
 	border-color: black;
 }
+.wheel {
+	background: #ffffff;
+	border-style: solid;
+	border-width: 3px;
+	border-color: black;
+}

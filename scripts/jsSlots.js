@@ -1119,6 +1119,7 @@ function initReels() {
 		}
 		setReel(r);
 	}
+	
 }
 
 // Advance reels by one step.
@@ -1176,8 +1177,10 @@ function lightReel(reelNum,posNum,toggle) {
 	var bright;
 	if ( toggle == 1 ) {
 		bright=100;
+		color="white";
 	} else {
-		bright=50;
+		bright=75;
+		color="";
 	}
 	document.getElementById("r" + reelNum + "p" + posNum).style.backgroundColor = color;
 	document.getElementById("r" + reelNum + "p" + posNum).style.WebkitFilter="brightness(" + bright + "%)" 
@@ -1574,7 +1577,7 @@ function initWheel() {
 
 function printWheel() {
 	wheeltext = '';
-	wheeltext += '<tr><td>--&gt;</td><td class="reel" width=' + wheelWidth + '><table width=100%>';
+	wheeltext += '<tr><td>--&gt;</td><td class="wheel" width=' + wheelWidth + '><table width=100%>';
 	for ( row = 0; row < wheelRows; row++ ) {
 		wheeltext += "<tr><td id='wp"+row+"'></td></tr>";
 	}
