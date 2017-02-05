@@ -1545,6 +1545,7 @@ function checkPayline() {
 			}, 1500);
 		} else {
 			payFinal = payout + credits;
+			payStats( payout * -1 );
 			payWin( wintype,payout,(payout+credits),0,0 );
 		}
 	} else {
@@ -1697,6 +1698,7 @@ function endWheel() {
 		document.getElementById("wheelWin").innerHTML=padNumber(payout,6);
 		payout += wheelPrePay;
 		document.getElementById("wheelPay").innerHTML=padNumber(payout,6);
+		payStats( payout * -1 );
 		payWin(18,payout,(payout+credits),0,0)
 	}
 }
