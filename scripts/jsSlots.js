@@ -344,8 +344,7 @@ var rndNudgeSym = new Array(numReels);		// Symbol nudge probability randomizer
 var rndWheel = new Array(wheelProg);		// Bonus wheel randomizer
 
 // Bet related variables
-//var betLimit = maxLineBet * paylines.length;
-var betLimit = maxLineBet;
+var betLimit = maxLineBet * paylines.length;
 
 var credits = 0;
 var betAmt = 0;
