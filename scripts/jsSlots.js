@@ -305,7 +305,17 @@ paytable[18] = [0,0,0,1,"3 Blanks"];
 
 var payline = new Array(numReels);	// Physical reel stop at payline
 var paySym = new Array(numReels);	// Numeric value representing symbol on payline
-var paylines = 1;			// Number of paylines.  Must remain set to one.  Included for multiple paylines in the future
+var paylines = new Array();		// Array holding reel positions for various paylines
+paylines[0] = [1,1,1];
+paylines[1] = [0,0,0];
+paylines[2] = [2,2,2];
+paylines[3] = [0,1,2];
+paylines[4] = [2,1,0];
+paylines[5] = [0,1,0];
+paylines[6] = [1,2,1];
+paylines[7] = [2,1,2];
+paylines[8] = [0,1,0];
+
 var payout;
 var payingOut;				// Machine is currently paying out a prize.
 
@@ -332,7 +342,7 @@ var rndNudgeSym = new Array(numReels);		// Symbol nudge probability randomizer
 var rndWheel = new Array(wheelProg);		// Bonus wheel randomizer
 
 // Bet related variables
-var betLimit = maxLineBet * paylines
+var betLimit = maxLineBet * paylines.length;
 
 var credits = 0;
 var betAmt = 0;
