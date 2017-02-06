@@ -1555,13 +1555,23 @@ function initWheel() {
 }
 
 function printWheel() {
-	wheeltext = '';
+	var wheeltext = '';
 	wheeltext += '<tr><td>--&gt;</td><td class="wheel" width=' + wheelWidth + '><table width=100%>';
-	for ( row = 0; row < wheelRows; row++ ) {
+	for ( var row = 0; row < wheelRows; row++ ) {
 		wheeltext += "<tr><td id='wp"+row+"'></td></tr>";
 	}
 	wheeltext += '</table><td>&lt;--</td></tr>';
 	document.getElementById("bonusWheel").innerHTML=wheeltext;
+	
+	var bright;
+	for ( var row = 0; row < wheelRows; row++ ) {
+		if ( row == wheelPayRow ) {
+			bright = 100;
+		} else {
+			bright = 50;
+		}
+		document.getElementById("wp" + row).style.WebkitFilter="brightness(" + bright + "%)"
+	}
 }
 
 function advWheel() {
