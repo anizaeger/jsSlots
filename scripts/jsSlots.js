@@ -941,7 +941,7 @@ function insertCoin() {
 		return;
 	} else {
 		lockBtn = 1;
-		playSound(0);
+		playSound("insertCoin");
 		setTimeout(function () {
 			lockBtn = 0;
 			credits++;
@@ -959,7 +959,7 @@ function insertBill() {
 		credits = credits + billCredits;
 		document.getElementById("credits").innerHTML=padNumber(credits,6);
 		setCookie("credits",credits,expiry);
-		playSound(1);
+		playSound("coinBong");
 	}
 }
 
@@ -969,7 +969,7 @@ function cashOut() {
 	} else {
 		cashingOut = 1;
 		lastBet = 0;
-		playSound(11);
+		playSound("cashOut");
 		setTimeout(function () {
 			document.getElementById("paid").innerHTML=padNumber(credits,6);
 			credits = 0;
@@ -1022,7 +1022,7 @@ function betOne() {
 			}
 			document.getElementById("progVal").style.color = "#ff0000";
 			document.getElementById("credits").innerHTML=padNumber(credits,6);
-			playSound(1);
+			playSound("coinBong");
 			if ( betAmt >= betLimit ) {
 				betAmt = betLimit;
 			}
@@ -1328,10 +1328,10 @@ function spinLoop(minSpin) {
 	if ( spinSteps < reelSteps[minSpin] || reelTopPos[minSpin] != topPos ) {
 		advReel(minSpin);
 	} else {
-		playSound(6);
+		playSound("reelStop");
 		if ( possWin == 1 ) {
 			if ( payline[minSpin] == 7 ) {
-				playSound(minSpin+7);
+				playSound("possWin" + minSpin);
 				lightReel(minSpin,1,1);
 			} else {
 				possWin = 0;
@@ -1345,7 +1345,7 @@ function spinLoop(minSpin) {
 	}
 	
 	if ( spinSteps % Math.round( 100 / spinSpeed ) == 0 ) {
-		playSound(  Math.floor(Math.random() * 4) + 2  );
+		playSound( "tone" + Math.floor(Math.random() * 4 ));
 	}
 	spinSteps++;
 
@@ -1390,30 +1390,6 @@ function checkNudge() {
 	}
 }
 
-/*
-function doNudge(reel) {
-	if (nudgeVal[reel] != 0) {
-		reelTopPos[reel] += nudgeVal[reel];
-		if ( reelTopPos[reel] > 21 ) {
-			reelTopPos[reel] = 0
-		}
-		if ( reelTopPos[reel] < 0 ) {
-			reelTopPos[reel] = 21
-		}
-		setReel(reel);
-		playSound(6);
-	}
-	reel++
-	if ( reel == numReels ){
-		checkPayline();
-	} else {
-		setTimeout(function () {
-			doNudge(reel);
-		}, 250 )
-	}
-}
-*/
-
 function doNudge(r,nudge) {
 	for ( ; r < numReels; r++ ) {
 		if ( nudgeVal[r] != 0 ) {
@@ -1424,7 +1400,7 @@ function doNudge(r,nudge) {
 				reelTopPos[r] = strip[r].length - 1
 			}
 			setReel(r);
-			playSound(6);
+			playSound("reelStop");
 			nudgeVal[r] = 0;
 			nudge--;
 			break;
@@ -1763,7 +1739,7 @@ function payComplete(wintype,payout,payfinal) {
 	credits = payfinal;
 	document.getElementById("paid").innerHTML=padNumber(payout,6);
 	document.getElementById("credits").innerHTML=padNumber(credits,6);
-	playSound(1);
+	playSound("coinBong");
 	payout = 0;
 	payingOut = 0;
 	displayWin(wintype);
@@ -1792,7 +1768,7 @@ function endGame() {
 }
 
 function jackpot(c,m) {
-	playSound(10);
+	playSound("jackpot");
 	if ( c < 9 ) {
 		c++;
 		setTimeout(function () {
@@ -2131,49 +2107,36 @@ function preloadImage() {
 	SoundJS Functions
 */
 
-var sounds = ["insertCoin","coinBong","4C","4E","4G","5C","reelStop","possWin0","possWin1","possWin2","jackpot","cashOut","scatter1","scatter2","scatter3","bonusWin","bonusHit1","bonusHit2","bonusHit3","spinWheel","wheelTick"];
+var sounds = ["insertCoin","coinBong","reelStop","jackpot","cashOut"];
 
 var wheelSounds = ["Spin","Wait","Tick"]
 
 var paySounds = 33;
 
 function preloadSound() {
-	for ( sIndex = 0; sIndex < sounds.length; sIndex++ ) {
-		createjs.Sound.registerSound({id:sIndex, src:"sounds/" + sounds[sIndex] + ".wav"});
+
+	// General sounds
+	for ( var sIndex = 0; sIndex < sounds.length; sIndex++ ) {
+		createjs.Sound.registerSound({id:sounds[sIndex], src:"sounds/" + sounds[sIndex] + ".wav"});
 	};
-	for ( pIndex = 0; pIndex < paySounds; pIndex++ ) {
-		createjs.Sound.registerSound({id:"paySound" + pIndex, src:"sounds/payOut/paySound" + pIndex + ".wav"});
+	// Reel spinning tones
+	for ( var sIndex = 0; sIndex < 4; sIndex++ ) {
+		createjs.Sound.registerSound({id:"tone" + sIndex, src:"sounds/tone" + sIndex + ".wav"});
 	};
-	for ( wIndex = 0; wIndex < wheelSounds.length; wIndex++ ) {
-		createjs.Sound.registerSound({id:"wheel" + wheelSounds[wIndex], src:"sounds/wheel" + wheelSounds[wIndex] + ".wav"});
+	// Possible progressive
+	for ( var sIndex = 0; sIndex < wheelSounds.length; sIndex++ ) {
+		createjs.Sound.registerSound({id:"possWin" + sIndex, src:"sounds/possWin" + sIndex + ".wav"});
+	};	
+	// Bonus wheel sounds
+	for ( var sIndex = 0; sIndex < wheelSounds.length; sIndex++ ) {
+		createjs.Sound.registerSound({id:"wheel" + wheelSounds[sIndex], src:"sounds/wheel" + wheelSounds[sIndex] + ".wav"});
+	};
+	// Payout Sounds
+	for ( var sIndex = 0; sIndex < paySounds; sIndex++ ) {
+		createjs.Sound.registerSound({id:"paySound" + sIndex, src:"sounds/payOut/paySound" + sIndex + ".wav"});
 	};
 }
 
 function playSound(sIndex) {
-	/*
-		sounds sIndex Values:
-		0: insertCoin
-		1: coinBong
-		2: 4C
-		3: 4E
-		4: 4G
-		5: 5C
-		6: reelStop
-		7: possWin0
-		8: possWin1
-		9: possWin2
-		10: jackpot
-		11: cashout
-		12: scatter1
-		13: scatter2
-		14: scatter3
-		15: bonusWin
-		16: bonusHit1
-		17: bonusHit2
-		18: bonusHit3
-		19: spinWheel
-		20: wheelTick
-	*/
-
 	createjs.Sound.play(sIndex)
 }
