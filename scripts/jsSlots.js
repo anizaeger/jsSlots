@@ -664,7 +664,9 @@ function clearMisc() {
 	dbgSpin=0;
 	dbgRapid=0;
 	rndDisp=0;
-	document.getElementById("miscDataTbl").innerHTML="";
+	var miscHtml="";
+	miscHtml += '<tr><td>&nbsp;</td></tr>'
+	document.getElementById("miscDataTbl").innerHTML=miscHtml;
 }
 
 function printStats() {
@@ -1177,12 +1179,12 @@ function lightReel(reelNum,posNum,toggle) {
 	var bright;
 	if ( toggle == 1 ) {
 		bright=100;
-		color="white";
+//		color="";
 	} else {
-		bright=75;
-		color="";
+		bright=50;
+//		color="";
 	}
-	document.getElementById("r" + reelNum + "p" + posNum).style.backgroundColor = color;
+//	document.getElementById("r" + reelNum + "p" + posNum).style.backgroundColor = color;
 	document.getElementById("r" + reelNum + "p" + posNum).style.WebkitFilter="brightness(" + bright + "%)" 
 }
 
@@ -1970,7 +1972,7 @@ function initTicker() {
 	tickerHtml += '<tr cellpadding=0>';
 	for (var c = tickerCells - 1; c >= 0; c--) {
 		tickerTape[c] = '';
-		tickerHtml += '<td width=50 id="ticker_' + c + '">';
+		tickerHtml += '<td id="ticker_' + c + '">';
 		tickerHtml += '&nbsp;';
 		tickerHtml += '</td>';
 	}
