@@ -91,7 +91,7 @@ var maxProg = 100000;
 
 // Width of bonus wheel.
 // [Default: 150]
-var wheelWidth = 150;
+var wheelWidth = 125;
 
 // Number of rows to display on bonus wheel.  Even values will be incremented to the next odd integer.
 // [Default: 9]
@@ -316,6 +316,8 @@ paylines[6] = [1,2,1];
 paylines[7] = [2,1,2];
 paylines[8] = [0,1,0];
 
+var paylineLed = [4,2,6,1,7,3,5,8,0];
+
 var payout;
 var payingOut;				// Machine is currently paying out a prize.
 
@@ -342,7 +344,8 @@ var rndNudgeSym = new Array(numReels);		// Symbol nudge probability randomizer
 var rndWheel = new Array(wheelProg);		// Bonus wheel randomizer
 
 // Bet related variables
-var betLimit = maxLineBet * paylines.length;
+//var betLimit = maxLineBet * paylines.length;
+var betLimit = maxLineBet;
 
 var credits = 0;
 var betAmt = 0;
@@ -449,33 +452,15 @@ function printPaytable() {
 	}
 	document.getElementById( "paytable" ).innerHTML=paytext;
 }
-/*
-function printPaytable() {
-	var paytext = "";
-	for (p = 0; p < paytable.length; p++) {
-		paytext += "<tr>";
-		for (r = 0; r < numReels; r++) {
 
-		}
-		for (c = 1; c <= maxLineBet; c++) {
-			
-		}
-		paytext += "</tr>";
-	}
-	document.getElementById( "paytable" ).innerHTML=paytext;
-}
-
-function populatePaytable() {
-	for (p = 0; p < paytable.length; p++) {
-		for (r = 0; r < numReels; r++) {
-			
-		}
-		for (c = 1; c <= maxLineBet; c++) {
-			
-		}
+function printPaylines() {
+	for ( var p = 0; p < paylines.length; p++ ) {
+		document.getElementById("pLbl"+paylineLed[p]).innerHTML=( p + 1 ) + ":";
+		document.getElementById("pBet"+paylineLed[p]).innerHTML=0;
+		document.getElementById("pWin"+paylineLed[p]).innerHTML=padNumber('',4);
 	}
 }
-*/
+
 function payStats(pmt) {
 	if ( dbgOvrd == 1 ) { return ; }
 	if ( pmt > 0 ) {
@@ -926,7 +911,7 @@ function printRnd() {
 		}
 		rndHtml += '</tr>';
 	}
-	rndHtml += '<tr><td>XOR</td>';
+	rndHtml += '<tr><td>X:</td>';
 	for (var b = 31; b >= 0; b--) {
 		rndHtml += '<td id=xor_b' + b + '>';
 		rndHtml += '&nbsp;';
@@ -2170,6 +2155,7 @@ function init() {
 	preloadImage();
 	preloadSound();
 	printPaytable();
+	printPaylines();
 	initRNG();
 	initVReels();
 	popRnd();
