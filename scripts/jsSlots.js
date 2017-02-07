@@ -412,7 +412,7 @@ function printPaytable() {
 		}
 		for ( c = 1; c <= maxLineBet; c++ ) {
 			if ( p == 0 && c == maxLineBet ) {
-				paytext += '<td class="payCell" id="pt' + p + 'c' + c + '" colspan=2 style="text-align:left;"><span class="ledDispl" id="progVal">&nbsp;</span></td>';
+				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" colspan=2 style="text-align:left;">Jackpot!</td>';
 			} else if ( p == 18 && c == maxLineBet ) {
 				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" colspan=2 style="text-align:left;">SPIN</td>';
 			} else {
@@ -1020,7 +1020,6 @@ function betOne() {
 					x[i].style.fontWeight = weight;
 				}
 			}
-			document.getElementById("progVal").style.color = "#ff0000";
 			document.getElementById("credits").innerHTML=padNumber(credits,6);
 			playSound("coinBong");
 			if ( betAmt >= betLimit ) {
@@ -1028,7 +1027,6 @@ function betOne() {
 			}
 			document.getElementById("betAmt").innerHTML=padNumber(betAmt,2);
 			if ( betAmt == betLimit ) {
-				document.getElementById("progVal").style.color = "#00ff00";
 				reBet = 0;
 				setTimeout(function() {
 					spin();
@@ -1824,6 +1822,7 @@ function progInit() {
 		setCookie("progVal",progVal,expiry)
 	}
 	document.getElementById("progVal").innerHTML=padNumber(progVal,6,'',1);
+	document.getElementById("progVal").style.color = "#00ff00";
 }
 
 function progReset() {
