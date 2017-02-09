@@ -425,7 +425,7 @@ function printPaytable() {
 		for ( c = 1; c <= maxLineBet; c++ ) {
 			if ( p == 0 && c == maxLineBet ) {
 				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" colspan=2 style="text-align:left;">Jackpot!</td>';
-			} else if ( p == 18 && c == maxLineBet ) {
+			} else if ( p == 6 && c == maxLineBet ) {
 				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" colspan=2 style="text-align:left;">SPIN</td>';
 			} else {
 				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" width=32>' + paytable[p][numReels] * c + '</td>';
@@ -1444,11 +1444,9 @@ function checkPayline() {
 			wilds++;
 		}
 	}
-	for (p = 0; p < paytable.length - 1; p++) {
+	for (p = 0; p < paytable.length; p++) {
 		match = 0;
-		if ( p == paytable.length - 1 && wilds > 0 ) {
-			continue;
-		} else if (( p == 13 && wilds == 2 ) || ( p == 17 && wilds == 1 )) { // Any Wilds
+		if ( paytable[p][1] < 0 && Math.abs(paytable[p][1]) == wilds  && wintype == -1 ) { // Any Wilds
 			wintype = p;
 		} else {
 			for (r = 0; r < numReels; r++) {
@@ -1487,7 +1485,6 @@ function checkPayline() {
 			}
 		}
 	}
-	alert(wintype)
 	if ( wintype >= 0 ) {
 		if ( wintype != paytable.length - 1 ) {
 			for ( var r = 0; r < numReels; r++ ) {
