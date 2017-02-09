@@ -198,14 +198,14 @@ var numVirtStops = new Array();  // Virt. reels
 // Reel Stop		   0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 2 2
 // Numbers		   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 
-strip[0] 		= [0,4,0,7,0,3,0,5,0,2,0,4,0,1,0,5,0,3,0,6,0,2];
-numVirtStops[0]		= [4,1,5,1,6,3,4,1,3,2,5,1,3,6,4,1,5,3,5,1,5,3];
+strip[0] 		= [0,4,0,7,0,3,0,5,0,8,0,4,0,1,0,5,0,3,0,6,0,2];
+numVirtStops[0]		= [4,1,4,1,4,3,4,1,3,5,4,1,3,6,4,1,5,3,5,1,4,5];
 
-strip[1] 		= [0,4,0,1,0,7,0,6,0,3,0,4,0,1,0,5,0,3,0,6,0,2];
-numVirtStops[1]		= [4,1,4,4,5,1,7,1,5,3,3,1,3,4,3,1,3,4,5,1,5,4];
+strip[1] 		= [0,4,0,8,0,7,0,6,0,2,0,4,0,1,0,5,0,3,0,6,0,2];
+numVirtStops[1]		= [4,1,4,5,4,1,6,1,4,3,3,1,3,8,3,1,3,4,4,1,4,4];
 
 strip[2] 		= [0,7,0,1,0,5,0,3,0,2,0,4,0,8,0,5,0,3,0,6,0,2];
-numVirtStops[2]		= [4,1,6,9,3,1,3,3,2,4,4,2,4,1,5,1,3,2,5,1,3,5];
+numVirtStops[2]		= [4,1,4,9,3,1,3,3,2,4,4,2,4,5,4,1,3,3,4,1,3,4];
 
 // Odds of symbol nudging to  payline space if selected, in symbols[] order
 var nudgeOdds = [0,1,2,3,10,20,30,100,50]
@@ -285,19 +285,19 @@ paytable[2] = [6,6,6,120,"3 Red Sevens"];
 paytable[3] = [5,5,5,100,"3 White Sevens"];
 paytable[4] = [4,4,4,80,"3 Blue Sevens"];
 paytable[5] = [100,100,100,40,"3 Sevens"];
-paytable[6] = [1,2,3,40,"Red, White, & Blue Bars"];
-paytable[7] = [3,3,3,30,"3 Blue Bars"];
-paytable[8] = [2,2,2,20,"3 White Bars"];
-paytable[9] = [102,103,104,20,"Red, White, & Blue"];
-paytable[10] = [1,1,1,10,"3 Red Bars"];
-paytable[11] = [101,101,101,5,"3 Bars"];
-paytable[12] = [-2,-2,-2,5,"2 Wilds"];
-paytable[13] = [102,102,102,2,"3 Reds"];
-paytable[14] = [103,103,103,2,"3 Whites"];
-paytable[15] = [104,104,104,2,"3 Blues"];
-paytable[16] = [-1,-1,-1,2,"1 Wild"];
-paytable[17] = [0,0,0,1,"3 Blanks"];
-paytable[18] = ["-","-",8,10,"Spin"];
+paytable[6] = [8,8,8,10,"Spin"];
+paytable[7] = [1,2,3,40,"Red, White, & Blue Bars"];
+paytable[8] = [3,3,3,30,"3 Blue Bars"];
+paytable[9] = [2,2,2,20,"3 White Bars"];
+paytable[10] = [102,103,104,20,"Red, White, & Blue"];
+paytable[11] = [1,1,1,10,"3 Red Bars"];
+paytable[12] = [101,101,101,5,"3 Bars"];
+paytable[13] = [-2,-2,-2,5,"2 Wilds"];
+paytable[14] = [102,102,102,2,"3 Reds"];
+paytable[15] = [103,103,103,2,"3 Whites"];
+paytable[16] = [104,104,104,2,"3 Blues"];
+paytable[17] = [-1,-1,-1,2,"1 Wild"];
+paytable[18] = [0,0,0,1,"3 Blanks"];
 
 var payline = new Array(numReels);	// Physical reel stop at payline
 var paySym = new Array(numReels);	// Numeric value representing symbol on payline
@@ -425,7 +425,7 @@ function printPaytable() {
 		for ( c = 1; c <= maxLineBet; c++ ) {
 			if ( p == 0 && c == maxLineBet ) {
 				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" colspan=2 style="text-align:left;">Jackpot!</td>';
-			} else if ( p == 18 && c == maxLineBet ) {
+			} else if ( p == 6 && c == maxLineBet ) {
 				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" colspan=2 style="text-align:left;">SPIN</td>';
 			} else {
 				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" width=32>' + paytable[p][numReels] * c + '</td>';
@@ -1444,51 +1444,41 @@ function checkPayline() {
 			wilds++;
 		}
 	}
-	if ( payline[2] == 8 ) {
-		wintype = paytable.length - 1;
-		doWheel = 1;
-	} else {
-		for (p = 0; p < paytable.length - 1; p++) {
-			match = 0;
-			if ( p == 18 && doWheel == 1 ) {
-				wintype = p;
-				break;
-			} else if ( p == 17 && wilds > 0 ) {
-				continue;
-			} else if (( p == 12 && wilds == 2 ) || ( p == 16 && wilds == 1 )) { // Any Wilds
-				wintype = p;
-			} else {
-				for (r = 0; r < numReels; r++) {
-					paySym[r] = paytable[p][r];
-				}
-				for (r = 0; r < numReels; r++) {
-					if ( paySym[r] < 0 ) {
-						break;
-					} else if (paySym[r] === "-" ) {
-						continue;
-					} else if (paySym[r] < 100) {
-						if (payline[r] == paySym[r] || payline[r] == 7) {
-							if (r == numReels - 1) {
-								wintype = p;
-								p = paytable.length;
-								break;	
-							} else {
-								continue;
-							}
+	for (p = 0; p < paytable.length; p++) {
+		match = 0;
+		if ( paytable[p][1] < 0 && Math.abs(paytable[p][1]) == wilds  && wintype == -1 ) { // Any Wilds
+			wintype = p;
+		} else {
+			for (r = 0; r < numReels; r++) {
+				paySym[r] = paytable[p][r];
+			}
+			for (r = 0; r < numReels; r++) {
+				if ( paySym[r] < 0 ) {
+					break;
+				} else if (paySym[r] === "-" ) {
+					continue;
+				} else if (paySym[r] < 100) {
+					if (payline[r] == paySym[r] || payline[r] == 7) {
+						if (r == numReels - 1) {
+							wintype = p;
+							p = paytable.length;
+							break;	
 						} else {
-							break;
+							continue;
 						}
 					} else {
-						gnum = paySym[r] - 100;
-						for ( sym = 0; sym < groups[gnum].length; sym++) {
-							if (payline[r] == groups[gnum][sym] || payline[r] == 7) {
-								match++;
-								if (r == numReels - 1 && match == numReels) {
-									wintype = p;
-									p = paytable.length;
-								}
-								break;
+						break;
+					}
+				} else {
+					gnum = paySym[r] - 100;
+					for ( sym = 0; sym < groups[gnum].length; sym++) {
+						if (payline[r] == groups[gnum][sym] || payline[r] == 7) {
+							match++;
+							if (r == numReels - 1 && match == numReels) {
+								wintype = p;
+								p = paytable.length;
 							}
+							break;
 						}
 					}
 				}
@@ -1496,12 +1486,9 @@ function checkPayline() {
 		}
 	}
 	if ( wintype >= 0 ) {
-		if ( wintype != 17 ) {
+		if ( wintype != paytable.length - 1 ) {
 			for ( var r = 0; r < numReels; r++ ) {
-				if ( (wintype == 12 || wintype == 16 ) && ( payline[r]) != 7 ) {
-					continue
-				}
-				if ( wintype == 18 && r != 2 ) {
+				if ( (wintype == 13 || wintype == 17 ) && ( payline[r]) != 7 ) {
 					continue
 				}
 				lightReel( r, 1 , 1 );
@@ -1514,12 +1501,12 @@ function checkPayline() {
 			payout = paytable[wintype][3];
 			payout *= betAmt;
 		}
-		if ( wintype != 0 && wintype != 12 && wintype != 16 ) {
+		if ( wintype != 0 && wintype != 13 && wintype != 17 ) {
 			payout *= Math.pow(2, wilds);
 
 		}
 		winStats( wintype, betAmt );
-		if ( wintype == 18 && betAmt == betLimit) {
+		if ( wintype == 6 && betAmt == betLimit) {
 			setTimeout(function () {
 				playSound("wheelSpin")
 			}, 250);
