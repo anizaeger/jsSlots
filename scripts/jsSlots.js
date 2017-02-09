@@ -2049,9 +2049,11 @@ $(window).keypress(function(e){
 });
 
 function preloadImage() {
-	for ( i = 0; i < symbols.length; i++)
-	var img=new Image();
-	img.src='images/' + symbols[i] + '.png';
+	var img;
+	for ( i = 0; i < symbols.length; i++) {
+		img=new Image();
+		img.src='images/' + symbols[i] + '.png';
+	}
 }
 
 /*
