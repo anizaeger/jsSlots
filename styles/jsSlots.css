@@ -45,6 +45,11 @@ button.round {
 	color:red;
 	background:#3f0000;
 }
+.progDispl {
+	font-family: LED;
+	font-size: 14pt;
+	background:#3f0000;
+}
 .top {
 	border-top:1px solid black;
 }

@@ -46,7 +46,7 @@ function gplAlert() {
 	copyTxt += "that code without the copy of the GNU GPL normally required by\n"
 	copyTxt += "section 4, provided you include this license notice and a URL\n"
 	copyTxt += "through which recipients can access the Corresponding Source.\n"
-	window.alert(copyTxt)
+	window.alert(copyTxt);
 }
 
 /*
@@ -61,13 +61,17 @@ var tickerChars = 45;
 // [Default: 250]
 var tickerTime = 250;
 
-// Number of characters in progressive jackpot display (include commas, points, and credit symbol in count.)
-// [Default: 10]
-var progDispChars = 10;
-
 // Miliseconds between progressive jackpot display cell color changes.
 // [Default: 500]
 var progDispTime = 500;
+
+// Number of credits to play before incrementing progressive value.
+// [Default: 5]
+var progInt = 5;
+
+// Colors to cycle on progressive display.
+// [Default: "red", "green", "blue", "orange"]
+var progColors = ["red", "green", "blue", "orange"];
 
 // Number of 32 bit random seeds to generate.  These will be XORed together to generate the final seed.
 // [Default: 10]
@@ -1017,6 +1021,7 @@ function betOne() {
 			credits--;
 			betAmt++;
 			payStats(1);
+			progInc(1);
 			for (c = 1; c <= maxLineBet; c++) {
 				if ( c == betAmt ) {
 					weight = "bold";
@@ -1228,7 +1233,6 @@ function spin() {
 	}
 	setCookie("spinCount",spinCount,expiry);
 	setCookie("credits",credits,expiry);
-	progInc(betAmt);
 	spinSteps = 0;
 	possWin = 1;
 	wheelMult = -1;
@@ -1809,6 +1813,10 @@ function jackpot(c,m) {
 }
 
 function progMakeDisp() {
+	var progDisp;
+	var progDispChars = (( progFormat(maxProg).length) + 1 );
+	var numProgColors = progColors.length;
+	var colorNum = 0;
 	var progDispHtml = '';
 	progDispHtml += "<tr>";
 	for ( c = 0; c < progDispChars; c++ ) {
@@ -1818,6 +1826,14 @@ function progMakeDisp() {
 	}
 	progDispHtml += "</tr>";
 	document.getElementById('progDisp').innerHTML=progDispHtml;
+	progCharColor = new Array();
+	for ( c = 0; c < progDispChars; c++ ) {
+		progCharColor[c] = colorNum;
+		if ( ++colorNum == numProgColors ) {
+			colorNum = 0;
+		}
+		document.getElementById('progChar' + c).style.color = progColors[progCharColor[c]];
+	}
 	progInit();
 }
 
@@ -1828,25 +1844,60 @@ function progInit() {
 		setCookie("progCnt",progCnt,expiry)
 		setCookie("progVal",progVal,expiry)
 	}
-	document.getElementById("progVal").innerHTML=padNumber(progVal,6,'',1);
-	document.getElementById("progVal").style.color = "#00ff00";
+	progPrint(progVal);
+	setTimeout(function () {
+		progCycleColors()
+	}, progDispTime )
 }
 
-function progPrint() {
-	
+function progPrint(progAmt) {
+	var progString = new Array();
+	progString = progFormat(progAmt);
+	var progDispChars = progFormat(maxProg).length;
+	for ( var c = 0; c < progDispChars; c++ ) {
+		document.getElementById("progChar" + c).innerHTML="&nbsp;"
+	}
+	for ( var c = 0; c < progString.length; c++ ) {
+		document.getElementById("progChar" + c).innerHTML=progString[c];
+	}
+	return progString;
+}
+
+function progCycleColors() {
+	var progDispChars = progFormat(maxProg).length;
+	var numProgColors = progColors.length;
+	for ( c = 0; c < progDispChars; c++ ) {
+		if ( ++progCharColor[c] == numProgColors ) {
+			progCharColor[c] = 0;
+		}
+		document.getElementById('progChar' + c).style.color = progColors[progCharColor[c]];
+	}
+	setTimeout(function () {
+		progCycleColors()
+	}, progDispTime )
+}
+
+function progFormat(progAmt) {
+	var progCreds = parseInt(progAmt).toLocaleString();
+	var progCents = Math.round( ( progCnt / progInt ) * 100 )
+	progCents = padNumber(progCents, 2, '0');
+	var progString = '$' + progCreds + '.' + progCents
+	progString = progString.toString();
+	var progLen = progString.length;
+	return progString;
 }
 
 function progInc (steps) {
 	for ( i = 0; i < steps; i++ ) {
 		progCnt++
-		if ( progCnt == 5 ) {
+		if ( progCnt == progInt ) {
 			progCnt = 0;
 			if ( progVal < maxProg ) {
 				progVal++;
 			}
 			setCookie("progVal",progVal,expiry);
-			document.getElementById("progVal").innerHTML=padNumber(progVal,6,'',1);
 		}
+		progPrint(progVal);
 	}
 }
 
