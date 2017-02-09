@@ -285,19 +285,19 @@ paytable[2] = [6,6,6,120,"3 Red Sevens"];
 paytable[3] = [5,5,5,100,"3 White Sevens"];
 paytable[4] = [4,4,4,80,"3 Blue Sevens"];
 paytable[5] = [100,100,100,40,"3 Sevens"];
-paytable[6] = [1,2,3,40,"Red, White, & Blue Bars"];
-paytable[7] = [3,3,3,30,"3 Blue Bars"];
-paytable[8] = [2,2,2,20,"3 White Bars"];
-paytable[9] = [102,103,104,20,"Red, White, & Blue"];
-paytable[10] = [1,1,1,10,"3 Red Bars"];
-paytable[11] = [101,101,101,5,"3 Bars"];
-paytable[12] = [-2,-2,-2,5,"2 Wilds"];
-paytable[13] = [102,102,102,2,"3 Reds"];
-paytable[14] = [103,103,103,2,"3 Whites"];
-paytable[15] = [104,104,104,2,"3 Blues"];
-paytable[16] = [-1,-1,-1,2,"1 Wild"];
-paytable[17] = [0,0,0,1,"3 Blanks"];
-paytable[18] = [8,8,8,10,"Spin"];
+paytable[6] = [8,8,8,10,"Spin"];
+paytable[7] = [1,2,3,40,"Red, White, & Blue Bars"];
+paytable[8] = [3,3,3,30,"3 Blue Bars"];
+paytable[9] = [2,2,2,20,"3 White Bars"];
+paytable[10] = [102,103,104,20,"Red, White, & Blue"];
+paytable[11] = [1,1,1,10,"3 Red Bars"];
+paytable[12] = [101,101,101,5,"3 Bars"];
+paytable[13] = [-2,-2,-2,5,"2 Wilds"];
+paytable[14] = [102,102,102,2,"3 Reds"];
+paytable[15] = [103,103,103,2,"3 Whites"];
+paytable[16] = [104,104,104,2,"3 Blues"];
+paytable[17] = [-1,-1,-1,2,"1 Wild"];
+paytable[18] = [0,0,0,1,"3 Blanks"];
 
 var payline = new Array(numReels);	// Physical reel stop at payline
 var paySym = new Array(numReels);	// Numeric value representing symbol on payline
@@ -1446,13 +1446,15 @@ function checkPayline() {
 	}
 	for (p = 0; p < paytable.length - 1; p++) {
 		match = 0;
-		if ( p == 17 && wilds > 0 ) {
+		if ( p == paytable.length - 1 && wilds > 0 ) {
 			continue;
-		} else if (( p == 12 && wilds == 2 ) || ( p == 16 && wilds == 1 )) { // Any Wilds
+		} else if (( p == 13 && wilds == 2 ) || ( p == 17 && wilds == 1 )) { // Any Wilds
 			wintype = p;
 		} else {
 			for (r = 0; r < numReels; r++) {
 				paySym[r] = paytable[p][r];
+			}
+			for (r = 0; r < numReels; r++) {
 				if ( paySym[r] < 0 ) {
 					break;
 				} else if (paySym[r] === "-" ) {
@@ -1485,10 +1487,11 @@ function checkPayline() {
 			}
 		}
 	}
+	alert(wintype)
 	if ( wintype >= 0 ) {
-		if ( wintype != 17 ) {
+		if ( wintype != paytable.length - 1 ) {
 			for ( var r = 0; r < numReels; r++ ) {
-				if ( (wintype == 12 || wintype == 16 ) && ( payline[r]) != 7 ) {
+				if ( (wintype == 13 || wintype == 17 ) && ( payline[r]) != 7 ) {
 					continue
 				}
 				lightReel( r, 1 , 1 );
@@ -1501,12 +1504,12 @@ function checkPayline() {
 			payout = paytable[wintype][3];
 			payout *= betAmt;
 		}
-		if ( wintype != 0 && wintype != 12 && wintype != 16 ) {
+		if ( wintype != 0 && wintype != 13 && wintype != 17 ) {
 			payout *= Math.pow(2, wilds);
 
 		}
 		winStats( wintype, betAmt );
-		if ( wintype == 18 && betAmt == betLimit) {
+		if ( wintype == 6 && betAmt == betLimit) {
 			setTimeout(function () {
 				playSound("wheelSpin")
 			}, 250);
