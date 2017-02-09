@@ -198,14 +198,14 @@ var numVirtStops = new Array();  // Virt. reels
 // Reel Stop		   0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 2 2
 // Numbers		   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 
-strip[0] 		= [0,4,0,7,0,3,0,5,0,2,0,4,0,1,0,5,0,3,0,6,0,2];
-numVirtStops[0]		= [4,1,5,1,6,3,4,1,3,2,5,1,3,6,4,1,5,3,5,1,5,3];
+strip[0] 		= [0,4,0,7,0,3,0,5,0,8,0,4,0,1,0,5,0,3,0,6,0,2];
+numVirtStops[0]		= [4,1,4,1,4,3,4,1,3,5,4,1,3,6,4,1,5,3,5,1,4,5];
 
-strip[1] 		= [0,4,0,1,0,7,0,6,0,3,0,4,0,1,0,5,0,3,0,6,0,2];
-numVirtStops[1]		= [4,1,4,4,5,1,7,1,5,3,3,1,3,4,3,1,3,4,5,1,5,4];
+strip[1] 		= [0,4,0,8,0,7,0,6,0,2,0,4,0,1,0,5,0,3,0,6,0,2];
+numVirtStops[1]		= [4,1,4,5,4,1,6,1,4,3,3,1,3,8,3,1,3,4,4,1,4,4];
 
 strip[2] 		= [0,7,0,1,0,5,0,3,0,2,0,4,0,8,0,5,0,3,0,6,0,2];
-numVirtStops[2]		= [4,1,6,9,3,1,3,3,2,4,4,2,4,1,5,1,3,2,5,1,3,5];
+numVirtStops[2]		= [4,1,4,9,3,1,3,3,2,4,4,2,4,5,4,1,3,3,4,1,3,4];
 
 // Odds of symbol nudging to  payline space if selected, in symbols[] order
 var nudgeOdds = [0,1,2,3,10,20,30,100,50]
@@ -297,7 +297,7 @@ paytable[14] = [103,103,103,2,"3 Whites"];
 paytable[15] = [104,104,104,2,"3 Blues"];
 paytable[16] = [-1,-1,-1,2,"1 Wild"];
 paytable[17] = [0,0,0,1,"3 Blanks"];
-paytable[18] = ["-","-",8,10,"Spin"];
+paytable[18] = [8,8,8,10,"Spin"];
 
 var payline = new Array(numReels);	// Physical reel stop at payline
 var paySym = new Array(numReels);	// Numeric value representing symbol on payline
@@ -1444,51 +1444,41 @@ function checkPayline() {
 			wilds++;
 		}
 	}
-	if ( payline[2] == 8 ) {
-		wintype = paytable.length - 1;
-		doWheel = 1;
-	} else {
-		for (p = 0; p < paytable.length - 1; p++) {
-			match = 0;
-			if ( p == 18 && doWheel == 1 ) {
-				wintype = p;
-				break;
-			} else if ( p == 17 && wilds > 0 ) {
-				continue;
-			} else if (( p == 12 && wilds == 2 ) || ( p == 16 && wilds == 1 )) { // Any Wilds
-				wintype = p;
-			} else {
-				for (r = 0; r < numReels; r++) {
-					paySym[r] = paytable[p][r];
-				}
-				for (r = 0; r < numReels; r++) {
-					if ( paySym[r] < 0 ) {
-						break;
-					} else if (paySym[r] === "-" ) {
-						continue;
-					} else if (paySym[r] < 100) {
-						if (payline[r] == paySym[r] || payline[r] == 7) {
-							if (r == numReels - 1) {
-								wintype = p;
-								p = paytable.length;
-								break;	
-							} else {
-								continue;
-							}
+	for (p = 0; p < paytable.length - 1; p++) {
+		match = 0;
+		if ( p == 17 && wilds > 0 ) {
+			continue;
+		} else if (( p == 12 && wilds == 2 ) || ( p == 16 && wilds == 1 )) { // Any Wilds
+			wintype = p;
+		} else {
+			for (r = 0; r < numReels; r++) {
+				paySym[r] = paytable[p][r];
+				if ( paySym[r] < 0 ) {
+					break;
+				} else if (paySym[r] === "-" ) {
+					continue;
+				} else if (paySym[r] < 100) {
+					if (payline[r] == paySym[r] || payline[r] == 7) {
+						if (r == numReels - 1) {
+							wintype = p;
+							p = paytable.length;
+							break;	
 						} else {
-							break;
+							continue;
 						}
 					} else {
-						gnum = paySym[r] - 100;
-						for ( sym = 0; sym < groups[gnum].length; sym++) {
-							if (payline[r] == groups[gnum][sym] || payline[r] == 7) {
-								match++;
-								if (r == numReels - 1 && match == numReels) {
-									wintype = p;
-									p = paytable.length;
-								}
-								break;
+						break;
+					}
+				} else {
+					gnum = paySym[r] - 100;
+					for ( sym = 0; sym < groups[gnum].length; sym++) {
+						if (payline[r] == groups[gnum][sym] || payline[r] == 7) {
+							match++;
+							if (r == numReels - 1 && match == numReels) {
+								wintype = p;
+								p = paytable.length;
 							}
+							break;
 						}
 					}
 				}
@@ -1499,9 +1489,6 @@ function checkPayline() {
 		if ( wintype != 17 ) {
 			for ( var r = 0; r < numReels; r++ ) {
 				if ( (wintype == 12 || wintype == 16 ) && ( payline[r]) != 7 ) {
-					continue
-				}
-				if ( wintype == 18 && r != 2 ) {
 					continue
 				}
 				lightReel( r, 1 , 1 );
