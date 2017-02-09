@@ -1708,27 +1708,15 @@ function payWin(wintype,payout,payfinal,i,paySound) {
 		}, 500);
 	} else {
 		payingOut = 1;
-		var loopTime;
+		var loopTime = 100;
 		document.getElementById("win").innerHTML=padNumber(payout,6);
-	
-		if (payout >= 300) {
-			loopTime = 25;
-		} else {
-			loopTime = 100;
-		}
+		loopTime = 100;
 		if ( wintype == 0 && betAmt == maxLineBet) {
 			jackpot(0,1);
 			return;
 		} else {
-			if ( loopTime == 25 ) {
-				if ( i % 4 == 0 ) {
-					playSound("paySound" + paySound);
-					paySound++;
-				}
-			} else {
-				playSound("paySound" + paySound);
-				paySound++;
-			}
+			playSound("paySound" + paySound);
+			paySound++;
 			if (paySound == paySounds ) { paySound = 0; }
 		}
 	
