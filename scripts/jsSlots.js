@@ -63,7 +63,7 @@ var tickerTime = 250;
 
 // Miliseconds between progressive jackpot display cell color changes.
 // [Default: 500]
-var progDispTime = 500;
+var progDispTime = 1000;
 
 // Number of credits to play before incrementing progressive value.
 // [Default: 5]
@@ -71,7 +71,7 @@ var progInt = 5;
 
 // Colors to cycle on progressive display.
 // [Default: "red", "green", "blue", "orange"]
-var progColors = ["red", "green", "blue", "orange"];
+var progColors = ["#ffffff", "#00ffff", "#ff00ff", "#0000ff", "#ffff00", "#00ff00", "#ff0000"];
 
 // Number of 32 bit random seeds to generate.  These will be XORed together to generate the final seed.
 // [Default: 10]
