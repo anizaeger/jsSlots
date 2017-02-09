@@ -53,13 +53,21 @@ function gplAlert() {
  *	Configuration
  */
 
-// Number of cells in message ticker.
+// Number of characters in message ticker.
 // [Default: 40]
-var tickerCells = 45;
+var tickerChars = 45;
 
 // Milliseconds between ticker steps.
 // [Default: 250]
 var tickerTime = 250;
+
+// Number of characters in progressive jackpot display (include commas, points, and credit symbol in count.)
+// [Default: 10]
+var progDispChars = 10;
+
+// Miliseconds between progressive jackpot display cell color changes.
+// [Default: 500]
+var progDispTime = 500;
 
 // Number of 32 bit random seeds to generate.  These will be XORed together to generate the final seed.
 // [Default: 10]
@@ -1800,6 +1808,34 @@ function jackpot(c,m) {
 	}
 }
 
+function progMakeDisp() {
+	var progDispHtml = '';
+	progDispHtml += "<tr>";
+	for ( c = 0; c < progDispChars; c++ ) {
+		progDispHtml += '<td id=progChar' + c + '>';
+		progDispHtml += '';
+		progDispHtml += '</td>';
+	}
+	progDispHtml += "</tr>";
+	document.getElementById('progDisp').innerHTML=progDispHtml;
+	progInit();
+}
+
+function progInit() {
+	if (progVal == 0) {
+		progCnt = 0;
+		progVal = paytable[0][numReels] * maxLineBet * 5/3;
+		setCookie("progCnt",progCnt,expiry)
+		setCookie("progVal",progVal,expiry)
+	}
+	document.getElementById("progVal").innerHTML=padNumber(progVal,6,'',1);
+	document.getElementById("progVal").style.color = "#00ff00";
+}
+
+function progPrint() {
+	
+}
+
 function progInc (steps) {
 	for ( i = 0; i < steps; i++ ) {
 		progCnt++
@@ -1812,17 +1848,6 @@ function progInc (steps) {
 			document.getElementById("progVal").innerHTML=padNumber(progVal,6,'',1);
 		}
 	}
-}
-
-function progInit() {
-	if (progVal == 0) {
-		progCnt = 0;
-		progVal = paytable[0][numReels] * maxLineBet * 5/3;
-		setCookie("progCnt",progCnt,expiry)
-		setCookie("progVal",progVal,expiry)
-	}
-	document.getElementById("progVal").innerHTML=padNumber(progVal,6,'',1);
-	document.getElementById("progVal").style.color = "#00ff00";
 }
 
 function progReset() {
@@ -1949,13 +1974,13 @@ function popRnd() {
 
 // Message ticker
 
-var tickerTape = new Array(tickerCells);
+var tickerTape = new Array(tickerChars);
 var runTicker;
 function initTicker() {
 	var tickerHtml = ""
 	runTicker = 0;
 	tickerHtml += '<tr cellpadding=0>';
-	for (var c = tickerCells - 1; c >= 0; c--) {
+	for (var c = tickerChars - 1; c >= 0; c--) {
 		tickerTape[c] = '';
 		tickerHtml += '<td id="ticker_' + c + '">';
 		tickerHtml += '&nbsp;';
@@ -1976,7 +2001,7 @@ function tickerLoop(tickerText,tickerStep) {
 	} else {
 		var msgTxt = tickerText.split('');
 		var nextCell;
-		if (tickerStep >= (tickerText.length + tickerCells)) {
+		if (tickerStep >= (tickerText.length + tickerChars)) {
 			tickerStep = 0
 		}
 		if (tickerStep < tickerText.length && tickerText[tickerStep] != ' ') {
@@ -1984,7 +2009,7 @@ function tickerLoop(tickerText,tickerStep) {
 		} else {
 			nextCell = '&nbsp;';
 		}
-		for (var c = tickerCells - 1; c >= 0; c--) {
+		for (var c = tickerChars - 1; c >= 0; c--) {
 			if ( c == 0 ) {
 				tickerTape[c] = nextCell;
 			} else {
@@ -2002,7 +2027,7 @@ function tickerLoop(tickerText,tickerStep) {
 function clearTicker() {
 	runTicker = 0;
 	setTimeout(function () {
-		for (c = 0; c < tickerCells; c++) {
+		for (c = 0; c < tickerChars; c++) {
 			tickerTape[c] = '&nbsp;';
 			document.getElementById("ticker_" + c).innerHTML = tickerTape[c];
 		}
@@ -2059,7 +2084,7 @@ function init() {
 	initTicker();
 	clearWin();
 	cookieRestore();
-	progInit();
+	progMakeDisp();
 	clearMisc();
 	payStats(0);
 	endGame();
