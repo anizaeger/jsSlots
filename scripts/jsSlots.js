@@ -1000,8 +1000,8 @@ function clearWin() {
 		for ( var p = 0; p < numReelPos; p++ ) {
 			lightReel(r,p,0);
 		}
-		lightWheel(0);
 	}
+	tgglLights("wheelPayRow", 0);
 	document.getElementById("win").innerHTML=padNumber("",6);
 	document.getElementById("paid").innerHTML=padNumber("",6);
 	document.getElementById("reelMult").innerHTML=padNumber("",2);
@@ -1523,7 +1523,7 @@ function checkPayline() {
 			setTimeout(function () {
 				wheelWait(wintype);
 			}, 1500);
-			lightWheel(1);
+			tgglLights("wheelPayRow", 1);
 		} else {
 			payFinal = payout + credits;
 			payStats( payout * -1 );
@@ -1559,20 +1559,15 @@ function initWheel() {
 
 function printWheel() {
 	var wheeltext = '';
-	wheeltext += '<tr><td>--&gt;</td><td class="wheel" width=' + wheelWidth + '><table width=100%>';
+	wheeltext += '<tr><td class="wheelPayRow">--&gt;</td><td class="wheel" width=' + wheelWidth + '><table width=100%>';
 	for ( var row = 0; row < wheelRows; row++ ) {
 		wheeltext += "<tr><td id='wp"+row+"'></td></tr>";
 	}
-	wheeltext += '</table><td>&lt;--</td></tr>';
+	wheeltext += '</table><td class="wheelPayRow">&lt;--</td></tr>';
 	document.getElementById("bonusWheel").innerHTML=wheeltext;
-	
-	var bright;
+	document.getElementById('wp'+wheelPayRow).className = "wheelPayRow"
+	var bright = 50;
 	for ( var row = 0; row < wheelRows; row++ ) {
-		if ( row == wheelPayRow ) {
-			bright = 100;
-		} else {
-			bright = 50;
-		}
 		document.getElementById("wp" + row).style.WebkitFilter="brightness(" + bright + "%)"
 	}
 }
@@ -1612,20 +1607,6 @@ function drawWheel() {
 		document.getElementById( "wp" + p ).innerHTML=slotVal;
 		document.getElementById( "wp" + p ).style.backgroundColor=slotColor;
 	}
-}
-
-// Control lighting effects for individual reel positions
-
-function lightWheel(toggle) {
-	var toggle = ( toggle || 0 );
-	var color;
-	var bright;
-	if ( toggle == 1 ) {
-		bright=100;
-	} else {
-		bright=50;
-	}
-	document.getElementById( "wp" + wheelPayRow ).style.WebkitFilter="brightness(" + bright + "%)" 
 }
 
 function wheelWait(wintype) {
@@ -2032,6 +2013,21 @@ function popRnd() {
 	}
 	for ( w = 0; w < wheelProg; w++ ) {
 		rndWheel[w] = Math.floor( Math.random() * wheelStrip.length);
+	}
+}
+
+function tgglLights(className, toggle) {
+	var toggle = ( toggle || 0 );
+	var color;
+	var bright;
+	if ( toggle == 1 ) {
+		bright=100;
+	} else {
+		bright=50;
+	}
+	var classElements = document.getElementsByClassName( className )
+	for ( c = 0; c < classElements.length; c++ ) {
+		classElements[c].style.WebkitFilter="brightness(" + bright + "%)"
 	}
 }
 
