@@ -261,8 +261,8 @@ var wheelTopPos;
 var wheelPayRow;
 var wheelStop = new Array(wheelProg);
 
-var doWheel;
 var wheelRun;
+var doWheelWait;
 
 /*
 	Symbol Group Legend
@@ -285,7 +285,7 @@ paytable[2] = [6,6,6,120,"3 Red Sevens"];
 paytable[3] = [5,5,5,100,"3 White Sevens"];
 paytable[4] = [4,4,4,80,"3 Blue Sevens"];
 paytable[5] = [100,100,100,40,"3 Sevens"];
-paytable[6] = [8,8,8,10,"Spin"];
+paytable[6] = [8,8,8,10,"Spin, spin, SPIN!!!!"];
 paytable[7] = [1,2,3,40,"Red, White, & Blue Bars"];
 paytable[8] = [3,3,3,30,"3 Blue Bars"];
 paytable[9] = [2,2,2,20,"3 White Bars"];
@@ -1000,6 +1000,7 @@ function clearWin() {
 		for ( var p = 0; p < numReelPos; p++ ) {
 			lightReel(r,p,0);
 		}
+		lightWheel(0);
 	}
 	document.getElementById("win").innerHTML=padNumber("",6);
 	document.getElementById("paid").innerHTML=padNumber("",6);
@@ -1012,14 +1013,18 @@ function clearWin() {
 	clearTicker();
 }
 
-function betOne() {
+function betOne(autobet) {
 	var weight;
 	if ( lockBtn != 1 ) {
 		if ( credits > 0 ) {
-			clearWin();
 			document.getElementById("gameover").innerHTML="";
 			credits--;
-			betAmt++;
+			if ( ++betAmt == 1 ) {
+				clearWin();
+				if (!autobet) {
+					startTicker("Press SPIN!");
+				}
+			}
 			payStats(1);
 			progInc(1);
 			for (c = 1; c <= maxLineBet; c++) {
@@ -1053,7 +1058,7 @@ function rebet() {
 	if ( reBet == 0 || lockSpin == 1 || lastBet == 0 || betAmt == betLimit || credits <= 0 ) {
 		return;
 	} else {
-		betOne();
+		betOne(true);
 	}
 	if ( betAmt == lastBet ) {
 		reBet = 0;
@@ -1072,7 +1077,7 @@ function betMax() {
 		return;
 	} else {
 		gameIdle = 0;
-		betOne();
+		betOne(true);
 	}
 	setTimeout(function () {
 		betMax();
@@ -1201,14 +1206,13 @@ function lightReel(reelNum,posNum,toggle) {
 
 // Spin related functions
 function startGame() {
-	if ( credits == 0 && betAmt == 0 || lockSpin == 1 && wheelRun != 1 && payingOut != 1 ) {
+	if ( credits == 0 && betAmt == 0 || lockSpin == 1 && wheelRun != true && payingOut != 1 ) {
 		return;
 	} else {
 		gameIdle = 0;
 	}
-	if ( wheelRun == 1 ) {
-		createjs.Sound.stop();
-		wheelSpin();
+	if ( wheelRun == true ) {
+		doWheelWait = false;
 	} else if ( payingOut == 1 ) {
 		payingOut = 2;
 	} else if ( betAmt == 0 ) {
@@ -1223,6 +1227,7 @@ function spin() {
 	if ( lockSpin == 1 || betAmt <= 0) {
 		return;
 	}
+	clearTicker();
 	gameIdle = 0;
 	lockSpin = 1;
 	lockBtn = 1;
@@ -1331,6 +1336,7 @@ function rapidSpin() {
 }
 
 function spinLoop(minSpin) {
+	runTicker = 0;
 	var topPos = reelStop[minSpin] - 1;
 	if ( topPos < 0 ) {
 		topPos = strip[minSpin].length - 1
@@ -1438,7 +1444,6 @@ function checkPayline() {
 	var matches;
 	var gnum;
 	var wintype = -1;
-	var doWheel = 0;
 	for (r = 0; r < numReels; r++) {
 		if (payline[r] == 7) {
 			wilds++;
@@ -1516,8 +1521,9 @@ function checkPayline() {
 			document.getElementById("reelMult").innerHTML=padNumber(Math.pow(2, wheelPreMult),2);
 			document.getElementById("wheelPrepay").innerHTML=padNumber(wheelPrePay,3);
 			setTimeout(function () {
-				playWheelWait();
+				wheelWait(wintype);
 			}, 1500);
+			lightWheel(1);
 		} else {
 			payFinal = payout + credits;
 			payStats( payout * -1 );
@@ -1608,15 +1614,46 @@ function drawWheel() {
 	}
 }
 
-function playWheelWait() {
-	wheelRun = 1;
+// Control lighting effects for individual reel positions
+
+function lightWheel(toggle) {
+	var toggle = ( toggle || 0 );
+	var color;
+	var bright;
+	if ( toggle == 1 ) {
+		bright=100;
+	} else {
+		bright=50;
+	}
+	document.getElementById( "wp" + wheelPayRow ).style.WebkitFilter="brightness(" + bright + "%)" 
+}
+
+function wheelWait(wintype) {
+	wheelRun = true;
+	doWheelWait = true;
 	wheelTotMult = wheelPreMult + wheelMult;
 	document.getElementById("wheelMult").innerHTML=padNumber((Math.pow(2, wheelMult)),2);
 	document.getElementById("totMult").innerHTML=padNumber((Math.pow(2, wheelTotMult)),2);
 	createjs.Sound.play("wheelWait",{loop:-1});
+	startTicker("Press SPIN!")
+	setTimeout(function() {
+		wheelWaitLoop(wintype);
+	},500)
 }
 
-function wheelSpin() {
+function wheelWaitLoop(wintype) {
+	if ( doWheelWait == true) {
+		setTimeout(function() {
+			wheelWaitLoop(wintype);
+		},500)
+	} else {
+		createjs.Sound.stop();
+		wheelSpin(wintype)
+	}
+}
+
+function wheelSpin(wintype) {
+	runTicker = 0;
 	if ( dbgWheel == 1 ) {
 		document.getElementById("wheelStop" + (wheelMult + 1)).innerHTML=wheelStop[wheelMult];
 		symnum = wheelStrip[wheelStop[wheelMult]];
@@ -1624,15 +1661,15 @@ function wheelSpin() {
 		document.getElementById("dbgWheelSlot" + (wheelMult + 1)).innerHTML=symbol;
 	}
 	spinSteps = 0;
-	wheelRun = 0;
+	wheelRun = false;
 	wheelTotMult = wheelPreMult + wheelMult;
 	document.getElementById("wheelMult").innerHTML=padNumber((Math.pow(2, wheelMult)),2);
 	document.getElementById("totMult").innerHTML=padNumber((Math.pow(2, wheelTotMult)),2);
 	wheelSteps = Math.floor(Math.random() * wheelStrip.length) + wheelStrip.length;
-	wheelLoop();
+	wheelLoop(wintype);
 }
 
-function wheelLoop() {
+function wheelLoop(wintype) {
 	var topPos = wheelStop[wheelMult] - wheelPayRow;
 	var paysym;
 	if ( topPos < 0 ) {
@@ -1653,14 +1690,14 @@ function wheelLoop() {
 			loopTime = 100;
 		}
 		setTimeout(function () {
-			wheelLoop();
+			wheelLoop(wintype);
 		}, loopTime );
 	} else {
-		endWheel();
+		endWheel(wintype);
 	}
 }
 
-function endWheel() {
+function endWheel(wintype) {
 	payslot = wheel[wheelPayRow];
 	var totMult = wheelPreMult + wheelMult;
 	if ( payslot == 0 ) {
@@ -1684,7 +1721,7 @@ function endWheel() {
 		payout += wheelPrePay;
 		document.getElementById("wheelPay").innerHTML=padNumber(payout,6);
 		payStats( payout * -1 );
-		payWin(18,payout,(payout+credits),0,0)
+		payWin(wintype,payout,(payout+credits),0,0)
 	}
 }
 
@@ -2017,8 +2054,10 @@ function initTicker() {
 }
 
 function startTicker(tickerText) {
-	runTicker = 1;
-	tickerLoop(tickerText,0);
+	setTimeout(function() {
+		runTicker = 1;
+		tickerLoop(tickerText,0);
+	},500)
 }
 
 function tickerLoop(tickerText,tickerStep) {
@@ -2135,7 +2174,7 @@ $(window).keypress(function(e){
 	switch ( code )
 	{
 	case 49:
-		betOne();
+		betOne(false);
 		return false;
 	case 32:
 		startGame();
