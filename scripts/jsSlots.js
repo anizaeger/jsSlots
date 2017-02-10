@@ -424,9 +424,9 @@ function printPaytable() {
 		}
 		for ( c = 1; c <= maxLineBet; c++ ) {
 			if ( p == 0 && c == maxLineBet ) {
-				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" colspan=2 style="text-align:left;">Jackpot!</td>';
+				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" colspan=2 style="text-align:left;">WIN</td>';
 			} else if ( p == 6 && c == maxLineBet ) {
-				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" colspan=2 style="text-align:left;">SPIN</td>';
+				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" colspan=2 style="text-align:left;">???</td>';
 			} else {
 				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" width=32>' + paytable[p][numReels] * c + '</td>';
 				if ( c == maxLineBet ) {
@@ -529,10 +529,11 @@ var grpNums = new Array(groups.length);
 var grpOdds = new Array(groups.length);
 
 function initSymOdds() {
+	var r,s;
 	for ( r = 0; r < numReels; r++ ) {
 		numVirtReelStops[r] = virtReel[r].length;
 	}
-	for ( symnum = 0; symnum < symbols.length; symnum++) {
+	for ( var symnum = 0; symnum < symbols.length; symnum++) {
 		symsNums[symnum] = new Array(numReels)
 		symsOdds[symnum] = new Array(numReels)
 		for ( r = 0; r < numReels; r++ ) {
@@ -546,7 +547,7 @@ function initSymOdds() {
 		}
 	}
 	
-	for ( grpnum = 0; grpnum < groups.length; grpnum++ ) {
+	for ( var grpnum = 0; grpnum < groups.length; grpnum++ ) {
 		grpNums[grpnum] = new Array(groups[grpnum].length)
 		grpOdds[grpnum] = new Array(groups[grpnum].length)
 		for ( r = 0; r < numReels; r++ ) {
@@ -587,7 +588,7 @@ function printSymOdds() {
 	var symOddsHtml = '';
 
 	symOddsHtml += '<tr><td><table>'
-	symOddsHtml += '<tr><td colspan=' + ( numReels * 2 + 1 ) + '>Number of vReel stops: </td></tr>';
+	symOddsHtml += '<tr><td colspan=' + numReels + '>Number of vReel stops: </td>';
 	symOddsHtml += '<tr>';
 	for ( r = 0; r < numReels; r++ ) {
 		symOddsHtml += '<td>' + numVirtReelStops[r] + '</td>';
@@ -621,6 +622,7 @@ function printSymOdds() {
 		symOddsHtml += '</tr>';
 	}
 	symOddsHtml += '</tr></table></td></tr>';
+	symOddsHtml += '<tr><td>*All symbol counts include WILDs.<br \>Totals will exceed number of vReel stops.</td></tr>';
 	document.getElementById("miscDataTbl").innerHTML=symOddsHtml;
 }
 
@@ -1532,7 +1534,6 @@ function checkPayline() {
 			tgglLights("wheelPayRow", 1);
 		} else {
 			payFinal = payout + credits;
-			payStats( payout * -1 );
 			payWin( wintype,payout,(payout+credits),0,0 );
 		}
 	} else {
@@ -1707,7 +1708,6 @@ function endWheel(wintype) {
 		document.getElementById("wheelWin").innerHTML=padNumber(payout,6);
 		payout += wheelPrePay;
 		document.getElementById("wheelPay").innerHTML=padNumber(payout,6);
-		payStats( payout * -1 );
 		payWin(wintype,payout,(payout+credits),0,0)
 	}
 }
