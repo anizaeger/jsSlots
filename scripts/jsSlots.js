@@ -1453,6 +1453,8 @@ function checkPayline() {
 		match = 0;
 		if ( paytable[p][1] < 0 && Math.abs(paytable[p][1]) == wilds  && wintype == -1 ) { // Any Wilds
 			wintype = p;
+		} else if ( p == paytable.length - 1 && wilds > 0 ) {
+			continue;
 		} else {
 			for (r = 0; r < numReels; r++) {
 				paySym[r] = paytable[p][r];
