@@ -1449,43 +1449,47 @@ function checkPayline() {
 			wilds++;
 		}
 	}
-	for (p = 0; p < paytable.length; p++) {
-		match = 0;
-		if ( paytable[p][1] < 0 && Math.abs(paytable[p][1]) == wilds  && wintype == -1 ) { // Any Wilds
-			wintype = p;
-		} else if ( p == paytable.length - 1 && wilds > 0 ) {
-			continue;
-		} else {
-			for (r = 0; r < numReels; r++) {
-				paySym[r] = paytable[p][r];
-			}
-			for (r = 0; r < numReels; r++) {
-				if ( paySym[r] < 0 ) {
-					break;
-				} else if (paySym[r] === "-" ) {
-					continue;
-				} else if (paySym[r] < 100) {
-					if (payline[r] == paySym[r] || payline[r] == 7) {
-						if (r == numReels - 1) {
-							wintype = p;
-							p = paytable.length;
-							break;	
-						} else {
-							continue;
-						}
-					} else {
+	if ( wilds == numReels ) {
+		wintype = 0;
+	} else {
+		for (p = 0; p < paytable.length; p++) {
+			match = 0;
+			if ( paytable[p][1] < 0 && Math.abs(paytable[p][1]) == wilds  && wintype == -1 ) { // Any Wilds
+				wintype = p;
+			} else if ( p == paytable.length - 1 && wilds > 0 ) {
+				continue;
+			} else {
+				for (r = 0; r < numReels; r++) {
+					paySym[r] = paytable[p][r];
+				}
+				for (r = 0; r < numReels; r++) {
+					if ( paySym[r] < 0 ) {
 						break;
-					}
-				} else {
-					gnum = paySym[r] - 100;
-					for ( sym = 0; sym < groups[gnum].length; sym++) {
-						if (payline[r] == groups[gnum][sym] || payline[r] == 7) {
-							match++;
-							if (r == numReels - 1 && match == numReels) {
+					} else if (paySym[r] === "-" ) {
+						continue;
+					} else if (paySym[r] < 100) {
+						if (payline[r] == paySym[r] || payline[r] == 7) {
+							if (r == numReels - 1) {
 								wintype = p;
 								p = paytable.length;
+								break;	
+							} else {
+								continue;
 							}
+						} else {
 							break;
+						}
+					} else {
+						gnum = paySym[r] - 100;
+						for ( sym = 0; sym < groups[gnum].length; sym++) {
+							if (payline[r] == groups[gnum][sym] || payline[r] == 7) {
+								match++;
+								if (r == numReels - 1 && match == numReels) {
+									wintype = p;
+									p = paytable.length;
+								}
+								break;
+							}
 						}
 					}
 				}
