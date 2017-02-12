@@ -424,14 +424,11 @@ function printPaytable() {
 		}
 		for ( c = 1; c <= maxLineBet; c++ ) {
 			if ( p == 0 && c == maxLineBet ) {
-				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" colspan=2 style="text-align:left;">WIN</td>';
+				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" width=32">WIN</td>';
 			} else if ( p == 6 && c == maxLineBet ) {
-				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" colspan=2 style="text-align:left;">???</td>';
+				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" width=32">???</td>';
 			} else {
 				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" width=32>' + paytable[p][numReels] * c + '</td>';
-				if ( c == maxLineBet ) {
-					paytext += '<td />';
-				}
 			}
 		}
 		paytext += '</tr>';
