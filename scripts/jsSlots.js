@@ -144,6 +144,24 @@ var dbgWheelStop = 7;
 		8: Spin
 */
 
+var strip = new Array();  // Phys. reels
+var numVirtStops = new Array();  // Virt. reels
+
+// Reel Stop		    0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  1  1  1  1  1  2  2
+// Numbers		    0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1
+
+strip[0] 		= [ 0, 4, 0, 7, 0, 3, 0, 5, 0, 8, 0, 4, 0, 1, 0, 5, 0, 3, 0, 6, 0, 2];
+numVirtStops[0]		= [ 4, 1, 5, 1, 5, 5, 4, 2, 5, 5, 5, 1, 4,10, 4, 1, 4, 5, 4, 2, 4,15];
+
+strip[1] 		= [ 0, 4, 0, 8, 0, 2, 0, 6, 0, 2, 0, 4, 0, 7, 0, 5, 0, 3, 0, 6, 0, 1];
+numVirtStops[1]		= [ 4, 2, 5, 5, 5, 3, 4, 1, 4, 2, 4, 2, 5, 1, 5, 1, 4,10, 4, 1, 4,20];
+
+strip[2] 		= [ 0, 7, 0, 1, 0, 5, 0, 3, 0, 2, 0, 4, 0, 8, 0, 5, 0, 3, 0, 6, 0, 2];
+numVirtStops[2]		= [ 5, 1, 5,10, 4, 2, 4, 5, 4, 8, 4, 2, 5, 5, 5, 1, 4, 5, 4, 2, 4, 7];
+
+// Odds of symbol nudging to  payline space if selected, in symbols[] order
+var nudgeOdds = [0,1,2,3,10,20,30,100,50]
+
 // Reel symbol names.
 var symName = ["Blank", "Red Bar", "White Bar", "Blue Bar", "Blue 7", "White 7", "Red 7", "Wild", "Spin"]
 
@@ -191,24 +209,6 @@ var grpSym = ["7A", "BA", "Red", "White", "Blue"];
 //	strip[0][1]	is 2
 
 //	As a result, the reel will stop at that particular White Bar.
-
-var strip = new Array();  // Phys. reels
-var numVirtStops = new Array();  // Virt. reels
-
-// Reel Stop		   0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 2 2
-// Numbers		   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-
-strip[0] 		= [0,4,0,7,0,3,0,5,0,8,0,4,0,1,0,5,0,3,0,6,0,2];
-numVirtStops[0]		= [4,1,4,1,4,3,4,1,3,5,4,1,3,6,4,1,5,3,5,1,4,5];
-
-strip[1] 		= [0,4,0,8,0,7,0,6,0,2,0,4,0,1,0,5,0,3,0,6,0,2];
-numVirtStops[1]		= [4,1,4,5,4,1,6,1,4,3,3,1,3,8,3,1,3,4,4,1,4,4];
-
-strip[2] 		= [0,7,0,1,0,5,0,3,0,2,0,4,0,8,0,5,0,3,0,6,0,2];
-numVirtStops[2]		= [4,1,4,9,3,1,3,3,2,4,4,2,4,5,4,1,3,3,4,1,3,4];
-
-// Odds of symbol nudging to  payline space if selected, in symbols[] order
-var nudgeOdds = [0,1,2,3,10,20,30,100,50]
 
 /*
 	Script follows
@@ -536,7 +536,7 @@ function initSymOdds() {
 		for ( r = 0; r < numReels; r++ ) {
 			symsNums[symnum][r] = 0;
 			for ( s = 0; s < strip[r].length; s++ ) {
-				if ( strip[r][s] == symnum || ( strip[r][s] == 7 && symnum != 0 && symnum != 8 )) {
+				if ( strip[r][s] == symnum || ( strip[r][s] == 7 && symnum != 0 )) {
 					symsNums[symnum][r] += numVirtStops[r][s]
 				}
 			}
