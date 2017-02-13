@@ -114,8 +114,8 @@ var payIcoSize = 25;
 var spinSpeed = 55;
 
 // Default virtual reel debugging stops.
-// [Default: 10,18,4; 3 Wilds]
-var dbgVReelStops = [10,18,4];
+// [Default: 9,18,4; 3 Wilds]
+var dbgVReelStops = [9,18,4];
 
 // Default physical reel debugging stops.
 // [Default: 3,5,1; 3 Wilds]
@@ -463,7 +463,7 @@ function populatePaytable() {
 }
 */
 function payStats(pmt) {
-	if ( dbgSpin == 1 || dbgVReel == 1 ) { return ; }
+	if ( dbgOvrd == 1 ) { return ; }
 	if ( pmt > 0 ) {
 		paidIn = paidIn + pmt;
 	} else {
@@ -488,7 +488,7 @@ function payStats(pmt) {
 }
 
 function winStats(w,c) {
-	if ( dbgSpin == 1 || dbgVReel == 1 ) { return; }
+	if ( dbgOvrd == 1 ) { return ; }
 	var cIndex = c - 1;
 	payouts[w][ cIndex ]++;
 	setCookie("payouts"+w+"c"+cIndex,payouts[w][ cIndex ],expiry);
@@ -637,6 +637,9 @@ function printPayOdds() {
 function miscData(value) {
 	dbgMode=0;
 	dbgSpin=0;
+	dbgVReel=0;
+	dbgWheel=0;
+	dbgOvrd=0;
 	dbgRapid=0;
 	rndDisp=0;
 	miscDataType=value;
@@ -673,6 +676,8 @@ function miscData(value) {
 function clearMisc() {
 	dbgMode=0;
 	dbgSpin=0;
+	dbgWheel=0;
+	dbgOvrd=0
 	dbgRapid=0;
 	rndDisp=0;
 	var miscHtml="";
@@ -807,8 +812,12 @@ function tgglSpinDbg() {
 		}
 		dbgVReel = 0;
 		dbgSpin = 1;
+		dbgOvrd=1;
 	} else {
 		dbgSpin = 0;
+		if ( dbgSpin == 0 && dbgVReel == 0 && dbgWheel == 0 ) {
+			dbgOvrd=0;
+		}
 		for ( r = 0; r < numReels; r++ ) {
 			document.getElementById("dbgSpinStop" + r).disabled = true;
 			payPos = reelTopPos[r] + 1;
@@ -836,8 +845,12 @@ function tgglVReelDbg() {
 		}
 		dbgSpin = 0;
 		dbgVReel = 1;
+		dbgOvrd=1;
 	} else {
 		dbgVReel = 0;
+		if ( dbgSpin == 0 && dbgVReel == 0 && dbgWheel == 0 ) {
+			dbgOvrd=0;
+		}
 		for ( r = 0; r < numReels; r++ ) {
 			document.getElementById("dbgVReelStop" + r).disabled = true;
 			payPos = reelTopPos[r] + 1;
@@ -858,10 +871,14 @@ function tgglVReelDbg() {
 function wheelDbg() {
 	if (document.getElementById('wheelDebug').checked) {
 		dbgWheel = 1;
+		dbgOvrd=1;
 		document.getElementById("dbgWheelStop").disabled = false;
 		setWheelStop();
 	} else {
 		dbgWheel = 0;
+		if ( dbgSpin == 0 && dbgVReel == 0 && dbgWheel == 0 ) {
+			dbgOvrd=0;
+		}
 		document.getElementById("dbgWheelStop").disabled = true;
 		wheelStop[(wheelMult + 1)] = rndWheel[w];
 		payPos = wheelTopPos + wheelPayRow;
