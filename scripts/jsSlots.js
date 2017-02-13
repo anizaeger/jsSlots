@@ -1712,7 +1712,7 @@ function endWheel(wintype) {
 function payWin(wintype,payout,payfinal,i,paySound) {
 	if ( payingOut == 2 ) {
 		setTimeout(function () {
-			payComplete( wintype, payout, payfinal);
+			payComplete( wintype, payout, payfinal,i);
 		}, 500);
 	} else {
 		payingOut = 1;
@@ -1727,13 +1727,13 @@ function payWin(wintype,payout,payfinal,i,paySound) {
 			paySound++;
 			if (paySound == paySounds ) { paySound = 0; }
 		}
-	
+
 		i++;
 		credits++
+		payStats(-1);
 		setCookie("credits",credits,expiry);
 		document.getElementById("paid").innerHTML=padNumber(i,6);
 		document.getElementById("credits").innerHTML=padNumber(credits,6);
-		payStats(-1);
 
 		if ( dbgRapid == 1 ) {
 			loopTime = 0;
@@ -1751,8 +1751,9 @@ function payWin(wintype,payout,payfinal,i,paySound) {
 	}
 }
 
-function payComplete(wintype,payout,payfinal) {
+function payComplete(wintype,payout,payfinal,winpaid) {
 	credits = payfinal;
+	payStats(( payout - winpaid ) * -1 )
 	document.getElementById("paid").innerHTML=padNumber(payout,6);
 	document.getElementById("credits").innerHTML=padNumber(credits,6);
 	playSound("coinBong");
