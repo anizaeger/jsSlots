@@ -18,9 +18,6 @@
 				<table>
 					<tr>
 						<td>
-							<table width=100%><tr>
-								<td width=50% /><td><table class="progDispl" id="progDisp" width=100%></table><div /></td><td width=50% />
-							</tr></table>
 							<table>
 								<!--
 									Playfield Table Layout:
@@ -36,19 +33,14 @@
 								-->
 								<!-- Upper Playfield Border -->
 								<tr>
-									<td colspan=2 />
-									<td id="r1Dbg">
-							
+									<td colspan=2>&nbsp;</td>
+									<td colspan=7 rowspan=2>
+										<table width=100%><tr>
+											<td width=50% /><td><table class="progDispl" id="progDisp" width=100%></table><div /></td><td width=50% />
+										</tr></table>
 									</td>
-									<td colspan=2 />
-									<td id="r2Dbg">
-							
 									</td>
-									<td colspan=2 />
-									<td id="r3Dbg">
-							
-									</td>
-									<td />
+									<td>&nbsp;</td>
 								</tr>
 								<tr>
 									<td>
@@ -61,7 +53,7 @@
 										<div class="ledDispl" id="pBet0">
 										</div>
 									</td>
-									<td colspan=7 />
+									<!--<td colspan=7 />-->
 									<td>
 										<!-- Payline Win -->
 										<div class="ledDispl" id="pWin0">
@@ -69,12 +61,12 @@
 									</td>
 								</tr>
 								<tr>
-									<td rowspan=3>
+									<td valign=top>
 										<!-- Payline Label -->
 										<div class="ledLabel" id="pLbl1">
 										</div>
 									</td>
-									<td rowspan=3>
+									<td valign=top>
 										<!-- Payline Bet -->
 										<div class="ledDispl" id="pBet1">
 										</div>
@@ -86,7 +78,7 @@
 									<td align="right"><span id="p2s1c0">&nbsp;</span></td>
 									<td align="left"><span id="p2s1c1">&nbsp;</span></td>
 									<td rowspan=7 valign=middle class="reel" id="r2"></td>  <!-- Reel 3 -->
-									<td rowspan=3>
+									<td valign=top>
 										<!-- Payline Win -->
 										<div class="ledDispl" id="pWin1">
 										</div>
@@ -94,38 +86,61 @@
 								</tr>
 								<!-- Reel Row 1 -->
 								<tr>
-									<!--<td />-->
-									<!--<td />-->
+									<td>
+										<!-- Payline Label -->
+										<div class="ledLabel" id="pLbl2">
+										</div>
+									</td>
+									<td>
+										<!-- Payline Bet -->
+										<div class="ledDispl" id="pBet2">
+										</div>
+									</td>
 									<!--<td />-->
 									<td align="right"><span id="p4s0c0">&nbsp;</span></td>
 									<td align="left"><span id="p6s0c1">&nbsp;</span></td>
 									<!--<td />-->
 									<td align="right"><span id="p6s1c0">&nbsp;</span></td>
 									<td align="left"><span id="p5s1c1">&nbsp;</span></td>
-									<!--<td />-->
+									<td>
+										<!-- Payline Win -->
+										<div class="ledDispl" id="pWin2">
+										</div>
+									</td>
 								</tr>
 								<tr>
-									<!--<td />-->
-									<!--<td />-->
+									<td valign=bottom>
+										<!-- Payline Label -->
+										<div class="ledLabel" id="pLbl3">
+										</div>
+									</td>
+									<td valign=bottom>
+										<!-- Payline Bet -->
+										<div class="ledDispl" id="pBet3">
+										</div>
+									</td>
 									<!--<td />-->
 									<td align="right"><span id="p6s0c0">&nbsp;</span></td>
 									<td align="left"><span id="p4s0c1">&nbsp;</span></td>
 									<!--<td />-->
 									<td align="right"><span id="p5s1c0">&nbsp;</span></td>
 									<td align="left"><span id="p6s1c1">&nbsp;</span></td>
-									<!--<td />-->
+									<td valign=bottom>
+										<!-- Payline Win -->
+										<div class="ledDispl" id="pWin3">
+										</div>
+									</td>
 								</tr>
 								<!-- Reel Row 2 -->
 								<tr>
 									<td>
 										<!-- Payline Label -->
-										<div class="ledLabel" id="pLbl2">
-											1:
+										<div class="ledLabel" id="pLbl4">
 										</div>
 									</td>
 									<td>
 										<!-- Payline Bet -->
-										<div class="ledDispl" id="pBet2">
+										<div class="ledDispl" id="pBet4">
 										</div>
 									</td>
 									<!--<td />-->
@@ -137,19 +152,19 @@
 									<!--<td />-->
 									<td>
 										<!-- Payline Win -->
-										<div class="ledDispl" id="pWin2">
+										<div class="ledDispl" id="pWin4">
 										</div>
 									</td>
 								</tr>
 								<tr>
-									<td rowspan=3>
+									<td valign=top>
 										<!-- Payline Label -->
-										<div class="ledLabel" id="pLbl3">
+										<div class="ledLabel" id="pLbl5">
 										</div>
 									</td>
-									<td rowspan=3>
+									<td valign=top>
 										<!-- Payline Bet -->
-										<div class="ledDispl" id="pBet3">
+										<div class="ledDispl" id="pBet5">
 										</div>
 									</td>
 									<!--<td />-->
@@ -159,48 +174,79 @@
 									<td align="right"><span id="p4s1c0">&nbsp;</span></td>
 									<td align="left"><span id="p7s1c1">&nbsp;</span></td>
 									<!--<td />-->
-									<td rowspan=3>
+									<td valign=top>
 										<!-- Payline Win -->
-										<div class="ledDispl" id="pWin3">
+										<div class="ledDispl" id="pWin5">
 										</div>
 									</td>
 								</tr>
 								<!-- Reel Row 3 -->
 								<tr>
-									<!--<td />-->
-									<!--<td />-->
+									<td>
+										<!-- Payline Label -->
+										<div class="ledLabel" id="pLbl6">
+										</div>
+									</td>
+									<td>
+										<!-- Payline Bet -->
+										<div class="ledDispl" id="pBet6">
+										</div>
+									</td>
 									<!--<td />-->
 									<td align="right"><span id="p5s0c0">&nbsp;</span></td>
 									<td align="left"><span id="p7s0c1">&nbsp;</span></td>
 									<!--<td />-->
 									<td align="right"><span id="p7s1c0">&nbsp;</span></td>
 									<td align="left"><span id="p4s1c1">&nbsp;</span></td>
-									<!--<td />-->
+									<td>
+										<!-- Payline Win -->
+										<div class="ledDispl" id="pWin6">
+										</div>
+									</td>
 								</tr>
 								<tr>
-									<!--<td />-->
-									<!--<td />-->
+									<td valign=bottom>
+										<!-- Payline Label -->
+										<div class="ledLabel" id="pLbl7">
+										</div>
+									</td>
+									<td valign=bottom>
+										<!-- Payline Bet -->
+										<div class="ledDispl" id="pBet7">
+										</div>
+									</td>
 									<!--<td />-->
 									<td align="right"><span id="p3s0c0">&nbsp;</span></td>
 									<td align="left"><span id="p3s0c1">&nbsp;</span></td>
 									<!--<td />-->
 									<td align="right"><span id="p3s1c0">&nbsp;</span></td>
 									<td align="left"><span id="p3s1c1">&nbsp;</span></td>
-									<!--<td />-->
+									<td valign=bottom>
+										<!-- Payline Win -->
+										<div class="ledDispl" id="pWin7">
+										</div>
+									</td>
 								</tr>
 								<tr>
 									<td>
-										<div class="ledLabel" id="pLbl4">
+										<div class="ledLabel" id="pLbl8">
 										</div>
 									</td>
 									<td>
-										<div class="letDispl" id="pBet4">
+										<div class="ledDispl" id="pBet8">
 										</div>
 									</td>
-									<td colspan=7 />
+									<td colspan=7>
+										<table width=100%>
+											<tr>
+												<td><button onclick="gplAlert()">About</button></td>
+												<td><a href="about/licenses.html" rel="jslicense">Licensing</a></td>
+											</tr>
+										</table>
+									</td>
 									<td>
 										<!-- Payline Win -->
-										<div class="ledDispl" id="pWin4">
+										<div class="ledDispl" id="pWin8">
 										</div>
 									</td>
 								</tr>
@@ -351,12 +397,6 @@
 							<button class="wide" onclick="insertBill()">[ 6 ]<br />Insert Bill</button>
 							
 						</td>
-					</tr>
-				</table>
-				<table width=100%>
-					<tr>
-						<td><button onclick="gplAlert()">About</button></td>
-						<td><a href="about/licenses.html" rel="jslicense">Licensing</a></td>
 					</tr>
 				</table>
 			</td>
