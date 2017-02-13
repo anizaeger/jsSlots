@@ -1502,7 +1502,6 @@ function checkPayline() {
 			}, 1500);
 		} else {
 			payFinal = payout + credits;
-			payStats( payout * -1 );
 			payWin( wintype,payout,(payout+credits),0,0 );
 		}
 	} else {
@@ -1661,7 +1660,6 @@ function endWheel() {
 		document.getElementById("wheelWin").innerHTML=payout;
 		payout += wheelPrePay;
 		document.getElementById("wheelPay").innerHTML=payout;
-		payStats( payout * -1 );
 		payWin(18,payout,(payout+credits),0,0)
 	}
 }
@@ -1669,7 +1667,7 @@ function endWheel() {
 function payWin(wintype,payout,payfinal,i,paySound) {
 	if ( payingOut == 2 ) {
 		setTimeout(function () {
-			payComplete( wintype, payout, payfinal);
+			payComplete( wintype, payout, payfinal,i);
 		}, 500);
 	} else {
 		payingOut = 1;
@@ -1696,9 +1694,10 @@ function payWin(wintype,payout,payfinal,i,paySound) {
 			}
 			if (paySound == paySounds ) { paySound = 0; }
 		}
-	
+
 		i++;
 		credits++
+		payStats(-1);
 		setCookie("credits",credits,expiry);
 		document.getElementById("paid").innerHTML=i;
 		document.getElementById("credits").innerHTML=credits;
@@ -1719,8 +1718,9 @@ function payWin(wintype,payout,payfinal,i,paySound) {
 	}
 }
 
-function payComplete(wintype,payout,payfinal) {
+function payComplete(wintype,payout,payfinal,winpaid) {
 	credits = payfinal;
+	payStats(( payout - winpaid ) * -1 )
 	document.getElementById("paid").innerHTML=payout;
 	document.getElementById("credits").innerHTML=credits;
 	playSound(1);
