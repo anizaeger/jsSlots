@@ -1016,7 +1016,7 @@ function clearWin() {
 		lineBet[l] = 0;
 		document.getElementById("pBet" + paylineLed[l]).innerHTML=lineBet[l];
 		linePay[l] = 0;
-		document.getElementById("pWin" + paylineLed[l]).innerHTML=linePay[l];
+		document.getElementById("pWin" + paylineLed[l]).innerHTML=padNumber(linePay[l],5);
 	}
 	for ( var r = 0; r < numReels; r++ ) {
 		for ( var p = 0; p < numReelPos; p++ ) {
