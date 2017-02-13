@@ -345,6 +345,8 @@ var rndWheel = new Array(wheelProg);		// Bonus wheel randomizer
 
 // Bet related variables
 var betLimit = maxLineBet * paylines.length;
+var lineBet = new Array(paylines.length);
+var linePay = new Array(paylines.length);
 
 var credits = 0;
 var betAmt = 0;
@@ -402,7 +404,7 @@ function setCookie(cname, cvalue, exdays) {
 function getCookie(cname) {
 	var name = cname + "=";
 	var ca = document.cookie.split(';');
-	for(var i = 0; i <ca.length; i++) {
+	for(var i = 0; i < ca.length; i++) {
 		var c = ca[i];
 		while (c.charAt(0)==' ') {
 			c = c.substring(1);
@@ -418,13 +420,13 @@ function getCookie(cname) {
 function printPaytable() {
 	var paytext = "";
 	var g;
-	for (p = 0; p < paytable.length; p++) {
+	for (var p = 0; p < paytable.length; p++) {
 		paytext += '<tr id="payRow' + p + '">';
 		if ( paytable[p][0] < 0 ) {  // Print payout name for wild-only combinations.
 			paytext += '<td class=payCell valign=middle colspan=' + ( numReels - 1 ) + '>Any ' + Math.abs( paytable[p][0] ) + '</td>';
 			paytext += '<td class=payCell><image width="' + payIcoSize + '" src=images/Wild.png /></td>';
 		} else {
-			for ( s = 0; s < numReels; s++ ) {
+			for ( var s = 0; s < numReels; s++ ) {
 				if (paytable[p][s] >= 100 ) {
 					var g = paytable[p][s] - 100;
 					paytext += '<td class=payCell><image width="' + payIcoSize + '" src=images/' + grpSym[g] + '.png /></td>';
@@ -438,7 +440,7 @@ function printPaytable() {
 				}
 			}
 		}
-		for ( c = 1; c <= maxLineBet; c++ ) {
+		for ( var c = 1; c <= maxLineBet; c++ ) {
 			if ( p == 0 && c == maxLineBet ) {
 				paytext += '<td class="c' + c + ' payCell" id="pt' + p + 'c' + c + '" width=32">WIN</td>';
 			} else if ( p == 6 && c == maxLineBet ) {
@@ -1007,8 +1009,14 @@ function cashOut() {
 }
 
 function clearWin() {
-	for (var pt = 0; pt < paytable.length; pt++) {
+	for ( var pt = 0; pt < paytable.length; pt++ ) {
 		document.getElementById("payRow" + pt).style.backgroundColor = "white";
+	}
+	for ( var l = 0; l < paylines.length; l++ ) {
+		lineBet[l] = 0;
+		document.getElementById("pBet" + paylineLed[l]).innerHTML=lineBet[l];
+		linePay[l] = 0;
+		document.getElementById("pWin" + paylineLed[l]).innerHTML=linePay[l];
 	}
 	for ( var r = 0; r < numReels; r++ ) {
 		for ( var p = 0; p < numReelPos; p++ ) {
@@ -1039,6 +1047,8 @@ function betOne(autobet) {
 					startTicker("Press SPIN!");
 				}
 			}
+			var betLine = (( betAmt - 1 ) % paylines.length);
+			lineBet[betLine]++;
 			payStats(1);
 			progInc(1);
 			for (c = 1; c <= maxLineBet; c++) {
@@ -1058,6 +1068,7 @@ function betOne(autobet) {
 				betAmt = betLimit;
 			}
 			document.getElementById("betAmt").innerHTML=padNumber(betAmt,2);
+			document.getElementById("pBet" + paylineLed[betLine]).innerHTML=lineBet[betLine];
 			if ( betAmt == betLimit ) {
 				reBet = 0;
 				setTimeout(function() {
