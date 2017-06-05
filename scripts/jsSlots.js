@@ -1758,7 +1758,7 @@ function payWin(wintype,payout,payfinal,i,paySound) {
 
 		setTimeout(function () {
 			if ( i < payout ) {
-				payWin( wintype, payout, ( payout + credits ), i, paySound);
+				payWin( wintype, payout, payfinal, i, paySound);
 			} else {
 				payout = 0;
 				payingOut = 0;
