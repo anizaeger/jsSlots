@@ -1038,13 +1038,18 @@ function betOne(autobet) {
 	if ( lockBtn != 1 ) {
 		if ( credits > 0 ) {
 			document.getElementById("gameover").innerHTML="";
+
 			credits--;
+			document.getElementById("credits").innerHTML=padNumber(credits,6);
+
 			if ( ++betAmt == 1 ) {
 				clearWin();
 				if (!autobet) {
 					startTicker("Press SPIN!");
 				}
 			}
+			document.getElementById("betAmt").innerHTML=padNumber(betAmt,2);
+
 			payStats(1);
 			progInc(1);
 			for (c = 1; c <= maxLineBet; c++) {
@@ -1058,12 +1063,11 @@ function betOne(autobet) {
 					x[i].style.fontWeight = weight;
 				}
 			}
-			document.getElementById("credits").innerHTML=padNumber(credits,6);
 			playSound("coinBong");
 			if ( betAmt >= betLimit ) {
 				betAmt = betLimit;
 			}
-			document.getElementById("betAmt").innerHTML=padNumber(betAmt,2);
+
 			if ( betAmt == betLimit ) {
 				reBet = 0;
 				setTimeout(function() {
@@ -1078,17 +1082,39 @@ function rebet() {
 	if ( reBet == 0 || lockSpin == 1 || lastBet == 0 || betAmt == betLimit || credits <= 0 ) {
 		return;
 	} else {
-		betOne(true);
+		document.getElementById("gameover").innerHTML="";
+		clearWin();
+
+		credits -= lastBet;
+		document.getElementById("credits").innerHTML=padNumber(credits,6);
+
+		betAmt = lastBet;
+		document.getElementById("betAmt").innerHTML=padNumber(betAmt,2);
+
+		payStats(lastBet);
+		progInc(lastBet);
+
+		playSound("coinBong");
+
 	}
+
+	for (c = 1; c <= maxLineBet; c++) {
+		if ( c == betAmt ) {
+			weight = "bold";
+		} else {
+			weight = "normal";
+		}
+		x = document.getElementsByClassName('c'+c);
+		for (i = 0; i < x.length; i++) {
+			x[i].style.fontWeight = weight;
+		}
+	}
+
 	if ( betAmt == lastBet ) {
 		reBet = 0;
 		setTimeout(function () {
 			spin();
 		}, 250 );
-	} else {
-		setTimeout(function () {
-			rebet();
-		}, 125 );
 	}
 }
 
