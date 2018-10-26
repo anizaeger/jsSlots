@@ -118,8 +118,8 @@ var spinSpeed = 55;
 var dbgVReelStops = [9,18,4];
 
 // Default physical reel debugging stops.
-// [Default: 3,5,1; 3 Wilds]
-var dbgSpinStops = [3,5,1];
+// [Default: 3,13,1; 3 Wilds]
+var dbgSpinStops = [3,13,1];
 
 // Default bonus wheel debugging stop.
 // [Default: 7; Double]
@@ -1742,7 +1742,7 @@ function endWheel(wintype) {
 			jackpot(0,wheelPreMult);
 		} else {
 			setTimeout(function () {
-				wheelSpin()
+				wheelSpin(wintype)
 			}, 500);
 		}
 	} else {
