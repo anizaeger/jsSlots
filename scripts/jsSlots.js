@@ -163,11 +163,11 @@ strip[2] 		= [ 0, 7, 0, 1, 0, 5, 0, 3, 0, 2, 0, 4, 0, 8, 0, 5, 0, 3, 0, 6, 0, 2]
 numVirtStops[2]		= [ 6, 1, 6, 8, 4, 2, 4, 3, 4, 7, 4, 2, 5,12, 5, 1, 4, 5, 4, 2, 4, 7];
 
 
-// Odds of symbol nudging to  payline space if selected, in symbols[] order
-var nudgeOdds = [0,1,2,3,10,20,30,100,50]
+// Odds of symbol nudging to payline space if selected, in symbols[] order
+var nudgeOdds = [0,1,2,3,10,20,30,100,50];
 
 // Reel symbol names.
-var symName = ["Blank", "Red Bar", "White Bar", "Blue Bar", "Blue 7", "White 7", "Red 7", "Wild", "Spin"]
+var symName = ["Blank", "Red Bar", "White Bar", "Blue Bar", "Blue 7", "White 7", "Red 7", "Wild", "Spin"];
 
 // Image filename for symbols, not including file extension.  Must be PNG format, and in images subdirectory.  Index number is symbol ID.
 var symbols = ["blank","BR", "BW", "BB", "7B", "7W", "7R", "Wild", "Spin"];
@@ -1307,12 +1307,24 @@ function spin() {
 			}
 			reelStop[r] = virtReel[r][virtStop[r]];
 		}
+
+		symPos = reelStop[r];
+		symnum = strip[r][symPos];
+
+		nudgeSymPos = symPos + rndNudgePos[r] - 1;
+		if ( nudgeSymPos >= strip[r].length ) {
+			nudgeSymPos = 0;
+		} else if ( nudgeSymPos < 0 ) {
+			nudgeSymPos = strip[r].length - 1;
+		}
+		nudgeSymNum = strip[r][nudgeSymPos];
+
+		rndNudgeSym[r] = Math.round( rndNudgeSym[r] * nudgeOdds[nudgeSymNum] )
+
 		if ( dbgMode == 1 ) {
 			document.getElementById("virtStop" + r ).innerHTML=virtStop[r];
 			document.getElementById("reelStop" + r ).innerHTML=reelStop[r];
 			document.getElementById("nudgePos" + r).innerHTML=rndNudgePos[r];
-			symPos = reelStop[r];
-			symnum = strip[r][symPos];
 			if ( symnum == 0  ) {
 				symbol = "blankico"
 			} else {
@@ -1328,22 +1340,12 @@ function spin() {
 			} else {
 				document.getElementById("nudgePos" + r).innerHTML="Mid";
 			}
-			nudgeSymPos = symPos + rndNudgePos[r] - 1;
-			if ( nudgeSymPos >= strip[r].length ) {
-				nudgeSymPos = 0;
-			} else if ( nudgeSymPos < 0 ) {
-				nudgeSymPos = strip[r].length - 1;
-			}
-			nudgeSymNum = strip[r][nudgeSymPos];
 			if ( nudgeSymNum == 0  ) {
 				symbol = "blankico"
 			} else {
 				symbol = symbols[ nudgeSymNum ];
 			}
 			document.getElementById("nudgeSym" + r ).src='images/' + symbol + '.png';
-
-			rndNudgeSym[r] = Math.round( rndNudgeSym[r] * nudgeOdds[nudgeSymNum] )
-			
 		}
 	}
 	for ( w = 0; w < wheelProg; w++ ) {
@@ -1403,7 +1405,6 @@ function spinLoop(minSpin) {
 			}
 		}
 		minSpin++
-	
 	}
 	
 	if ( spinSteps % Math.round( 100 / spinSpeed ) == 0 ) {
@@ -2052,7 +2053,7 @@ function cyclePRNG() {
 		}
 		setTimeout(function () {
 			cyclePRNG();
-		}, 100 );
+		}, 10 );
 	}
 }
 
